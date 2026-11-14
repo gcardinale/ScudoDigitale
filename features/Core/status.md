@@ -1,12 +1,12 @@
-# Core — stato
+# Core — status
 
-- **Contenuto:** contratti, motore, priorità, Attribution
-- **Rilascio:** v0.0
-- **Stato:** ⚪ non iniziato
-- **Copertura test:** —
+- **Content:** contracts, engine, prioritization, Attribution
+- **Release:** v0.0
+- **Status:** ⚪ not started
+- **Test coverage:** —
 
-## Fatto
-- (niente)
+## Done
+- (nothing)
 
-## Da fare
-- vedi `docs/00-specifica-funzionale.md` e `docs/03-roadmap.md`
+## To do
+- see `docs/00-functional-spec.md` and `docs/03-roadmap.md`

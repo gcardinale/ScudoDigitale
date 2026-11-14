@@ -15,8 +15,8 @@ indent_size = 2
 trim_trailing_whitespace = false
 
 [*.cs]
-# L'intestazione obbligatoria è in build/header.txt ed è verificata in CI
-# (build/check-headers.ps1). Non usare file_header_template: non regge il riquadro ASCII.
+# The mandatory header is in build/header.txt and is verified in CI
+# (build/check-headers.ps1). Do not use file_header_template: it cannot hold the ASCII box.
 dotnet_sort_system_directives_first = true
 csharp_style_namespace_declarations = file_scoped:warning
 dotnet_diagnostic.CS1591.severity = error

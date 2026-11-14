@@ -1,34 +1,34 @@
-# 03 — Roadmap (accelerata)
+# 03 — Roadmap (accelerated)
 
-> Obiettivo: **v1.0 pubblica in circa 3 settimane** invece di 3 mesi.
-> Come: si fissano subito i contratti in `ScudoDigitale.Core`, poi i moduli si sviluppano **in parallelo** (un worktree per modulo) e si rimanda alla v1.1 tutto ciò che non serve al primo rilascio.
+> Goal: **public v1.0 in about 3 weeks** instead of 3 months.
+> How: the contracts in `ScudoDigitale.Core` are fixed right away, then the modules are developed **in parallel** (one worktree per module) and everything not needed for the first release is deferred to v1.1.
 
-## Piano giorno per giorno (giorni di lavoro effettivo)
-| Giorni | Rilascio | Contenuto | In parallelo | Fatto quando |
+## Day-by-day plan (actual working days)
+| Days | Release | Content | In parallel | Done when |
 |---|---|---|---|---|
-| **1** | **v0.0 — scheletro** | soluzione, progetti vuoti, `Core` con `ICheck`, `Finding`, `Severity`, `Confidence`, `Profile`, `ScopeDeclaration`, `IScopeGuard`, `Attribution`; `build/check-headers.ps1`; GitHub Actions (build + test + copertura su Windows/Linux/macOS) | — | CI verde sui 3 sistemi, contratti `Core` testati al 100% |
-| **2-4** | **v0.1 — passivo** | `Checks.Email`, `Checks.Web` (passivo + GDPR indicativo), `Compliance` (GDPR/NIS2 in JSON), `Reporting` (HTML/PDF/JSON), `Cli` | 4 worktree: Email · Web · Compliance · Reporting; verifica legale dei riferimenti in sessione separata | report completo su un dominio reale e su un dominio di test, copertura >90% |
-| **5-8** | **v0.2 — rete e CVE** | `Vulnerabilities` (NVD/KEV/EPSS/OSV in SQLite), `Checks.Network`, prova di proprietà dei domini + controlli web attivi, `App` Avalonia minima (procedura guidata + apertura report) | 3 worktree: Vulnerabilities · Network · App | scansione LAN reale con almeno una CVE collegata e confidenza corretta |
-| **9-11** | **v0.3 — senza fili** | `Checks.Wireless`: Wi-Fi (3 sistemi) e Bluetooth (Windows + Linux) | 2 worktree: Wi-Fi · Bluetooth | dispositivi BT e reti Wi-Fi di prova classificati correttamente |
-| **12-14** | **v1.0 — pubblica** | revisione di sicurezza e del codice, eseguibili single-file per 6 piattaforme, SHA-256 + attestazione di provenienza, README finale, richiesta di firma a SignPath Foundation | — | release su GitHub scaricabile, pagina download pubblicata |
+| **1** | **v0.0 — skeleton** | solution, empty projects, `Core` with `ICheck`, `Finding`, `Severity`, `Confidence`, `Profile`, `ScopeDeclaration`, `IScopeGuard`, `Attribution`; `build/check-headers.ps1`; GitHub Actions (build + test + coverage on Windows/Linux/macOS) | — | CI green on all 3 systems, `Core` contracts 100% tested |
+| **2-4** | **v0.1 — passive** | `Checks.Email`, `Checks.Web` (passive + indicative GDPR), `Compliance` (GDPR/NIS2 in JSON), `Reporting` (HTML/PDF/JSON), `Cli` | 4 worktrees: Email · Web · Compliance · Reporting; legal verification of references in a separate session | complete report on a real domain and on a test domain, coverage >90% |
+| **5-8** | **v0.2 — network and CVE** | `Vulnerabilities` (NVD/KEV/EPSS/OSV in SQLite), `Checks.Network`, domain ownership proof + active web checks, minimal Avalonia `App` (guided procedure + report opening) | 3 worktrees: Vulnerabilities · Network · App | real LAN scan with at least one linked CVE and correct confidence |
+| **9-11** | **v0.3 — wireless** | `Checks.Wireless`: Wi-Fi (3 systems) and Bluetooth (Windows + Linux) | 2 worktrees: Wi-Fi · Bluetooth | test BT devices and Wi-Fi networks classified correctly |
+| **12-14** | **v1.0 — public** | security and code review, single-file executables for 6 platforms, SHA-256 + provenance attestation, final README, signing request to SignPath Foundation | — | downloadable release on GitHub, download page published |
 
-La firma SignPath arriva dopo l'approvazione della Foundation (tempi esterni): la v1.0 esce **con attestazione e hash**, la firma si aggiunge in una v1.0.x.
+SignPath signing arrives after the Foundation's approval (external timing): v1.0 ships **with attestation and hashes**, signing is added in a v1.0.x.
 
-## Tre scenari
+## Three scenarios
 | Scenario | v0.1 | v1.0 |
 |---|---|---|
-| Ottimistico | giorno 3 | 2 settimane |
-| Realistico | giorno 4-5 | 3 settimane |
-| Pessimistico | giorno 7 | 5 settimane (Bluetooth e database CVE più lenti) |
+| Optimistic | day 3 | 2 weeks |
+| Realistic | day 4-5 | 3 weeks |
+| Pessimistic | day 7 | 5 weeks (Bluetooth and CVE database slower) |
 
-## Cosa si rimanda alla v1.1 se si è in ritardo
-In quest'ordine: Bluetooth su macOS → confronto tra due report → Have I Been Pwned → pacchetti Flatpak/Homebrew → interfaccia Avalonia completa (resta la procedura guidata minima).
+## What is deferred to v1.1 if running late
+In this order: Bluetooth on macOS → comparison between two reports → Have I Been Pwned → Flatpak/Homebrew packages → full Avalonia interface (the minimal guided procedure stays).
 
 ## Checklist
-- [x] Nome, licenza, piattaforme, perimetro decisi (14/11/2026)
-- [x] Repository creato con documentazione, ADR, LICENSE, NOTICE (14/11/2026)
-- [ ] v0.0 scheletro + CI
-- [ ] v0.1 passivo
-- [ ] v0.2 rete e CVE
-- [ ] v0.3 senza fili
-- [ ] v1.0 pubblica
+- [x] Name, license, platforms, scope decided (14/11/2026)
+- [x] Repository created with documentation, ADRs, LICENSE, NOTICE (14/11/2026)
+- [ ] v0.0 skeleton + CI
+- [ ] v0.1 passive
+- [ ] v0.2 network and CVE
+- [ ] v0.3 wireless
+- [ ] v1.0 public

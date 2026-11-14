@@ -5,9 +5,9 @@
 // ║   ╚════██║██║     ██║   ██║██║  ██║██║   ██║                  ║
 // ║   ███████║╚██████╗╚██████╔╝██████╔╝╚██████╔╝  D I G I T A L E ║
 // ║   ╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝  ╚═════╝                   ║
-// ║   Verifica sicurezza: rete, Wi-Fi, siti, posta, Bluetooth,    ║
-// ║   GDPR e NIS2.   © 2026 Gaetano Cardinale — gcardinale.it     ║
+// ║   Security check: network, Wi-Fi, websites, email, Bluetooth, ║
+// ║   GDPR and NIS2.   © 2026 Gaetano Cardinale — gcardinale.it   ║
 // ╠═══════════════════════════════════════════════════════════════╣
 // ║ SPDX-License-Identifier: AGPL-3.0-or-later                    ║
-// ║ Attribuzione obbligatoria (AGPL sez. 7(b)): vedi file NOTICE  ║
+// ║ Attribution required (AGPL sec. 7(b)): see NOTICE file        ║
 // ╚═══════════════════════════════════════════════════════════════╝

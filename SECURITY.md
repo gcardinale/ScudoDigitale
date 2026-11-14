@@ -1,7 +1,7 @@
-# Segnalare una vulnerabilità
+# Reporting a vulnerability
 
-Se trovi una vulnerabilità **in Scudo Digitale stesso**, non aprire una issue pubblica.
-Usa la funzione **"Report a vulnerability"** (GitHub Security Advisories) nella scheda *Security* del repository.
+If you find a vulnerability **in Scudo Digitale itself**, do not open a public issue.
+Use the **"Report a vulnerability"** feature (GitHub Security Advisories) in the repository's *Security* tab.
 
-Indica versione, sistema operativo, passi per riprodurre e impatto. Riceverai una risposta entro 7 giorni.
-Le segnalazioni su sistemi di terzi trovati con Scudo Digitale vanno fatte direttamente ai rispettivi proprietari.
+Include the version, operating system, steps to reproduce and impact. You will get a reply within 7 days.
+Reports about third-party systems found with Scudo Digitale must be sent directly to their respective owners.

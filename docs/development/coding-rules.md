@@ -1,11 +1,12 @@
-# Regole di codice del progetto
-Priorità: questo file > convenzioni generali dell'autore > convenzioni native di C#.
+# Project coding rules
+Priority: this file > the author's general conventions > native C# conventions.
 
-- C# moderno: namespace file-scoped, `nullable enable`, `TreatWarningsAsErrors` attivo, `async` fino in fondo con `CancellationToken` su ogni operazione di rete.
-- Intestazione `build/header.txt` su ogni `.cs`, prima di qualunque `using`.
-- XML doc su tutti i membri pubblici/protetti, in **italiano**. Identificatori in **inglese** (convenzione .NET), testi mostrati all'utente in **italiano** tramite file di risorse (`.resx`) per poter aggiungere l'inglese.
-- Test: `Metodo_QuandoCondizione_DovrebbeRisultato`; niente rete reale (server DNS/HTTP/TLS finti in-process, file di esempio in `tests/**/Fixtures`).
-- Ogni controllo: id stabile `AREA-TEMA-NNN` (es. `MAIL-DMARC-001`), mai riutilizzato; il testo di rischio e correzione sta nel catalogo, non nel codice di rilevamento.
-- Timeout e concorrenza sempre configurabili; valori prudenti di default (es. 50 connessioni TCP contemporanee, 2 s di timeout).
-- Nessun `Process.Start` con input dell'utente non validato; comandi di sistema solo con argomenti in lista.
-- Nessun segreto nel codice; la chiave HIBP eventuale si legge da variabile d'ambiente o da archivio protetto dell'OS.
+- Modern C#: file-scoped namespaces, `nullable enable`, `TreatWarningsAsErrors` on, `async` all the way down with a `CancellationToken` on every network operation.
+- `build/header.txt` header on every `.cs`, before any `using`.
+- XML docs on all public/protected members, in **English**. Identifiers in **English** (.NET convention).
+- User-facing strings are localized through resource files (`.resx`) with **English and Italian**; Italian is chosen automatically when the OS language is Italian, English otherwise.
+- Tests: `Method_WhenCondition_ShouldExpectedResult`; no real network (fake in-process DNS/HTTP/TLS servers, sample files in `tests/**/Fixtures`).
+- Every check has a stable id `AREA-TOPIC-NNN` (e.g. `MAIL-DMARC-001`), never reused; the risk and fix text lives in the catalog, not in the detection code.
+- Timeouts and concurrency are always configurable; cautious defaults (e.g. 50 simultaneous TCP connections, 2 s timeout).
+- No `Process.Start` with unvalidated user input; system commands only with argument lists.
+- No secrets in code; the optional HIBP key is read from an environment variable or from the OS protected store.

@@ -1,12 +1,12 @@
-# Checks.Web — stato
+# Checks.Web — status
 
-- **Contenuto:** TLS, header, cookie, CMS, GDPR indicativo; attivi dietro IScopeGuard
-- **Rilascio:** v0.1 (passivo) / v0.2 (attivo)
-- **Stato:** ⚪ non iniziato
-- **Copertura test:** —
+- **Content:** TLS, headers, cookies, CMS, indicative GDPR; active checks behind IScopeGuard
+- **Release:** v0.1 (passive) / v0.2 (active)
+- **Status:** ⚪ not started
+- **Test coverage:** —
 
-## Fatto
-- (niente)
+## Done
+- (nothing)
 
-## Da fare
-- vedi `docs/00-specifica-funzionale.md` e `docs/03-roadmap.md`
+## To do
+- see `docs/00-functional-spec.md` and `docs/03-roadmap.md`

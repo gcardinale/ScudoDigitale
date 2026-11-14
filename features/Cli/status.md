@@ -1,12 +1,12 @@
-# Cli — stato
+# Cli — status
 
-- **Contenuto:** comandi scan, db update, report
-- **Rilascio:** v0.1
-- **Stato:** ⚪ non iniziato
-- **Copertura test:** —
+- **Content:** scan, db update, report commands
+- **Release:** v0.1
+- **Status:** ⚪ not started
+- **Test coverage:** —
 
-## Fatto
-- (niente)
+## Done
+- (nothing)
 
-## Da fare
-- vedi `docs/00-specifica-funzionale.md` e `docs/03-roadmap.md`
+## To do
+- see `docs/00-functional-spec.md` and `docs/03-roadmap.md`

@@ -1,6 +1,6 @@
-# Pattern del progetto
+# Project patterns
 
-## Controllo (`ICheck`)
+## Check (`ICheck`)
 ```csharp
 public sealed class DmarcCheck : ICheck
 {
@@ -10,13 +10,13 @@ public sealed class DmarcCheck : ICheck
     public Task<CheckResult> RunAsync(CheckContext context, CancellationToken ct) { /* ... */ }
 }
 ```
-- `CheckResult` = `Executed(findings)` | `Skipped(reason)` | `Failed(error)`. Un controllo non lancia mai eccezioni verso il motore.
+- `CheckResult` = `Executed(findings)` | `Skipped(reason)` | `Failed(error)`. A check never throws exceptions towards the engine.
 
-## Adattatore per sistema operativo
-`IWifiProvider`, `IBluetoothProvider`, `INeighborTableProvider` con implementazioni `Windows*`, `Linux*`, `MacOs*`, scelte da una factory su `OperatingSystem.IsWindows()` ecc. Implementazione mancante → `Skipped("non disponibile su <OS>")`.
+## Per-OS adapter
+`IWifiProvider`, `IBluetoothProvider`, `INeighborTableProvider` with `Windows*`, `Linux*`, `MacOs*` implementations, chosen by a factory on `OperatingSystem.IsWindows()` etc. Missing implementation → `Skipped("not available on <OS>")`.
 
-## Guardia del perimetro
-I controlli con `ScopeRequirement.ActiveOwnedOnly` ricevono il bersaglio solo dopo `IScopeGuard.IsAuthorizedAsync(target)`: rete locale del PC oppure dominio con record TXT `scudo-digitale-verify=<token>` o file `/.well-known/scudo-digitale.txt`.
+## Scope guard
+Checks with `ScopeRequirement.ActiveOwnedOnly` receive the target only after `IScopeGuard.IsAuthorizedAsync(target)`: the PC's local network, or a domain with a TXT record `scudo-digitale-verify=<token>` or a file `/.well-known/scudo-digitale.txt`.
 
-## Priorità
-`KEV` → Critica e in cima; altrimenti CVSS → severità; EPSS ≥ 0,1 alza di un livello; ordinamento finale per severità, poi EPSS, poi confidenza.
+## Prioritization
+`KEV` → Critical and at the top; otherwise CVSS → severity; EPSS ≥ 0.1 raises it by one level; final ordering by severity, then EPSS, then confidence.

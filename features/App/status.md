@@ -1,12 +1,12 @@
-# App — stato
+# App — status
 
-- **Contenuto:** interfaccia Avalonia
-- **Rilascio:** v0.2 (minima)
-- **Stato:** ⚪ non iniziato
-- **Copertura test:** —
+- **Content:** Avalonia interface
+- **Release:** v0.2 (minimal)
+- **Status:** ⚪ not started
+- **Test coverage:** —
 
-## Fatto
-- (niente)
+## Done
+- (nothing)
 
-## Da fare
-- vedi `docs/00-specifica-funzionale.md` e `docs/03-roadmap.md`
+## To do
+- see `docs/00-functional-spec.md` and `docs/03-roadmap.md`

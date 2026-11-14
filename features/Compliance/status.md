@@ -1,12 +1,12 @@
-# Compliance — stato
+# Compliance — status
 
-- **Contenuto:** questionari GDPR e NIS2
-- **Rilascio:** v0.1
-- **Stato:** ⚪ non iniziato
-- **Copertura test:** —
+- **Content:** GDPR and NIS2 questionnaires
+- **Release:** v0.1
+- **Status:** ⚪ not started
+- **Test coverage:** —
 
-## Fatto
-- (niente)
+## Done
+- (nothing)
 
-## Da fare
-- vedi `docs/00-specifica-funzionale.md` e `docs/03-roadmap.md`
+## To do
+- see `docs/00-functional-spec.md` and `docs/03-roadmap.md`

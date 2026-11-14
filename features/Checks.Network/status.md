@@ -1,12 +1,12 @@
-# Checks.Network — stato
+# Checks.Network — status
 
-- **Contenuto:** scoperta LAN, porte, servizi, UPnP
-- **Rilascio:** v0.2
-- **Stato:** ⚪ non iniziato
-- **Copertura test:** —
+- **Content:** LAN discovery, ports, services, UPnP
+- **Release:** v0.2
+- **Status:** ⚪ not started
+- **Test coverage:** —
 
-## Fatto
-- (niente)
+## Done
+- (nothing)
 
-## Da fare
-- vedi `docs/00-specifica-funzionale.md` e `docs/03-roadmap.md`
+## To do
+- see `docs/00-functional-spec.md` and `docs/03-roadmap.md`
