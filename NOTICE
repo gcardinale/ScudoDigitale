@@ -1,0 +1,43 @@
+Scudo Digitale
+Copyright (C) 2026 Gaetano Cardinale — https://gcardinale.it
+
+Questo programma è software libero: puoi ridistribuirlo e/o modificarlo
+secondo i termini della GNU Affero General Public License, versione 3
+o (a tua scelta) qualsiasi versione successiva, pubblicata dalla
+Free Software Foundation (vedi il file LICENSE).
+
+Questo programma è distribuito nella speranza che sia utile, ma SENZA
+ALCUNA GARANZIA, nemmeno la garanzia implicita di COMMERCIABILITÀ o di
+IDONEITÀ PER UNO SCOPO PARTICOLARE (sezioni 15 e 16 della licenza).
+
+-------------------------------------------------------------------------
+TERMINI AGGIUNTIVI ai sensi della sezione 7 della GNU AGPL v3
+-------------------------------------------------------------------------
+
+7(b) Attribuzione. Chiunque distribuisca, o renda disponibile in rete,
+     questo programma o un'opera basata su di esso deve conservare,
+     in forma leggibile:
+     a) l'avviso "Scudo Digitale — © Gaetano Cardinale — https://gcardinale.it"
+        nella schermata "Informazioni" dell'interfaccia grafica, nel banner
+        di avvio della riga di comando e nel piè di pagina di ogni report
+        generato (HTML, PDF);
+     b) le intestazioni di copyright e attribuzione presenti in ogni
+        file sorgente.
+
+7(c) Origine. Le versioni modificate devono essere contrassegnate in modo
+     ragionevole come diverse dalla versione originale e non devono
+     presentarsi come la versione ufficiale di Scudo Digitale.
+
+7(e) Marchi. Questa licenza non concede alcun diritto sul nome
+     "Scudo Digitale" né su marchi, loghi o segni distintivi del progetto.
+
+-------------------------------------------------------------------------
+ADDITIONAL TERMS under section 7 of the GNU AGPL v3 (English summary)
+-------------------------------------------------------------------------
+7(b) Anyone conveying this program, or a work based on it, must preserve
+     the notice "Scudo Digitale — © Gaetano Cardinale — https://gcardinale.it"
+     in the "About" screen, the command-line startup banner and the footer
+     of every generated report, and the copyright headers of every source file.
+7(c) Modified versions must be marked as different from the original.
+7(e) No rights are granted to the name "Scudo Digitale" or project marks.
+In case of doubt the Italian text prevails.

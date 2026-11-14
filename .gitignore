@@ -1,0 +1,24 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+artifacts/
+publish/
+
+# Dati locali di Scudo Digitale (database CVE, report generati)
+data/
+reports/
+*.scudo.json
+
+
+# OS
+.DS_Store
+Thumbs.db
