@@ -3,7 +3,7 @@
 - **Content:** contracts, engine, prioritization, Attribution
 - **Release:** v0.0
 - **Status:** 🟢 v0.0 done (15/11/2026), review fixes applied
-- **Test coverage:** 100% lines (230/230), 95% branches (99/104) — 165 tests
+- **Test coverage:** 100% lines (230/230), 95% branches (99/104) — 169 tests
 
 ## Done
 - Contracts: `ICheck`, `CheckContext`, `CheckResult` (`Executed` / `Skipped` / `Failed`), `Finding`, `PrioritizedFinding`, `Severity`, `Confidence`, `CheckArea`, `ScopeRequirement`, `Target` / `TargetKind`, `Profile` / `ProfileKind`, `ScopeDeclaration` / `OperatorRole`, `IScopeGuard`.
@@ -13,13 +13,13 @@
 - `FindingPrioritizer`: KEV → Critical, CVSS qualitative rating, EPSS ≥ 0.1 raises one level, total ordering; returns `PrioritizedFinding`, so prioritizing again gives the same result.
 - `Attribution`: `Notice`, `Banner`, `ReportFooter(version)` (only the leading words are localized).
 - Localized engine messages in `Resources/Strings.resx` + `Strings.it.resx`.
-- Counter-checks: 11 at v0.0 and 13 after the review fixes, each one turning the expected test red.
+- ADR-005 (15/11/2026): `ICheck.Title` (validated, carried by `CheckRun.CheckTitle`); `ScopeDeclaration` accepts no targets for a questionnaire-only assessment.
+- Counter-checks: 11 at v0.0 and 13 after the review fixes, each one turning the expected test red. 3 more for ADR-005.
 
 ## Known limits
 - Record equality compares list members (CVE, references, targets, findings) by reference.
 - A check that never ends keeps running in the background after its slot is given back: checks must honour their cancellation token.
 
 ## To do
-- Contracts for v0.1 (questionnaires, JSON form of the results, user-facing check name): see ADR-005.
 - `IScopeGuard` implementation (local network + domain ownership proof) — v0.2, with the active web checks.
 - Enrichment of findings by `Vulnerabilities` — v0.2.

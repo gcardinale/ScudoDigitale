@@ -1,5 +1,5 @@
 # ADR-005 — Core contracts for questionnaires, JSON output and check names
-> **Status:** proposed · **Decision maker:** Gaetano Cardinale · **Date:** 2026-11-15
+> **Status:** accepted · **Decision maker:** Gaetano Cardinale · **Date:** 2026-11-15
 
 ## Context
 v0.1 is developed in four parallel worktrees (Email, Web, Compliance, Reporting) that all depend on `ScudoDigitale.Core`. The review of v0.0 found three gaps in the Core contracts. If they are not settled before the parallel work starts, each worktree will change Core on its own.
@@ -21,14 +21,14 @@ v0.1 is developed in four parallel worktrees (Email, Web, Compliance, Reporting)
 - **A — `ICheck.Title`**: a localized, user-facing name that each module takes from its own `.resx`. The engine copies it into `CheckRun`.
 - **B — A catalog in `Reporting`** mapping ids to names. Every module would have to update a file it does not own, in a fifth place, for every new check.
 
-## Decision (proposed)
+## Decision
 **1B, 2B, 3A.**
 - Questionnaires are evaluated by `Compliance` and produce ordinary `Finding`s, which are prioritized and reported together with the technical ones. `ScopeDeclaration` accepts an empty list of targets.
 - The JSON report is a versioned DTO owned by `Reporting`. Enums are written as strings, as in spec §3.
 - `ICheck` gets a localized `Title`. The engine rejects a blank title together with the other definition errors, and `CheckRun` carries the title.
 
 ## Consequences
-- ✅ Core changes once, before the parallel work: `ScopeDeclaration` (empty targets allowed), `ICheck.Title`, `CheckRun.CheckTitle`.
+- ✅ Core changes once, before the parallel work: `ScopeDeclaration` (empty targets allowed), `ICheck.Title`, `CheckRun.CheckTitle`. Implemented on 2026-11-15.
 - ✅ The JSON format can only change through `schemaVersion`, so comparing two runs stays possible across versions.
 - ⚠️ `Reporting` maintains its own DTOs and their tests, including a round trip (write, read back, compare).
 - ⚠️ Every check must provide a title in English and Italian.

@@ -57,11 +57,14 @@ internal sealed class FakeCheck(
     string id,
     TargetKind appliesTo,
     Func<CheckContext, CancellationToken, Task<CheckResult>> run,
-    ScopeRequirement scope = ScopeRequirement.Passive) : ICheck
+    ScopeRequirement scope = ScopeRequirement.Passive,
+    string title = "Test check") : ICheck
 {
     private int calls;
 
     public string Id => id;
+
+    public string Title => title;
 
     public CheckArea Area => CheckArea.Email;
 
@@ -92,6 +95,8 @@ internal sealed class FakeCheck(
 internal sealed class BrokenCheck : ICheck
 {
     public string Id => throw new InvalidOperationException("broken definition");
+
+    public string Title => "Broken";
 
     public CheckArea Area => CheckArea.Email;
 

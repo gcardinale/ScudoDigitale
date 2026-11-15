@@ -191,9 +191,9 @@ public class ScopeDeclarationTests
     }
 
     [Fact]
-    public void Constructor_WhenTargetsAreEmpty_ShouldThrow()
+    public void Constructor_WhenTargetsAreEmpty_ShouldAcceptAQuestionnaireOnlyAssessment()
     {
-        Assert.Throws<ArgumentException>(() => new ScopeDeclaration("Mario Rossi", OperatorRole.Owner, [], Make.DeclaredAt));
+        Assert.Empty(new ScopeDeclaration("Mario Rossi", OperatorRole.Owner, [], Make.DeclaredAt).Targets);
     }
 
     [Fact]
