@@ -177,6 +177,57 @@ public class FindingTests
         Assert.Throws<ArgumentNullException>(() => Make.Finding() with { Cve = null! });
     }
 
+    [Theory]
+    [InlineData("CVE-2024-3094")]
+    [InlineData("CVE-1999-0001")]
+    [InlineData("CVE-2021-44228123")]
+    public void Cve_WhenWellFormed_ShouldAcceptIt(string id)
+    {
+        Assert.Equal([id], (Make.Finding() with { Cve = [id] }).Cve);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("cve-2024-3094")]
+    [InlineData("CVE-2024-309")]
+    [InlineData("CVE-24-3094")]
+    [InlineData("CVE-2024-3094\n")]
+    [InlineData("GHSA-xxxx-yyyy-zzzz")]
+    public void Cve_WhenAnItemIsMalformed_ShouldThrow(string id)
+    {
+        Assert.Throws<ArgumentException>(() => Make.Finding() with { Cve = ["CVE-2024-3094", id] });
+    }
+
+    [Fact]
+    public void Cve_WhenAnItemIsNull_ShouldThrow()
+    {
+        Assert.Throws<ArgumentException>(() => Make.Finding() with { Cve = [null!] });
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void References_WhenAnItemIsBlank_ShouldThrow(string reference)
+    {
+        Assert.Throws<ArgumentException>(() => Make.Finding() with { References = ["RFC 7489", reference] });
+    }
+
+    [Fact]
+    public void References_WhenAnItemIsNull_ShouldThrow()
+    {
+        Assert.Throws<ArgumentException>(() => Make.Finding() with { References = [null!] });
+    }
+
+    [Theory]
+    [InlineData("MAIL-DMARC-001", true)]
+    [InlineData("MAIL-DMARC-001\n", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void IsCheckId_WhenCalled_ShouldTellWellFormedIds(string? id, bool expected)
+    {
+        Assert.Equal(expected, Finding.IsCheckId(id));
+    }
+
     [Fact]
     public void References_WhenSetToNull_ShouldThrow()
     {

@@ -61,13 +61,14 @@ public static class FindingPrioritizer
     };
 
     /// <summary>
-    /// Returns the findings with their effective severity, most urgent first: KEV, then severity,
-    /// then EPSS (missing last), then confidence, then id and target so the order is always the same.
+    /// Pairs each finding with its effective severity and sorts them, most urgent first: KEV, then
+    /// effective severity, then EPSS (missing last), then confidence, then id and target so the order
+    /// is always the same. The findings are not modified: prioritizing again gives the same result.
     /// </summary>
     /// <param name="findings">The findings to prioritize.</param>
-    /// <returns>A new sorted list; the input is not modified.</returns>
+    /// <returns>A new sorted list.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="findings"/> or one of its items is <see langword="null"/>.</exception>
-    public static IReadOnlyList<Finding> Prioritize(IEnumerable<Finding> findings)
+    public static IReadOnlyList<PrioritizedFinding> Prioritize(IEnumerable<Finding> findings)
     {
         ArgumentNullException.ThrowIfNull(findings);
         var list = findings.ToArray();
@@ -77,13 +78,13 @@ public static class FindingPrioritizer
         }
 
         return list
-            .Select(f => f with { Severity = EffectiveSeverity(f) })
-            .OrderByDescending(f => f.Kev)
-            .ThenByDescending(f => f.Severity)
-            .ThenByDescending(f => f.Epss ?? -1.0)
-            .ThenByDescending(f => f.Confidence)
-            .ThenBy(f => f.Id, StringComparer.Ordinal)
-            .ThenBy(f => f.Target, StringComparer.Ordinal)
+            .Select(f => new PrioritizedFinding(f, EffectiveSeverity(f)))
+            .OrderByDescending(p => p.Finding.Kev)
+            .ThenByDescending(p => p.EffectiveSeverity)
+            .ThenByDescending(p => p.Finding.Epss ?? -1.0)
+            .ThenByDescending(p => p.Finding.Confidence)
+            .ThenBy(p => p.Finding.Id, StringComparer.Ordinal)
+            .ThenBy(p => p.Finding.Target, StringComparer.Ordinal)
             .ToArray();
     }
 }

@@ -88,6 +88,21 @@ internal sealed class FakeCheck(
         new(id, kind, (_, _) => Task.FromResult(result), scope);
 }
 
+/// <summary>A check whose definition cannot be read: its id getter throws.</summary>
+internal sealed class BrokenCheck : ICheck
+{
+    public string Id => throw new InvalidOperationException("broken definition");
+
+    public CheckArea Area => CheckArea.Email;
+
+    public TargetKind AppliesTo => TargetKind.Domain;
+
+    public ScopeRequirement Scope => ScopeRequirement.Passive;
+
+    public Task<CheckResult> RunAsync(CheckContext context, CancellationToken cancellationToken) =>
+        throw new InvalidOperationException("must never run");
+}
+
 /// <summary>A configurable scope guard double.</summary>
 internal sealed class FakeScopeGuard(Func<Target, CancellationToken, Task<bool>> decide) : IScopeGuard
 {

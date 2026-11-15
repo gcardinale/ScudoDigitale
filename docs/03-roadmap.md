@@ -27,7 +27,7 @@ In this order: Bluetooth on macOS → comparison between two reports → Have I 
 ## Checklist
 - [x] Name, license, platforms, scope decided (14/11/2026)
 - [x] Repository created with documentation, ADRs, LICENSE, NOTICE (14/11/2026)
-- [ ] v0.0 skeleton + CI — built on 15/11/2026, build and tests green locally; to be ticked when CI is green on the 3 systems (first push)
+- [x] v0.0 skeleton + CI (15/11/2026, CI green on Windows, Linux and macOS)
 - [ ] v0.1 passive
 - [ ] v0.2 network and CVE
 - [ ] v0.3 wireless

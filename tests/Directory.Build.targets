@@ -22,4 +22,20 @@
   <PropertyGroup Condition="'$(ModuleNotStarted)' == 'true'">
     <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --ignore-exit-code 8</TestingPlatformCommandLineArguments>
   </PropertyGroup>
+
+  <!--
+    The flag above switches the coverage gate off, so it must never outlive the empty module:
+    the build fails as soon as the module or its test project contains a C# file.
+  -->
+  <Target Name="EnsureModuleIsReallyNotStarted" BeforeTargets="BeforeBuild" Condition="'$(ModuleNotStarted)' == 'true'">
+    <PropertyGroup>
+      <_ModuleSourceDirectory>$(MSBuildThisFileDirectory)../src/$(AssemblyUnderTest)/</_ModuleSourceDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <_ModuleNotStartedSource Include="$(_ModuleSourceDirectory)**/*.cs" Exclude="$(_ModuleSourceDirectory)bin/**;$(_ModuleSourceDirectory)obj/**" />
+      <_ModuleNotStartedSource Include="$(MSBuildProjectDirectory)/**/*.cs" Exclude="$(MSBuildProjectDirectory)/bin/**;$(MSBuildProjectDirectory)/obj/**" />
+    </ItemGroup>
+    <Error Condition="!Exists('$(_ModuleSourceDirectory)')" Text="ModuleNotStarted: source folder '$(_ModuleSourceDirectory)' not found; check AssemblyUnderTest." />
+    <Error Condition="'@(_ModuleNotStartedSource)' != ''" Text="$(MSBuildProjectName) is marked ModuleNotStarted but these files exist: @(_ModuleNotStartedSource->'%(Identity)', ', '). Remove &lt;ModuleNotStarted&gt; from the test project: it switches the coverage gate off." />
+  </Target>
 </Project>

@@ -48,7 +48,7 @@ public sealed partial record Finding
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
         ArgumentException.ThrowIfNullOrWhiteSpace(target);
-        if (!IdPattern().IsMatch(id))
+        if (!IsCheckId(id))
         {
             throw new ArgumentException($"'{id}' is not a check id in the AREA-TOPIC-NNN form.", nameof(id));
         }
@@ -70,8 +70,11 @@ public sealed partial record Finding
     /// <summary>Short, user-facing title.</summary>
     public string Title { get; }
 
-    /// <summary>Severity. After <see cref="FindingPrioritizer.Prioritize"/> it is the effective severity.</summary>
-    public Severity Severity { get; init; }
+    /// <summary>
+    /// Severity assigned by the check. It never changes: the severity used to sort the report is
+    /// <see cref="PrioritizedFinding.EffectiveSeverity"/>, computed by <see cref="FindingPrioritizer"/>.
+    /// </summary>
+    public Severity Severity { get; }
 
     /// <summary>How sure the check is.</summary>
     public Confidence Confidence { get; }
@@ -82,11 +85,13 @@ public sealed partial record Finding
     /// <summary>What was observed (a DNS record, a header, a banner), if any.</summary>
     public string? Evidence { get; init; }
 
-    /// <summary>Related CVE identifiers; never <see langword="null"/>.</summary>
+    /// <summary>Related CVE identifiers in the <c>CVE-YYYY-NNNN</c> form; never <see langword="null"/>.</summary>
+    /// <exception cref="ArgumentNullException">The list is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">An item is not a CVE identifier.</exception>
     public IReadOnlyList<string> Cve
     {
         get => cve;
-        init => cve = value?.ToArray() ?? throw new ArgumentNullException(nameof(Cve));
+        init => cve = CopyOf(value, nameof(Cve), static item => CvePattern().IsMatch(item));
     }
 
     /// <summary>CVSS base score, from 0 to 10, if known.</summary>
@@ -115,11 +120,20 @@ public sealed partial record Finding
     public string? Fix { get; init; }
 
     /// <summary>Standards and laws the finding refers to (RFCs, GDPR articles, ...); never <see langword="null"/>.</summary>
+    /// <exception cref="ArgumentNullException">The list is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">An item is empty or blank.</exception>
     public IReadOnlyList<string> References
     {
         get => references;
-        init => references = value?.ToArray() ?? throw new ArgumentNullException(nameof(References));
+        init => references = CopyOf(value, nameof(References), static item => !string.IsNullOrWhiteSpace(item));
     }
+
+    /// <summary>
+    /// Whether <paramref name="id"/> is a check id in the <c>AREA-TOPIC-NNN</c> form.
+    /// </summary>
+    /// <param name="id">The candidate id.</param>
+    /// <returns><see langword="true"/> if the id is well formed.</returns>
+    public static bool IsCheckId(string? id) => id is not null && IdPattern().IsMatch(id);
 
     /// <summary>
     /// Pattern of a check id. Anchored with <c>\A</c> and <c>\z</c>: in .NET <c>$</c> would also accept a trailing newline.
@@ -127,9 +141,28 @@ public sealed partial record Finding
     [GeneratedRegex(@"\A[A-Z][A-Z0-9]*-[A-Z][A-Z0-9]*-[0-9]{3}\z", RegexOptions.CultureInvariant)]
     private static partial Regex IdPattern();
 
+    /// <summary>Pattern of a CVE identifier, for example <c>CVE-2024-3094</c>.</summary>
+    [GeneratedRegex(@"\ACVE-[0-9]{4}-[0-9]{4,}\z", RegexOptions.CultureInvariant)]
+    private static partial Regex CvePattern();
+
     private static T Defined<T>(T value, string name)
         where T : struct, Enum =>
         Enum.IsDefined(value) ? value : throw new ArgumentOutOfRangeException(name, value, "Undefined value.");
+
+    private static string[] CopyOf(IEnumerable<string>? value, string name, Func<string, bool> isValid)
+    {
+        ArgumentNullException.ThrowIfNull(value, name);
+        var items = value.ToArray();
+        foreach (var item in items)
+        {
+            if (item is null || !isValid(item))
+            {
+                throw new ArgumentException($"Invalid item: '{item}'.", name);
+            }
+        }
+
+        return items;
+    }
 
     private static double? InRange(double? value, double max, string name) =>
         value is null || (value >= 0.0 && value <= max)

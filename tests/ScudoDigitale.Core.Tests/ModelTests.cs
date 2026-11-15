@@ -36,6 +36,18 @@ public class TargetTests
     }
 
     [Theory]
+    [InlineData(TargetKind.Domain, " Example.COM. ", "example.com")]
+    [InlineData(TargetKind.Domain, ".", ".")]
+    [InlineData(TargetKind.EmailAddress, "Mario.Rossi@Example.COM", "Mario.Rossi@example.com")]
+    [InlineData(TargetKind.EmailAddress, "no-at-sign", "no-at-sign")]
+    [InlineData(TargetKind.Website, "https://Example.com/Path", "https://Example.com/Path")]
+    [InlineData(TargetKind.Network, "192.168.1.0/24", "192.168.1.0/24")]
+    public void Constructor_WhenValueGiven_ShouldNormalizeDomainsOnly(TargetKind kind, string value, string expected)
+    {
+        Assert.Equal(expected, new Target(kind, value).Value);
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData("  ")]
     public void Constructor_WhenValueIsBlank_ShouldThrow(string value)
@@ -152,6 +164,24 @@ public class ScopeDeclarationTests
         source.Add(Network);
 
         Assert.Single(scope.Targets);
+    }
+
+    [Fact]
+    public void Constructor_WhenTheSameDomainIsWrittenDifferently_ShouldKeepItOnce()
+    {
+        var scope = new ScopeDeclaration(
+            "Mario Rossi",
+            OperatorRole.Owner,
+            [new Target(TargetKind.Domain, "Example.com"), new Target(TargetKind.Domain, "example.COM.")],
+            Make.DeclaredAt);
+
+        Assert.Single(scope.Targets);
+    }
+
+    [Fact]
+    public void Constructor_WhenDateIsMissing_ShouldThrow()
+    {
+        Assert.Throws<ArgumentException>(() => new ScopeDeclaration("Mario Rossi", OperatorRole.Owner, [Domain], default));
     }
 
     [Fact]
@@ -279,5 +309,18 @@ public class CheckEngineOptionsTests
     public void CheckTimeout_WhenNotPositive_ShouldThrow(long ticks)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new CheckEngineOptions { CheckTimeout = TimeSpan.FromTicks(ticks) });
+    }
+
+    [Fact]
+    public void CheckTimeout_WhenExactlyOneHour_ShouldAcceptIt()
+    {
+        Assert.Equal(CheckEngineOptions.MaxCheckTimeout, new CheckEngineOptions { CheckTimeout = TimeSpan.FromHours(1) }.CheckTimeout);
+    }
+
+    [Fact]
+    public void CheckTimeout_WhenAboveOneHour_ShouldThrow()
+    {
+        // Values far above would also make CancellationTokenSource.CancelAfter throw inside the engine.
+        Assert.Throws<ArgumentOutOfRangeException>(() => new CheckEngineOptions { CheckTimeout = TimeSpan.FromHours(1) + TimeSpan.FromTicks(1) });
     }
 }

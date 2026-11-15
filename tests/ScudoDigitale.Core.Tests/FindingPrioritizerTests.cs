@@ -110,9 +110,9 @@ public class FindingPrioritizerTests
 
         Assert.Equal(
             ["NET-SMB-001", "NET-RDP-001", "WEB-CMS-002", "WEB-CMS-001", "MAIL-SPF-001", "MAIL-SPF-002", "MAIL-BIMI-001"],
-            sorted.Select(f => f.Id));
-        Assert.Equal(Severity.Critical, sorted[0].Severity);
-        Assert.Equal(Severity.Critical, sorted[1].Severity);
+            sorted.Select(p => p.Finding.Id));
+        Assert.Equal(Severity.Critical, sorted[0].EffectiveSeverity);
+        Assert.Equal(Severity.Critical, sorted[1].EffectiveSeverity);
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class FindingPrioritizerTests
 
         var sorted = FindingPrioritizer.Prioritize([critical, kev]);
 
-        Assert.Equal(["ZZZ-KEV-001", "AAA-CRIT-001"], sorted.Select(f => f.Id));
+        Assert.Equal(["ZZZ-KEV-001", "AAA-CRIT-001"], sorted.Select(p => p.Finding.Id));
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class FindingPrioritizerTests
         var first = FindingPrioritizer.Prioritize([b2, a2, a1]);
         var second = FindingPrioritizer.Prioritize([a1, b2, a2]);
 
-        Assert.Equal(["z.com", "a.com", "b.com"], first.Select(f => f.Target));
+        Assert.Equal(["z.com", "a.com", "b.com"], first.Select(p => p.Finding.Target));
         Assert.Equal(first, second);
     }
 
@@ -147,8 +147,22 @@ public class FindingPrioritizerTests
 
         var sorted = FindingPrioritizer.Prioritize([original]);
 
-        Assert.Equal(Severity.Critical, sorted[0].Severity);
-        Assert.Equal(Severity.Low, original.Severity);
+        Assert.Equal(Severity.Critical, sorted[0].EffectiveSeverity);
+        Assert.Equal(Severity.Low, sorted[0].Finding.Severity);
+    }
+
+    [Fact]
+    public void Prioritize_WhenAppliedAgainToItsOwnOutput_ShouldNotRaiseTheSeverityAgain()
+    {
+        // Reporting may prioritize per area and then globally: EPSS must raise the severity once only.
+        var finding = Make.Finding(severity: Severity.Medium) with { Epss = 0.5 };
+
+        var once = FindingPrioritizer.Prioritize([finding]);
+        var twice = FindingPrioritizer.Prioritize(once.Select(p => p.Finding));
+
+        Assert.Equal(Severity.High, once[0].EffectiveSeverity);
+        Assert.Equal(Severity.High, twice[0].EffectiveSeverity);
+        Assert.Equal(once, twice);
     }
 
     [Fact]

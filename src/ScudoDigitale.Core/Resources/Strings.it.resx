@@ -18,6 +18,9 @@
   <data name="ScopeVerificationFailed" xml:space="preserve">
     <value>Saltato: non è stato possibile verificare la proprietà dell'obiettivo ({0}).</value>
   </data>
+  <data name="ScopeVerificationTimedOut" xml:space="preserve">
+    <value>Saltato: non è stato possibile verificare la proprietà dell'obiettivo entro {0} secondi.</value>
+  </data>
   <data name="CheckTimedOut" xml:space="preserve">
     <value>Il controllo non è terminato entro {0} secondi.</value>
   </data>

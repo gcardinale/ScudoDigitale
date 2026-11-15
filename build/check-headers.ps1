@@ -18,9 +18,10 @@
 
 .DESCRIPTION
     The header is a license term (AGPL-3.0 section 7(b), see NOTICE): it must be present,
-    identical, at the very top of every .cs file under src/ and tests/, before any `using`.
-    Files under bin/ and obj/ are generated and ignored. Line endings are not significant.
-    Exits with code 1 and lists the offending files when at least one header is missing or altered.
+    identical, at the very top of every .cs file of the repository, before any `using`.
+    Files under bin/, obj/ and .git/ are ignored. Line endings are not significant.
+    Exits with code 1 and lists the offending files when at least one header is missing or altered,
+    or when no C# file is found at all.
 
 .PARAMETER Root
     Repository root. Defaults to the parent folder of this script.
@@ -41,17 +42,21 @@ if ($header.Count -eq 0) {
     Write-Error "The header file '$headerPath' is empty."
 }
 
-$separator = [IO.Path]::DirectorySeparatorChar
-$generated = "$($separator)bin$($separator)", "$($separator)obj$($separator)"
+$Root = [IO.Path]::GetFullPath($Root)
+$skipped = 'bin', 'obj', '.git'
 $files = @(
-    foreach ($folder in 'src', 'tests') {
-        $path = Join-Path $Root $folder
-        if (Test-Path -LiteralPath $path) {
-            Get-ChildItem -LiteralPath $path -Recurse -File -Filter '*.cs' |
-                Where-Object { $full = $_.FullName; -not ($generated | Where-Object { $full.Contains($_) }) }
+    Get-ChildItem -LiteralPath $Root -Recurse -File -Filter '*.cs' |
+        Where-Object {
+            # Only the path inside the repository counts: a parent folder named bin or obj must not hide files.
+            $segments = [IO.Path]::GetRelativePath($Root, $_.FullName).Split([char[]]@('/', '\'))
+            -not ($segments | Where-Object { $skipped -contains $_ })
         }
-    }
 )
+
+if ($files.Count -eq 0) {
+    Write-Host "No C# file found under '$Root': nothing was verified."
+    exit 1
+}
 
 $failures = @(
     foreach ($file in $files) {

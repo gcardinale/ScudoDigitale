@@ -27,7 +27,7 @@ public sealed record ScopeDeclaration
     /// <param name="operatorRole">Declared role of that person.</param>
     /// <param name="targets">What is being checked; duplicates are removed, order is kept.</param>
     /// <param name="declaredAt">When the declaration was made.</param>
-    /// <exception cref="ArgumentException"><paramref name="operatorName"/> is empty or blank, or <paramref name="targets"/> is empty.</exception>
+    /// <exception cref="ArgumentException"><paramref name="operatorName"/> is empty or blank, <paramref name="targets"/> is empty, or <paramref name="declaredAt"/> is the default value.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="targets"/> or one of its items is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="operatorRole"/> is not a defined value.</exception>
     public ScopeDeclaration(
@@ -41,6 +41,11 @@ public sealed record ScopeDeclaration
         if (!Enum.IsDefined(operatorRole))
         {
             throw new ArgumentOutOfRangeException(nameof(operatorRole), operatorRole, "Unknown operator role.");
+        }
+
+        if (declaredAt == default)
+        {
+            throw new ArgumentException("The declaration date is missing.", nameof(declaredAt));
         }
 
         var list = targets.ToArray();
