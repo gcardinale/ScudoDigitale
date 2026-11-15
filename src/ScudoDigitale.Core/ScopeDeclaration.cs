@@ -25,9 +25,12 @@ public sealed record ScopeDeclaration
     /// </summary>
     /// <param name="operatorName">Name of the person running the assessment; surrounding spaces are removed.</param>
     /// <param name="operatorRole">Declared role of that person.</param>
-    /// <param name="targets">What is being checked; duplicates are removed, order is kept.</param>
+    /// <param name="targets">
+    /// What is being checked; duplicates are removed, order is kept. May be empty for an assessment
+    /// made only of questionnaires (ADR-005).
+    /// </param>
     /// <param name="declaredAt">When the declaration was made.</param>
-    /// <exception cref="ArgumentException"><paramref name="operatorName"/> is empty or blank, <paramref name="targets"/> is empty, or <paramref name="declaredAt"/> is the default value.</exception>
+    /// <exception cref="ArgumentException"><paramref name="operatorName"/> is empty or blank, or <paramref name="declaredAt"/> is the default value.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="targets"/> or one of its items is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="operatorRole"/> is not a defined value.</exception>
     public ScopeDeclaration(
@@ -54,11 +57,6 @@ public sealed record ScopeDeclaration
             throw new ArgumentNullException(nameof(targets), "A target is null.");
         }
 
-        if (list.Length == 0)
-        {
-            throw new ArgumentException("At least one target must be declared.", nameof(targets));
-        }
-
         OperatorName = operatorName.Trim();
         OperatorRole = operatorRole;
         Targets = list.Distinct().ToArray();
@@ -71,7 +69,7 @@ public sealed record ScopeDeclaration
     /// <summary>Declared role of that person.</summary>
     public OperatorRole OperatorRole { get; }
 
-    /// <summary>What is being checked, without duplicates, in declaration order.</summary>
+    /// <summary>What is being checked, without duplicates, in declaration order; empty for a questionnaire-only assessment.</summary>
     public IReadOnlyList<Target> Targets { get; }
 
     /// <summary>When the declaration was made.</summary>

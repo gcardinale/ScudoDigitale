@@ -5,6 +5,7 @@
 public sealed class DmarcCheck : ICheck
 {
     public string Id => "MAIL-DMARC-001";
+    public string Title => Strings.DmarcTitle;   // localized, from the module's .resx
     public CheckArea Area => CheckArea.Email;
     public TargetKind AppliesTo => TargetKind.Domain;
     public ScopeRequirement Scope => ScopeRequirement.Passive;

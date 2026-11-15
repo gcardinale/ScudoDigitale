@@ -60,7 +60,7 @@ public sealed class CheckEngine
     /// <exception cref="ArgumentNullException">An argument, or one of the checks, is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">
     /// A check cannot describe itself (a property throws), has an id not in the <c>AREA-TOPIC-NNN</c> form,
-    /// an undefined enum value, or the same id as another check.
+    /// a blank title, an undefined enum value, or the same id as another check.
     /// </exception>
     /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
     public async Task<IReadOnlyList<CheckRun>> RunAsync(
@@ -98,7 +98,7 @@ public sealed class CheckEngine
             CheckDescriptor descriptor;
             try
             {
-                descriptor = new CheckDescriptor(check, check.Id, check.Area, check.AppliesTo, check.Scope);
+                descriptor = new CheckDescriptor(check, check.Id, check.Title, check.Area, check.AppliesTo, check.Scope);
             }
             catch (Exception ex)
             {
@@ -108,6 +108,11 @@ public sealed class CheckEngine
             if (!Finding.IsCheckId(descriptor.Id))
             {
                 throw new ArgumentException($"'{descriptor.Id}' ({check.GetType().FullName}) is not a check id in the AREA-TOPIC-NNN form.", parameterName);
+            }
+
+            if (string.IsNullOrWhiteSpace(descriptor.Title))
+            {
+                throw new ArgumentException($"The check {descriptor.Id} has no title.", parameterName);
             }
 
             if (!Enum.IsDefined(descriptor.Area) || !Enum.IsDefined(descriptor.AppliesTo) || !Enum.IsDefined(descriptor.Scope))
@@ -138,7 +143,7 @@ public sealed class CheckEngine
         {
             var outcome = await RunOneAsync(check, context, cancellationToken).ConfigureAwait(false);
             stillRunning = outcome.StillRunning;
-            return new CheckRun(check.Id, check.Area, context.Target, outcome.Result);
+            return new CheckRun(check.Id, check.Title, check.Area, context.Target, outcome.Result);
         }
         finally
         {
@@ -248,7 +253,7 @@ public sealed class CheckEngine
         string.Format(CultureInfo.CurrentCulture, format, argument);
 
     /// <summary>A check definition read once, so a throwing property cannot fail the run later.</summary>
-    private sealed record CheckDescriptor(ICheck Check, string Id, CheckArea Area, TargetKind AppliesTo, ScopeRequirement Scope);
+    private sealed record CheckDescriptor(ICheck Check, string Id, string Title, CheckArea Area, TargetKind AppliesTo, ScopeRequirement Scope);
 
     /// <summary>The result to report, and the abandoned work that is still running, if any.</summary>
     private sealed record Outcome(CheckResult Result, Task? StillRunning = null);

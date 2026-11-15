@@ -336,6 +336,47 @@ public class CheckEngineTests
         Assert.Equal(0, good.Calls);
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task RunAsync_WhenACheckHasNoTitle_ShouldThrowBeforeRunningAnything(string title)
+    {
+        var good = FakeCheck.Returning("MAIL-DMARC-001", TargetKind.Domain, Nothing);
+        var untitled = new FakeCheck("MAIL-SPF-001", TargetKind.Domain, (_, _) => Task.FromResult(Nothing), title: title);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => new CheckEngine(FakeScopeGuard.Allowing()).RunAsync([good, untitled], Individual, Make.Scope(Domain), TestContext.Current.CancellationToken));
+        Assert.Equal(0, good.Calls);
+    }
+
+    [Fact]
+    public async Task RunAsync_WhenACheckIsSkipped_ShouldReportItsTitleSoTheUserKnowsWhichOne()
+    {
+        var check = new FakeCheck(
+            "WEB-FILES-001",
+            TargetKind.Domain,
+            (_, _) => Task.FromResult(Nothing),
+            ScopeRequirement.ActiveOwnedOnly,
+            "Exposed files");
+
+        var runs = await new CheckEngine(FakeScopeGuard.Denying()).RunAsync([check], Individual, Make.Scope(Domain), TestContext.Current.CancellationToken);
+
+        Assert.Equal("Exposed files", runs[0].CheckTitle);
+        Assert.IsType<CheckResult.Skipped>(runs[0].Result);
+    }
+
+    [Fact]
+    public async Task RunAsync_WhenTheScopeHasNoTargets_ShouldRunNothing()
+    {
+        var check = FakeCheck.Returning("MAIL-SPF-001", TargetKind.Domain, Nothing);
+        var questionnaireOnly = new ScopeDeclaration("Mario Rossi", OperatorRole.Owner, [], Make.DeclaredAt);
+
+        var runs = await new CheckEngine(FakeScopeGuard.Allowing()).RunAsync([check], Individual, questionnaireOnly, TestContext.Current.CancellationToken);
+
+        Assert.Empty(runs);
+        Assert.Equal(0, check.Calls);
+    }
+
     [Fact]
     public async Task RunAsync_WhenTwoChecksShareAnId_ShouldThrow()
     {

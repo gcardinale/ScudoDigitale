@@ -24,6 +24,12 @@ public interface ICheck
     /// <summary>Stable id in the form <c>AREA-TOPIC-NNN</c>, for example <c>MAIL-DMARC-001</c>.</summary>
     string Id { get; }
 
+    /// <summary>
+    /// User-facing name of the check in the current UI language, for example "DMARC policy" or
+    /// "Criterio DMARC". Taken from the module's resource files; never blank (ADR-005).
+    /// </summary>
+    string Title { get; }
+
     /// <summary>Area the check belongs to.</summary>
     CheckArea Area { get; }
 
