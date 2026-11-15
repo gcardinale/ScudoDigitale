@@ -1,0 +1,41 @@
+<Project>
+  <!--
+    Coverage gate (CONTRIBUTING.md, rule 3): every `dotnet test` measures the assembly under test only and
+    fails below 90% (total) for each type in CoverageThresholdTypes. Defined in .targets so that the
+    .csproj can override AssemblyUnderTest, CoverageThresholdTypes and ModuleNotStarted.
+    Our own exclusions never include CompilerGeneratedAttribute: it would hide the body of async
+    methods. (coverlet.MTP adds it to its defaults; checked on 2026-11-15 that async state machines
+    are still measured, e.g. CheckEngine.RunOneAsync.)
+  -->
+  <ItemGroup Condition="'$(ModuleNotStarted)' != 'true'">
+    <_CoverageThresholdType Include="$(CoverageThresholdTypes.Split(' '))" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(ModuleNotStarted)' != 'true'">
+    <_CoverageThresholdArgs>@(_CoverageThresholdType->'--coverlet-threshold-type %(Identity)', ' ')</_CoverageThresholdArgs>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --results-directory "$(CoverageOutputDirectory)" --coverlet --coverlet-file-prefix $(MSBuildProjectName) --coverlet-include "[$(AssemblyUnderTest)]*" --coverlet-exclude-by-attribute GeneratedCodeAttribute --coverlet-exclude-by-attribute ExcludeFromCodeCoverageAttribute --coverlet-skip-auto-props --coverlet-threshold 90 $(_CoverageThresholdArgs) --coverlet-threshold-stat total --coverlet-output-format cobertura</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+
+  <!--
+    A module with no code yet has no tests: exit code 8 ("zero tests ran") is accepted only here.
+    Remove ModuleNotStarted from the .csproj together with the first test.
+  -->
+  <PropertyGroup Condition="'$(ModuleNotStarted)' == 'true'">
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --ignore-exit-code 8</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+
+  <!--
+    The flag above switches the coverage gate off, so it must never outlive the empty module:
+    the build fails as soon as the module or its test project contains a C# file.
+  -->
+  <Target Name="EnsureModuleIsReallyNotStarted" BeforeTargets="BeforeBuild" Condition="'$(ModuleNotStarted)' == 'true'">
+    <PropertyGroup>
+      <_ModuleSourceDirectory>$(MSBuildThisFileDirectory)../src/$(AssemblyUnderTest)/</_ModuleSourceDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <_ModuleNotStartedSource Include="$(_ModuleSourceDirectory)**/*.cs" Exclude="$(_ModuleSourceDirectory)bin/**;$(_ModuleSourceDirectory)obj/**" />
+      <_ModuleNotStartedSource Include="$(MSBuildProjectDirectory)/**/*.cs" Exclude="$(MSBuildProjectDirectory)/bin/**;$(MSBuildProjectDirectory)/obj/**" />
+    </ItemGroup>
+    <Error Condition="!Exists('$(_ModuleSourceDirectory)')" Text="ModuleNotStarted: source folder '$(_ModuleSourceDirectory)' not found; check AssemblyUnderTest." />
+    <Error Condition="'@(_ModuleNotStartedSource)' != ''" Text="$(MSBuildProjectName) is marked ModuleNotStarted but these files exist: @(_ModuleNotStartedSource->'%(Identity)', ', '). Remove &lt;ModuleNotStarted&gt; from the test project: it switches the coverage gate off." />
+  </Target>
+</Project>

@@ -1,0 +1,62 @@
+# Build, test and coverage gate on the three supported systems, plus the license header check.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  headers:
+    name: License headers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check build/header.txt on every C# file
+        shell: pwsh
+        run: pwsh -NoProfile -File build/check-headers.ps1
+
+  build-test:
+    name: Build and test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore ScudoDigitale.sln
+
+      - name: Build
+        run: dotnet build ScudoDigitale.sln -c Release --no-restore
+
+      # Every test project fails below 90% line and branch coverage (tests/Directory.Build.targets).
+      - name: Test with coverage gate
+        run: dotnet test --solution ScudoDigitale.sln -c Release --no-build
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-${{ matrix.os }}
+          path: TestResults/coverage/*.xml
+          if-no-files-found: warn
+          retention-days: 14

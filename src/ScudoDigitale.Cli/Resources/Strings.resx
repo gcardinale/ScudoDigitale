@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="RootDescription" xml:space="preserve">
+    <value>Scudo Digitale: free, open-source security self-assessment of your network, Wi-Fi, websites, email, Bluetooth, GDPR and NIS2. Runs locally: no data leaves your computer.</value>
+  </data>
+  <data name="Disclaimer" xml:space="preserve">
+    <value>This is a self-assessment tool: it does not replace a penetration test or legal advice. Use it only on systems you own or are authorized to check.</value>
+  </data>
+  <data name="UsageHint" xml:space="preserve">
+    <value>Version 0.0: no checks are available yet. Run "scudo --help" to see the options.</value>
+  </data>
+</root>
