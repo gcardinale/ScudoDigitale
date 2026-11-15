@@ -2,7 +2,7 @@
 
 - **Content:** GDPR and NIS2 questionnaires
 - **Release:** v0.1
-- **Status:** ⚪ not started
+- **Status:** ⚪ not started (empty project and test project created in v0.0)
 - **Test coverage:** —
 
 ## Done
@@ -10,3 +10,4 @@
 
 ## To do
 - see `docs/00-functional-spec.md` and `docs/03-roadmap.md`
+- remove `<ModuleNotStarted>true</ModuleNotStarted>` from the test project together with the first test

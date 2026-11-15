@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ScopeNotAuthorized" xml:space="preserve">
+    <value>Skipped: the target is outside the verified scope. Active checks run only on this computer's local network or on domains whose ownership has been proven.</value>
+  </data>
+  <data name="ScopeVerificationFailed" xml:space="preserve">
+    <value>Skipped: the ownership of the target could not be verified ({0}).</value>
+  </data>
+  <data name="CheckTimedOut" xml:space="preserve">
+    <value>The check did not finish within {0} seconds.</value>
+  </data>
+  <data name="CheckUnexpectedError" xml:space="preserve">
+    <value>Unexpected error: {0}</value>
+  </data>
+  <data name="CheckReturnedNoResult" xml:space="preserve">
+    <value>The check returned no result.</value>
+  </data>
+  <data name="ReportGeneratedWith" xml:space="preserve">
+    <value>Report generated with</value>
+  </data>
+</root>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- No code in the module yet. Remove this line together with the first test. -->
+    <ModuleNotStarted>true</ModuleNotStarted>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ScudoDigitale.Vulnerabilities\ScudoDigitale.Vulnerabilities.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,27 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!-- Test projects: xUnit v3 on Microsoft.Testing.Platform, no XML docs. -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+    <!-- Assembly measured by the coverage gate; override in the .csproj when the name differs. -->
+    <AssemblyUnderTest>$(MSBuildProjectName.Replace('.Tests', ''))</AssemblyUnderTest>
+    <!-- true only while the module has no code yet: see Directory.Build.targets. -->
+    <ModuleNotStarted>false</ModuleNotStarted>
+    <!-- Coverage gate on lines and branches; "line" only when there is no branch to measure. -->
+    <CoverageThresholdTypes>line branch</CoverageThresholdTypes>
+    <!-- Each project writes its own report under TestResults/coverage. -->
+    <CoverageOutputDirectory>$(MSBuildThisFileDirectory)../TestResults/coverage</CoverageOutputDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="coverlet.MTP" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

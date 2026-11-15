@@ -36,12 +36,14 @@ Coming soon in [Releases](https://github.com/gcardinale/ScudoDigitale/releases) 
 In development. See the [roadmap](docs/03-roadmap.md) and the [functional specification](docs/00-functional-spec.md).
 
 ## Build from source
-Requires .NET SDK 10 or later.
+Requires .NET SDK 10 or later (pinned in `global.json`).
 ```bash
 git clone https://github.com/gcardinale/ScudoDigitale.git
 cd ScudoDigitale
 dotnet build
-dotnet test
+dotnet test                              # runs every test project with the 90% coverage gate
+pwsh build/check-headers.ps1             # verifies the license header on every .cs file
+dotnet run --project src/ScudoDigitale.Cli
 ```
 
 ## License and attribution
