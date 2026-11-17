@@ -30,7 +30,7 @@ Every issue in the report lists: **severity**, **CVE and CVSS score**, **EPSS** 
 - It is a **self-assessment** tool: it does not replace a professional penetration test or legal advice. False positives and false negatives are possible.
 
 ## Download
-Coming soon in [Releases](https://github.com/gcardinale/ScudoDigitale/releases) for Windows, macOS and Linux, with SHA-256 hashes and build provenance attestation.
+A first **beta 0.1** (email, website, GDPR/NIS2 questionnaires and reports) is planned for **1 December 2026** in [Releases](https://github.com/gcardinale/ScudoDigitale/releases), for Windows, macOS and Linux with SHA-256 hashes. Version 1.0 follows by mid-December 2026 with build provenance attestation.
 
 ## Project status
 In development. See the [roadmap](docs/03-roadmap.md) and the [functional specification](docs/00-functional-spec.md).
