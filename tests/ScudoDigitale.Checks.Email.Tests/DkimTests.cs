@@ -194,6 +194,17 @@ public sealed class DkimChecksTests
         Assert.Empty(await Make.FindingsAsync(dns, DkimChecks.SelectorsId));
     }
 
+    [Theory]
+    [InlineData("ovhmo-selector-1")]
+    [InlineData("ovhmo-selector-2")]
+    public async Task Selectors_WhenDomainUsesOvhMxPlan_ShouldFindTheKeyWithoutExtraSelectors(string selector)
+    {
+        // OVHcloud MX Plan signs with its own selectors (found on gcardinale.it on 19/11/2026).
+        var dns = new FakeDnsResolver().WithTxt(selector + "._domainkey.example.com", RsaKeys.Record(2048));
+
+        Assert.Empty(await Make.FindingsAsync(dns, DkimChecks.SelectorsId));
+    }
+
     [Fact]
     public async Task Selectors_WhenUserSuppliesASelector_ShouldTryItToo()
     {

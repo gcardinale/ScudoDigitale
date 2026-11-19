@@ -45,6 +45,7 @@ public sealed record EmailCheckOptions
         "default", "dkim", "mail", "email", "smtp", "selector1", "selector2", "google",
         "k1", "k2", "k3", "s1", "s2", "sig1", "key1", "key2", "mx", "dk",
         "fm1", "fm2", "fm3", "protonmail", "protonmail2", "protonmail3", "zoho", "mandrill", "everlytickey1",
+        "ovhmo-selector-1", "ovhmo-selector-2",
     ];
 
     /// <summary>
