@@ -31,7 +31,7 @@ public class CliAppTests
         Assert.StartsWith(Attribution.Banner, output, StringComparison.Ordinal);
         Assert.Contains(Attribution.Notice, output, StringComparison.Ordinal);
         Assert.Contains("does not replace a penetration test or legal advice", output, StringComparison.Ordinal);
-        Assert.Contains("scudo --help", output, StringComparison.Ordinal);
+        Assert.Contains("scudo scan --mail", output, StringComparison.Ordinal);
         Assert.Empty(error);
     }
 
@@ -81,7 +81,7 @@ public class CliAppTests
     {
         using var output = new StringWriter(CultureInfo.InvariantCulture);
         using var error = new StringWriter(CultureInfo.InvariantCulture);
-        var exitCode = CliApp.Run(args, output, error);
+        var exitCode = CliApp.RunAsync(args, output, error).GetAwaiter().GetResult();
         return (exitCode, output.ToString(), error.ToString());
     }
 

@@ -3,11 +3,6 @@
   <PropertyGroup>
     <!-- The CLI assembly is named after the command, not after the project. -->
     <AssemblyUnderTest>scudo</AssemblyUnderTest>
-    <!--
-      v0.0 CliApp has no branches, and coverlet counts 0 of 0 branches as 0%: the branch gate
-      would always fail. Remove this line as soon as CliApp gets its first branch (v0.1).
-    -->
-    <CoverageThresholdTypes>line</CoverageThresholdTypes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,5 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -13,12 +41,114 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="RootDescription" xml:space="preserve">
-    <value>Scudo Digitale: free, open-source security self-assessment of your network, Wi-Fi, websites, email, Bluetooth, GDPR and NIS2. Runs locally: no data leaves your computer.</value>
+    <value>Scudo Digitale: free, open-source security self-assessment of your network, Wi-Fi, websites, email, Bluetooth, GDPR and NIS2. Runs on your computer: nothing is sent to the author, and only public sources are queried.</value>
   </data>
   <data name="Disclaimer" xml:space="preserve">
     <value>This is a self-assessment tool: it does not replace a penetration test or legal advice. Use it only on systems you own or are authorized to check.</value>
   </data>
   <data name="UsageHint" xml:space="preserve">
-    <value>Version 0.0: no checks are available yet. Run "scudo --help" to see the options.</value>
+    <value>Run "scudo scan --mail &lt;domain&gt;" to check the email setup of a domain, or "scudo --help" to see the options.</value>
+  </data>
+  <data name="ScanDescription" xml:space="preserve">
+    <value>Runs the checks on the given targets and prints the results, most urgent first.</value>
+  </data>
+  <data name="MailOptionDescription" xml:space="preserve">
+    <value>Domain whose email setup is checked (SPF, DMARC, DKIM, MX), using only public DNS; can be repeated.</value>
+  </data>
+  <data name="DkimSelectorOptionDescription" xml:space="preserve">
+    <value>Extra DKIM selector to try besides the common ones (see the s= tag of the DKIM-Signature header); can be repeated.</value>
+  </data>
+  <data name="SystemDnsOptionDescription" xml:space="preserve">
+    <value>Use only the DNS of this computer instead of Cloudflare and Google over HTTPS.</value>
+  </data>
+  <data name="OperatorOptionDescription" xml:space="preserve">
+    <value>Name of the person running the assessment, printed in the declaration (default: the user name of this computer).</value>
+  </data>
+  <data name="RoleOptionDescription" xml:space="preserve">
+    <value>Role of that person: Owner, SecurityOfficer or AppointedPerson (default: Owner).</value>
+  </data>
+  <data name="NoTargets" xml:space="preserve">
+    <value>Nothing to check: give at least one domain with --mail &lt;domain&gt;.</value>
+  </data>
+  <data name="InvalidSelector" xml:space="preserve">
+    <value>'{0}' is not a valid DKIM selector.</value>
+  </data>
+  <data name="UnknownOperator" xml:space="preserve">
+    <value>not declared</value>
+  </data>
+  <data name="Declaration" xml:space="preserve">
+    <value>Declared by {0} ({1}) on {2}.</value>
+  </data>
+  <data name="Checking" xml:space="preserve">
+    <value>Checking {0}: {1} checks per target…</value>
+  </data>
+  <data name="RoleOwner" xml:space="preserve">
+    <value>owner</value>
+  </data>
+  <data name="RoleSecurityOfficer" xml:space="preserve">
+    <value>security officer</value>
+  </data>
+  <data name="RoleAppointedPerson" xml:space="preserve">
+    <value>appointed person</value>
+  </data>
+  <data name="AreaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="ProblemsFound" xml:space="preserve">
+    <value>Problems found</value>
+  </data>
+  <data name="NoProblems" xml:space="preserve">
+    <value>No problems found.</value>
+  </data>
+  <data name="ChecksPassed" xml:space="preserve">
+    <value>Checks passed</value>
+  </data>
+  <data name="ChecksSkipped" xml:space="preserve">
+    <value>Checks skipped</value>
+  </data>
+  <data name="ChecksFailed" xml:space="preserve">
+    <value>Checks that could not run</value>
+  </data>
+  <data name="EvidenceLabel" xml:space="preserve">
+    <value>Evidence</value>
+  </data>
+  <data name="RiskLabel" xml:space="preserve">
+    <value>Risk</value>
+  </data>
+  <data name="FixLabel" xml:space="preserve">
+    <value>Fix</value>
+  </data>
+  <data name="ConfidenceLabel" xml:space="preserve">
+    <value>Confidence</value>
+  </data>
+  <data name="ReferencesLabel" xml:space="preserve">
+    <value>References</value>
+  </data>
+  <data name="SeverityCritical" xml:space="preserve">
+    <value>CRITICAL</value>
+  </data>
+  <data name="SeverityHigh" xml:space="preserve">
+    <value>HIGH</value>
+  </data>
+  <data name="SeverityMedium" xml:space="preserve">
+    <value>MEDIUM</value>
+  </data>
+  <data name="SeverityLow" xml:space="preserve">
+    <value>LOW</value>
+  </data>
+  <data name="SeverityInfo" xml:space="preserve">
+    <value>INFO</value>
+  </data>
+  <data name="ConfidenceCertain" xml:space="preserve">
+    <value>certain</value>
+  </data>
+  <data name="ConfidenceProbable" xml:space="preserve">
+    <value>probable</value>
+  </data>
+  <data name="ConfidenceToBeVerified" xml:space="preserve">
+    <value>to be verified</value>
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Summary: {0} critical, {1} high, {2} medium, {3} low, {4} info · {5} checks passed, {6} skipped, {7} could not run.</value>
   </data>
 </root>

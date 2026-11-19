@@ -18,7 +18,7 @@ One check per kind of problem ([ADR-006](../../docs/decisions/ADR-006-check-gran
 | `MAIL-DMARC-001` | DMARC policy | missing; invalid or duplicated; `p=none`; `pct` < 100. A subdomain without a record inherits the parent's `sp`/`p` (probable) | High / High / Medium / Low |
 | `MAIL-DMARC-002` | DMARC aggregate reports | no `rua` | Low |
 | `MAIL-DMARC-003` | DMARC policy for subdomains | `sp=none` while `p` is enforced | Low |
-| `MAIL-DKIM-001` | DKIM on common selectors | no key on 27 common selectors + the user's own; lists the selectors the DNS did not answer for | Medium, to be verified |
+| `MAIL-DKIM-001` | DKIM on common selectors | no key on 29 common selectors (OVHcloud ones included) + the user's own; lists the selectors the DNS did not answer for | Medium, to be verified |
 | `MAIL-DKIM-002` | DKIM keys | RSA < 1024 bits; < 2048 bits; key not readable; test mode `t=y` | High / Medium / Medium / Low |
 | `MAIL-MX-001` | Mail servers (MX) | no MX (null MX `0 .` is fine) | Low |
 | `MAIL-MX-002` | Names of the mail servers | host without A/AAAA (High if none resolves); MX pointing to an IP; host not checkable | High / Medium / Medium / Low |
