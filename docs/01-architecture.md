@@ -18,7 +18,7 @@
 ## Principles
 - **Every check is an `ICheck`** with id, area, prerequisites (privileges, network, platform) and `ScopeRequirement` (Passive / ActiveOwnedOnly). The engine skips checks that cannot run and says so in the report ("skipped: requires Linux with BlueZ").
 - **`IScopeGuard`**: no active check starts without a declared scope and, for domains, without proof of ownership (TXT record `scudo-digitale-verify=<token>` or file `/.well-known/scudo-digitale.txt`).
-- **No outbound network beyond the targets and public data sources** (NVD, KEV, EPSS, OSV, optional HIBP). No telemetry. An `--offline` option uses only the already downloaded database.
+- **No outbound network beyond the targets and public data sources** (NVD, KEV, EPSS, OSV, optional HIBP, and the DNS over HTTPS resolvers of Cloudflare and Google for DNS lookups, ADR-006). No telemetry. An `--offline` option uses only the already downloaded database.
 - **Cautious network behavior**: configurable concurrency limit and timeouts, so as not to disturb fragile home devices.
 - **Localization**: user-facing strings live in `.resx` resource files in English and Italian; Italian is selected automatically when the OS language is Italian. XML docs and identifiers are in English.
 
