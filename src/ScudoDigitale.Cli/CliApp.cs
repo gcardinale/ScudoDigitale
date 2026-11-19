@@ -30,22 +30,30 @@ internal static class CliApp
     /// <param name="args">Command-line arguments.</param>
     /// <param name="output">Where normal output is written.</param>
     /// <param name="error">Where errors are written.</param>
-    /// <returns>The process exit code: 0 on success.</returns>
-    public static int Run(string[] args, TextWriter output, TextWriter error)
+    /// <param name="services">Checks, clock and user name; the real ones when <see langword="null"/>.</param>
+    /// <param name="cancellationToken">Stops a running scan.</param>
+    /// <returns>The process exit code: 0 on success, 1 for a wrong command line, 2 for invalid input.</returns>
+    public static Task<int> RunAsync(
+        string[] args,
+        TextWriter output,
+        TextWriter error,
+        CliServices? services = null,
+        CancellationToken cancellationToken = default)
     {
-        var root = BuildRootCommand();
+        var root = BuildRootCommand(services ?? CliServices.Default);
         var configuration = new InvocationConfiguration { Output = output, Error = error };
-        return root.Parse(args).Invoke(configuration);
+        return root.Parse(args).InvokeAsync(configuration, cancellationToken);
     }
 
     /// <summary>
     /// Builds the root command. Without a subcommand it prints the banner, the attribution and the
     /// self-assessment warning (docs/00-functional-spec.md §1).
     /// </summary>
+    /// <param name="services">Checks, clock and user name for the subcommands.</param>
     /// <returns>The root command.</returns>
-    internal static RootCommand BuildRootCommand()
+    internal static RootCommand BuildRootCommand(CliServices services)
     {
-        var root = new RootCommand(Strings.RootDescription);
+        var root = new RootCommand(Strings.RootDescription) { ScanCommand.Create(services) };
         root.SetAction(parseResult =>
         {
             var output = parseResult.InvocationConfiguration.Output;

@@ -28,10 +28,10 @@ internal static class Program
     /// </summary>
     /// <param name="args">Command-line arguments.</param>
     /// <returns>The process exit code.</returns>
-    private static int Main(string[] args)
+    private static Task<int> Main(string[] args)
     {
         // The banner uses box-drawing characters: make sure the Windows console shows them.
         Console.OutputEncoding = Encoding.UTF8;
-        return CliApp.Run(args, Console.Out, Console.Error);
+        return CliApp.RunAsync(args, Console.Out, Console.Error);
     }
 }
