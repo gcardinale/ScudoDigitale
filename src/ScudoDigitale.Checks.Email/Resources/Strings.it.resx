@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="InvalidDomain" xml:space="preserve">
+    <value>'{0}' non è un nome di dominio valido.</value>
+  </data>
+  <data name="DomainNotFound" xml:space="preserve">
+    <value>Il dominio {0} non esiste nel DNS pubblico.</value>
+  </data>
+  <data name="DnsQueryFailed" xml:space="preserve">
+    <value>La richiesta DNS per {0} non è riuscita: {1}</value>
+  </data>
+  <data name="NoDnsServer" xml:space="preserve">
+    <value>su questo computer non è configurato alcun server DNS</value>
+  </data>
+  <data name="DnsNoAnswerInTime" xml:space="preserve">
+    <value>nessuna risposta entro {0} secondi</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Errore imprevisto: {0}</value>
+  </data>
+  <data name="EvidenceNoRecord" xml:space="preserve">
+    <value>Nessun record trovato in {0}.</value>
+  </data>
+  <data name="EvidenceNoMx" xml:space="preserve">
+    <value>Nessun record MX per {0}.</value>
+  </data>
+  <data name="EvidenceInheritedFrom" xml:space="preserve">
+    <value>Ereditato da {0}:</value>
+  </data>
+  <data name="EvidenceDkimSelectorsTried" xml:space="preserve">
+    <value>Selettori provati: {0}.</value>
+  </data>
+  <data name="EvidenceDkimSelectorsUnanswered" xml:space="preserve">
+    <value>Il DNS non ha risposto per: {0}.</value>
+  </data>
+  <data name="EvidenceSpfLookups" xml:space="preserve">
+    <value>Almeno {0} ricerche DNS (il conteggio si ferma appena superato il limite di 10).</value>
+  </data>
+  <data name="SkippedNoSpf" xml:space="preserve">
+    <value>Saltato: il dominio non ha uno e un solo record SPF (vedi MAIL-SPF-001).</value>
+  </data>
+  <data name="SkippedNoDmarc" xml:space="preserve">
+    <value>Saltato: il dominio non ha un record DMARC valido (vedi MAIL-DMARC-001).</value>
+  </data>
+  <data name="SkippedNoDkim" xml:space="preserve">
+    <value>Saltato: non è stata trovata alcuna chiave DKIM (vedi MAIL-DKIM-001).</value>
+  </data>
+  <data name="SkippedNoMx" xml:space="preserve">
+    <value>Saltato: il dominio non ha record MX (vedi MAIL-MX-001).</value>
+  </data>
+  <data name="SkippedNullMx" xml:space="preserve">
+    <value>Saltato: il dominio dichiara di non ricevere posta (null MX, RFC 7505).</value>
+  </data>
+  <data name="SpfRecordCheck" xml:space="preserve">
+    <value>Record SPF</value>
+  </data>
+  <data name="SpfAllCheck" xml:space="preserve">
+    <value>Regola finale SPF (all)</value>
+  </data>
+  <data name="SpfLookupsCheck" xml:space="preserve">
+    <value>Limite SPF di 10 ricerche DNS</value>
+  </data>
+  <data name="SpfSyntaxCheck" xml:space="preserve">
+    <value>Sintassi e inclusioni SPF</value>
+  </data>
+  <data name="DmarcPolicyCheck" xml:space="preserve">
+    <value>Criterio DMARC</value>
+  </data>
+  <data name="DmarcReportsCheck" xml:space="preserve">
+    <value>Report aggregati DMARC</value>
+  </data>
+  <data name="DmarcSubdomainCheck" xml:space="preserve">
+    <value>Criterio DMARC per i sottodomini</value>
+  </data>
+  <data name="DkimSelectorsCheck" xml:space="preserve">
+    <value>DKIM sui selettori comuni</value>
+  </data>
+  <data name="DkimKeysCheck" xml:space="preserve">
+    <value>Chiavi DKIM</value>
+  </data>
+  <data name="MxRecordsCheck" xml:space="preserve">
+    <value>Server di posta (MX)</value>
+  </data>
+  <data name="MxHostsCheck" xml:space="preserve">
+    <value>Nomi dei server di posta</value>
+  </data>
+  <data name="SpfMissingTitle" xml:space="preserve">
+    <value>Nessun record SPF</value>
+  </data>
+  <data name="SpfMissingRisk" xml:space="preserve">
+    <value>I server che ricevono la posta non possono sapere quali server sono autorizzati a spedire per il dominio: i messaggi falsificati arrivano più facilmente.</value>
+  </data>
+  <data name="SpfMissingFix" xml:space="preserve">
+    <value>Pubblicare un solo record TXT che inizi con v=spf1, elenchi i server che spediscono la vostra posta (il fornitore indica l'include da usare) e finisca con -all, oppure ~all durante le prove. Se il dominio non spedisce posta, pubblicare v=spf1 -all.</value>
+  </data>
+  <data name="SpfMultipleTitle" xml:space="preserve">
+    <value>Più di un record SPF</value>
+  </data>
+  <data name="SpfMultipleRisk" xml:space="preserve">
+    <value>Con più di un record SPF la verifica termina con un errore permanente: l'SPF non protegge più in nessun caso.</value>
+  </data>
+  <data name="SpfMultipleFix" xml:space="preserve">
+    <value>Unire i record in un solo record TXT che inizi con v=spf1.</value>
+  </data>
+  <data name="SpfAllPassTitle" xml:space="preserve">
+    <value>L'SPF autorizza qualsiasi server (+all)</value>
+  </data>
+  <data name="SpfAllPassRisk" xml:space="preserve">
+    <value>Qualsiasi server di internet supera la verifica SPF del dominio: l'SPF non protegge.</value>
+  </data>
+  <data name="SpfAllNeutralTitle" xml:space="preserve">
+    <value>L'SPF non respinge gli altri server (?all o nessun all)</value>
+  </data>
+  <data name="SpfAllNeutralRisk" xml:space="preserve">
+    <value>La posta dei server non elencati viene trattata come neutra: l'SPF non aiuta contro i messaggi falsificati.</value>
+  </data>
+  <data name="SpfAllFix" xml:space="preserve">
+    <value>Terminare il record con -all, oppure ~all mentre si verifica che tutti i server legittimi siano elencati.</value>
+  </data>
+  <data name="SpfTooManyLookupsTitle" xml:space="preserve">
+    <value>L'SPF richiede più di 10 ricerche DNS</value>
+  </data>
+  <data name="SpfTooManyLookupsRisk" xml:space="preserve">
+    <value>Oltre 10 ricerche la verifica SPF termina con un errore permanente: anche la posta legittima può non superare SPF e DMARC.</value>
+  </data>
+  <data name="SpfTooManyLookupsFix" xml:space="preserve">
+    <value>Togliere gli include dei servizi non più usati, sostituire a e mx con intervalli ip4/ip6, oppure chiedere ai fornitori un include più leggero.</value>
+  </data>
+  <data name="SpfSyntaxErrorTitle" xml:space="preserve">
+    <value>Record SPF con un termine non valido</value>
+  </data>
+  <data name="SpfSyntaxErrorRisk" xml:space="preserve">
+    <value>Un termine non valido fa terminare la verifica SPF con un errore permanente: l'SPF non protegge.</value>
+  </data>
+  <data name="SpfSyntaxErrorFix" xml:space="preserve">
+    <value>Correggere o togliere il termine indicato nella prova; se si trova nel record di un fornitore, segnalarlo al fornitore.</value>
+  </data>
+  <data name="SpfBrokenReferenceTitle" xml:space="preserve">
+    <value>Include o redirect SPF verso un dominio senza un SPF valido</value>
+  </data>
+  <data name="SpfBrokenReferenceRisk" xml:space="preserve">
+    <value>Un include o un redirect che non porta a un SPF valido (o che gira in tondo) fa terminare la verifica SPF con un errore permanente.</value>
+  </data>
+  <data name="SpfBrokenReferenceFix" xml:space="preserve">
+    <value>Correggere il nome di dominio nell'include o nel redirect, oppure toglierlo se il servizio non è più usato.</value>
+  </data>
+  <data name="SpfUnverifiedTitle" xml:space="preserve">
+    <value>Include SPF che non è stato possibile verificare</value>
+  </data>
+  <data name="SpfUnverifiedRisk" xml:space="preserve">
+    <value>Il DNS non ha risposto per un dominio incluso: se l'errore persiste, anche chi riceve la posta può ottenere un errore temporaneo.</value>
+  </data>
+  <data name="SpfUnverifiedFix" xml:space="preserve">
+    <value>Ripetere il controllo più tardi; se l'errore persiste, verificare il dominio incluso con il suo fornitore.</value>
+  </data>
+  <data name="SpfPtrTitle" xml:space="preserve">
+    <value>L'SPF usa il meccanismo deprecato ptr</value>
+  </data>
+  <data name="SpfPtrRisk" xml:space="preserve">
+    <value>ptr è lento e inaffidabile: lo standard dice di non usarlo e alcuni destinatari lo ignorano.</value>
+  </data>
+  <data name="SpfPtrFix" xml:space="preserve">
+    <value>Sostituire ptr con gli intervalli ip4/ip6 o con a/mx dei server che spediscono; se si trova nel record di un fornitore (vedi la prova), segnalarlo al fornitore.</value>
+  </data>
+  <data name="DmarcMissingTitle" xml:space="preserve">
+    <value>Nessun record DMARC</value>
+  </data>
+  <data name="DmarcMissingRisk" xml:space="preserve">
+    <value>Chiunque può spedire posta che dichiara di provenire dal dominio, e chi la riceve non ha un criterio che gli dica di bloccarla.</value>
+  </data>
+  <data name="DmarcMissingFix" xml:space="preserve">
+    <value>Pubblicare un record TXT in _dmarc.&lt;vostro dominio&gt;, per esempio v=DMARC1; p=none; rua=mailto:&lt;indirizzo&gt;. Leggere i report per 2-4 settimane, poi passare a p=quarantine e a p=reject.</value>
+  </data>
+  <data name="DmarcInvalidTitle" xml:space="preserve">
+    <value>Record DMARC non valido</value>
+  </data>
+  <data name="DmarcInvalidRisk" xml:space="preserve">
+    <value>Chi riceve la posta ignora un record DMARC non valido (o più record insieme): il dominio non è protetto.</value>
+  </data>
+  <data name="DmarcInvalidFix" xml:space="preserve">
+    <value>Pubblicare un solo record in _dmarc.&lt;vostro dominio&gt; che inizi con v=DMARC1 e abbia un tag p valido (none, quarantine o reject).</value>
+  </data>
+  <data name="DmarcNoneTitle" xml:space="preserve">
+    <value>DMARC in sola osservazione (p=none)</value>
+  </data>
+  <data name="DmarcNoneRisk" xml:space="preserve">
+    <value>Chiunque può spedire posta a nome del dominio senza che venga bloccata.</value>
+  </data>
+  <data name="DmarcNoneFix" xml:space="preserve">
+    <value>Passare a p=quarantine dopo 2-4 settimane di report puliti, poi a p=reject.</value>
+  </data>
+  <data name="DmarcPartialTitle" xml:space="preserve">
+    <value>Criterio DMARC applicato solo al {0}% dei messaggi (pct)</value>
+  </data>
+  <data name="DmarcPartialRisk" xml:space="preserve">
+    <value>Una parte della posta falsificata viene ancora consegnata come se il criterio non ci fosse.</value>
+  </data>
+  <data name="DmarcPartialFix" xml:space="preserve">
+    <value>Portare pct a 100, oppure togliere il tag.</value>
+  </data>
+  <data name="DmarcNoReportsTitle" xml:space="preserve">
+    <value>DMARC senza report aggregati (rua)</value>
+  </data>
+  <data name="DmarcNoReportsRisk" xml:space="preserve">
+    <value>Senza report non si vede chi spedisce posta a nome del dominio: rendere il criterio più severo diventa un passo al buio.</value>
+  </data>
+  <data name="DmarcNoReportsFix" xml:space="preserve">
+    <value>Aggiungere rua=mailto:&lt;indirizzo&gt; al record DMARC, con una casella o un servizio che legga i report.</value>
+  </data>
+  <data name="DmarcSubdomainNoneTitle" xml:space="preserve">
+    <value>Sottodomini non protetti da DMARC (sp=none)</value>
+  </data>
+  <data name="DmarcSubdomainNoneRisk" xml:space="preserve">
+    <value>La posta falsificata da sottodomini inventati (per esempio fatture.&lt;vostro dominio&gt;) non viene bloccata.</value>
+  </data>
+  <data name="DmarcSubdomainNoneFix" xml:space="preserve">
+    <value>Impostare sp=quarantine o sp=reject, oppure togliere sp perché i sottodomini seguano p.</value>
+  </data>
+  <data name="DkimNotFoundTitle" xml:space="preserve">
+    <value>Nessuna chiave DKIM trovata sui selettori comuni</value>
+  </data>
+  <data name="DkimNotFoundRisk" xml:space="preserve">
+    <value>Senza DKIM i messaggi possono essere alterati lungo la strada e il DMARC può contare solo sull'SPF, che non regge all'inoltro della posta.</value>
+  </data>
+  <data name="DkimNotFoundFix" xml:space="preserve">
+    <value>Attivare la firma DKIM presso il fornitore di posta e pubblicarne la chiave. Se il DKIM è già attivo con un altro selettore (intestazione DKIM-Signature, tag s=), ripetere il controllo indicando quel selettore.</value>
+  </data>
+  <data name="DkimUnreadableTitle" xml:space="preserve">
+    <value>Chiave DKIM illeggibile (selettore {0})</value>
+  </data>
+  <data name="DkimUnreadableRisk" xml:space="preserve">
+    <value>Chi riceve la posta non può verificare le firme fatte con questo selettore.</value>
+  </data>
+  <data name="DkimUnreadableFix" xml:space="preserve">
+    <value>Ripubblicare la chiave esattamente come la fornisce il fornitore; una chiave lunga va divisa in stringhe di al massimo 255 caratteri dentro un solo record TXT.</value>
+  </data>
+  <data name="DkimWeakKeyTitle" xml:space="preserve">
+    <value>Chiave DKIM troppo corta (selettore {0}, {1} bit)</value>
+  </data>
+  <data name="DkimWeakKeyRisk" xml:space="preserve">
+    <value>Le chiavi RSA sotto i 1024 bit si possono rompere e i verificatori le rifiutano: le firme non valgono nulla.</value>
+  </data>
+  <data name="DkimShortKeyTitle" xml:space="preserve">
+    <value>Chiave DKIM da 1024 bit (selettore {0}, {1} bit)</value>
+  </data>
+  <data name="DkimShortKeyRisk" xml:space="preserve">
+    <value>Le chiavi RSA da 1024 bit sono ancora accettate, ma sotto la raccomandazione attuale di 2048 bit.</value>
+  </data>
+  <data name="DkimNewKeyFix" xml:space="preserve">
+    <value>Generare una nuova chiave da 2048 bit presso il fornitore, pubblicarla con un nuovo selettore, poi togliere quella vecchia.</value>
+  </data>
+  <data name="DkimTestingTitle" xml:space="preserve">
+    <value>Chiave DKIM in modalità di prova (selettore {0}, t=y)</value>
+  </data>
+  <data name="DkimTestingRisk" xml:space="preserve">
+    <value>Chi riceve la posta può considerare non verificate le firme di una chiave in prova.</value>
+  </data>
+  <data name="DkimTestingFix" xml:space="preserve">
+    <value>Togliere t=y dal record quando la prova è finita.</value>
+  </data>
+  <data name="MxMissingTitle" xml:space="preserve">
+    <value>Nessun record MX</value>
+  </data>
+  <data name="MxMissingRisk" xml:space="preserve">
+    <value>Il dominio non dichiara server di posta: la posta indirizzata al dominio finisce sul suo indirizzo web o va persa, e il dominio resta falsificabile.</value>
+  </data>
+  <data name="MxMissingFix" xml:space="preserve">
+    <value>Se il dominio riceve posta, pubblicarne i record MX. Se non la riceve, pubblicare un null MX (0 .) insieme a v=spf1 -all e a DMARC p=reject.</value>
+  </data>
+  <data name="MxAddressLiteralTitle" xml:space="preserve">
+    <value>MX che punta a un indirizzo IP ({0})</value>
+  </data>
+  <data name="MxAddressLiteralRisk" xml:space="preserve">
+    <value>Un MX deve indicare un nome, non un indirizzo IP: molti mittenti non consegnano la posta.</value>
+  </data>
+  <data name="MxAddressLiteralFix" xml:space="preserve">
+    <value>Creare un record A per un nome (per esempio mail.&lt;vostro dominio&gt;) e far puntare l'MX a quel nome.</value>
+  </data>
+  <data name="MxUnresolvableTitle" xml:space="preserve">
+    <value>Server di posta senza indirizzo ({0})</value>
+  </data>
+  <data name="MxUnresolvableRisk" xml:space="preserve">
+    <value>Un server di posta indicato nell'MX non ha un indirizzo: la posta può arrivare in ritardo o andare persa.</value>
+  </data>
+  <data name="MxUnresolvableFix" xml:space="preserve">
+    <value>Correggere il record MX, oppure pubblicare il record A/AAAA del server.</value>
+  </data>
+  <data name="MxUnverifiedTitle" xml:space="preserve">
+    <value>Server di posta che non è stato possibile verificare ({0})</value>
+  </data>
+  <data name="MxUnverifiedFix" xml:space="preserve">
+    <value>Ripetere il controllo più tardi; se l'errore persiste, verificare il DNS del server di posta con il suo fornitore.</value>
+  </data>
+</root>
