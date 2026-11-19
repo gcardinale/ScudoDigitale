@@ -34,7 +34,8 @@ public sealed class ScanCommandTests
         Assert.Empty(error);
         Assert.StartsWith(Attribution.Banner, output, StringComparison.Ordinal);
         Assert.Contains("does not replace a penetration test", output, StringComparison.Ordinal);
-        Assert.Contains("Declared by Mario Rossi (security officer) on 11/19/2026 10:30 AM.", output, StringComparison.Ordinal);
+        // The date format belongs to the platform: ICU (Linux, macOS) puts a narrow no-break space before "AM".
+        Assert.Contains($"Declared by Mario Rossi (security officer) on {Now.ToString("g", CultureInfo.CurrentCulture)}.", output, StringComparison.Ordinal);
         Assert.Contains("Checking example.com: 5 checks per target", output, StringComparison.Ordinal);
         Assert.Contains("== Email — example.com ==", output, StringComparison.Ordinal);
 
@@ -65,7 +66,8 @@ public sealed class ScanCommandTests
         Assert.Contains("== Posta — example.com ==", output, StringComparison.Ordinal);
         Assert.Contains("[ALTO] MAIL-SPF-001", output, StringComparison.Ordinal);
         Assert.Contains("      Correzione: fix of MAIL-SPF-001", output, StringComparison.Ordinal);
-        Assert.Contains("Dichiarato da tester (titolare) il 19/11/2026 10:30.", output, StringComparison.Ordinal);
+        Assert.Contains($"Dichiarato da tester (titolare) il {Now.ToString("g", CultureInfo.CurrentCulture)}.", output, StringComparison.Ordinal);
+        Assert.Contains("19/11/2026", output, StringComparison.Ordinal);
         Assert.Contains("Riepilogo: 0 critici, 1 alti", output, StringComparison.Ordinal);
     }
 
