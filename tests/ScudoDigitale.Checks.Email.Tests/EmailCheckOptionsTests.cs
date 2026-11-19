@@ -25,6 +25,7 @@ public sealed class EmailCheckOptionsTests
         Assert.Equal(1, options.DnsRetries);
         Assert.Equal(4, options.MaxConcurrentDnsQueries);
         Assert.Empty(options.DkimSelectors);
+        Assert.Equal(DnsSource.Public, options.DnsSource);
         Assert.Contains("selector1", EmailCheckOptions.CommonDkimSelectors);
         Assert.Equal(EmailCheckOptions.CommonDkimSelectors.Count, EmailCheckOptions.CommonDkimSelectors.Distinct().Count());
         Assert.All(EmailCheckOptions.CommonDkimSelectors, s => Assert.True(DomainName.IsLabel(s)));
@@ -106,5 +107,12 @@ public sealed class EmailCheckOptionsTests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new EmailCheckOptions { MaxConcurrentDnsQueries = value });
         }
+    }
+
+    [Fact]
+    public void DnsSource_WhenSet_ShouldAcceptOnlyDefinedValues()
+    {
+        Assert.Equal(DnsSource.System, new EmailCheckOptions { DnsSource = DnsSource.System }.DnsSource);
+        Assert.Throws<ArgumentOutOfRangeException>(() => new EmailCheckOptions { DnsSource = (DnsSource)9 });
     }
 }

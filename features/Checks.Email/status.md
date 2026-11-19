@@ -4,7 +4,7 @@
 - **Deferred:** MTA-STS + TLS-RPT, DNSSEC, STARTTLS/TLS of the MX, DNSBL, BIMI → v0.2 or later (see below)
 - **Release:** v0.1
 - **Status:** 🟢 implemented (19/11/2026), branch `feature/v0.1-email`
-- **Test coverage:** 100% lines (704/704), 98% branches (428/436); 329 tests; 45 of 46 counter-checks caught
+- **Test coverage:** 99.9% lines (805/806), 98% branches (474/482); 366 tests; 55 of 56 counter-checks caught
 
 ## Checks
 One check per kind of problem ([ADR-006](../../docs/decisions/ADR-006-check-granularity-and-dns-for-email.md)). A check whose subject is missing is `Skipped` and points to the check that reports it.
@@ -25,7 +25,7 @@ One check per kind of problem ([ADR-006](../../docs/decisions/ADR-006-check-gran
 
 ## Done
 - `EmailChecks.Create(EmailCheckOptions?)`: the 11 checks; `EmailCheckOptions` for extra DKIM selectors, DNS timeout (2 s), retries (1) and concurrency (4). The DKIM analysis has a 25-second budget, so a resolver that drops queries cannot push the check past its 60-second timeout.
-- DNS through DnsClient.NET on the resolvers of the computer only; DnsClient's fallback to Google Public DNS is switched off (zero telemetry).
+- DNS over HTTPS to Cloudflare, then Google (JSON API, `HttpClient`), then the DNS of the computer through DnsClient.NET as the last resort; `DnsSource.System` uses only the latter (ADR-006). DnsClient's own silent fallback to Google is switched off.
 - The checks of a run share their DNS answers: each name is queried once.
 - Every check validates the target (URLs, addresses, IPs rejected; internationalized names become punycode), fails with a clear message if the domain does not exist, and never throws towards the engine except to honour cancellation.
 - Titles, risk and fix in English and Italian (`Resources/Strings*.resx`); a test checks that both languages have the same keys and placeholders.

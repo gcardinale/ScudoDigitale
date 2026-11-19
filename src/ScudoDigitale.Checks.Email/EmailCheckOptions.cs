@@ -31,6 +31,7 @@ public sealed record EmailCheckOptions
 
     private readonly TimeSpan dnsTimeout = TimeSpan.FromSeconds(2);
     private readonly int dnsRetries = 1;
+    private readonly DnsSource dnsSource = DnsSource.Public;
     private readonly int maxConcurrentDnsQueries = 4;
     private readonly IReadOnlyList<string> dkimSelectors = [];
 
@@ -60,6 +61,19 @@ public sealed record EmailCheckOptions
             ArgumentNullException.ThrowIfNull(value, nameof(DkimSelectors));
             dkimSelectors = value.Select(NormalizeSelector).Distinct(StringComparer.Ordinal).ToArray();
         }
+    }
+
+    /// <summary>
+    /// Which DNS servers answer the queries. Default <see cref="Email.DnsSource.Public"/>: Cloudflare
+    /// and then Google over DNS over HTTPS, then the DNS of this computer.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">The value is not defined.</exception>
+    public DnsSource DnsSource
+    {
+        get => dnsSource;
+        init => dnsSource = Enum.IsDefined(value)
+            ? value
+            : throw new ArgumentOutOfRangeException(nameof(DnsSource), value, "Unknown DNS source.");
     }
 
     /// <summary>Timeout of a single DNS query. Default 2 seconds, at most <see cref="MaxDnsTimeout"/>.</summary>

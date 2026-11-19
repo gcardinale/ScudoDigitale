@@ -8,7 +8,7 @@ Free check of your own security: network, Wi-Fi, websites, email, Bluetooth, GDP
 </p>
 
 > **Scudo Digitale** is a **free and open-source** program that an owner or security officer runs **on their own PC** to check their own systems. It produces a **report split by area and sorted by severity**, with **CVEs**, likelihood of exploitation and **the fix to apply**.
-> **Everything stays on your computer**: no cloud, no telemetry, no data sent to the author.
+> **Everything stays on your computer**: no cloud, no telemetry, no data sent to the author. The only outside services are public sources, such as the vulnerability databases and the DNS resolvers of Cloudflare and Google, which see only the public domain names being checked.
 
 ## What it checks
 | Area | Example checks |
