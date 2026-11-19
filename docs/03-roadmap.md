@@ -41,6 +41,9 @@ In this order: Bluetooth on macOS → comparison between two reports → Have I 
 - [x] Repository created with documentation, ADRs, LICENSE, NOTICE (14/11/2026)
 - [x] v0.0 skeleton + CI (15/11/2026, CI green on Windows, Linux and macOS)
 - [x] Roadmap updated: beta 0.1 on 01/12/2026 with downloadable executables (17/11/2026)
+- [x] `Checks.Email`: SPF, DMARC, DKIM, MX, 11 checks (19/11/2026, [ADR-006](decisions/ADR-006-check-granularity-and-dns-for-email.md)); MTA-STS, DNSSEC, STARTTLS, DNSBL and BIMI moved after the beta
+- [ ] `Checks.Web`, `Compliance`, `Reporting` (not started on 19/11/2026)
+- [ ] `Cli`: `scudo scan --mail/--web` and report output; it has no worktree of its own yet, so it is assigned to whoever finishes first
 - [ ] v0.1 passive, published as beta 0.1 (01/12/2026)
 - [ ] v0.2 network and CVE
 - [ ] v0.3 wireless
