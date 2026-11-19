@@ -33,7 +33,22 @@ Every issue in the report lists: **severity**, **CVE and CVSS score**, **EPSS** 
 A first **beta 0.1** (email, website, GDPR/NIS2 questionnaires and reports) is planned for **1 December 2026** in [Releases](https://github.com/gcardinale/ScudoDigitale/releases), for Windows, macOS and Linux with SHA-256 hashes. Version 1.0 follows by mid-December 2026 with build provenance attestation.
 
 ## Project status
-In development. See the [roadmap](docs/03-roadmap.md) and the [functional specification](docs/00-functional-spec.md).
+In development, towards the beta of 1 December 2026. See the [roadmap](docs/03-roadmap.md), the [functional specification](docs/00-functional-spec.md) and the weekly [build journal](docs/journal/README.md).
+
+| Area | Status |
+|---|---|
+| ✉️ Email (SPF, DMARC, DKIM, MX) | ✅ working — 11 passive checks, `scudo scan --mail` |
+| 🔒 Websites, GDPR/NIS2 questionnaires, HTML/PDF/JSON report | 🚧 in progress for the beta |
+| 🌐 Local network, CVE database, 📶 Wi-Fi, 🔵 Bluetooth | 🗓️ after the beta (v0.2, v0.3) |
+
+## Try the email checks (from source)
+Until the beta executables are out, the email checks run from the source code (see *Build from source* below):
+```bash
+dotnet run --project src/ScudoDigitale.Cli -- scan --mail example.com
+dotnet run --project src/ScudoDigitale.Cli -- scan --mail example.com --dkim-selector myselector   # your own DKIM selector
+dotnet run --project src/ScudoDigitale.Cli -- scan --help
+```
+The output lists the problems most urgent first, each with evidence, risk and fix, in English or Italian depending on the system language. The checks read only public DNS records and send no email, so they work on any domain. DNS queries go to Cloudflare and then Google over DNS over HTTPS (they see only the domain names being checked); `--system-dns` uses the DNS of your computer instead.
 
 ## Build from source
 Requires .NET SDK 10 or later (pinned in `global.json`).
@@ -43,7 +58,7 @@ cd ScudoDigitale
 dotnet build
 dotnet test                              # runs every test project with the 90% coverage gate
 pwsh build/check-headers.ps1             # verifies the license header on every .cs file
-dotnet run --project src/ScudoDigitale.Cli
+dotnet run --project src/ScudoDigitale.Cli -- scan --mail example.com
 ```
 
 ## License and attribution
