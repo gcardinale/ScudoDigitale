@@ -53,7 +53,8 @@ internal enum TrailEnd
 /// <param name="Next">Where the last hop redirects to, when it was not followed.</param>
 /// <param name="Error">What went wrong, when <paramref name="End"/> is <see cref="TrailEnd.Error"/>.</param>
 /// <param name="Refused">Whether the error is a refused connection: nothing listens on that port.</param>
-internal sealed record Trail(IReadOnlyList<Hop> Hops, TrailEnd End, Uri? Next = null, string? Error = null, bool Refused = false)
+/// <param name="Unanswered">Whether the error is a DNS that did not answer: nothing is known about the site.</param>
+internal sealed record Trail(IReadOnlyList<Hop> Hops, TrailEnd End, Uri? Next = null, string? Error = null, bool Refused = false, bool Unanswered = false)
 {
     /// <summary>The addresses visited and the one not followed, for the evidence of a finding.</summary>
     public string Path => string.Join(" → ", Hops.Select(h => SafeUrl.Show(h.Url)).Concat(Next is null ? [] : [SafeUrl.Show(Next)]));

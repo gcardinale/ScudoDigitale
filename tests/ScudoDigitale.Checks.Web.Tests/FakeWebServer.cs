@@ -367,6 +367,16 @@ internal sealed class TestSite : IAsyncDisposable
     }
 }
 
+/// <summary>A proxy configuration decided by the test.</summary>
+internal sealed class FakeProxy(Func<Uri, Uri?> proxy) : IWebProxy
+{
+    public ICredentials? Credentials { get; set; }
+
+    public Uri? GetProxy(Uri destination) => proxy(destination);
+
+    public bool IsBypassed(Uri host) => false;
+}
+
 /// <summary>No proxy at all: the proxy settings of the computer running the tests are never read.</summary>
 internal sealed class NoProxy : IWebProxy
 {

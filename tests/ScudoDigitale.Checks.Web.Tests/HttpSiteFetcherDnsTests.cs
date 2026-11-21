@@ -61,7 +61,9 @@ public sealed class HttpSiteFetcherDnsTests(TestPki pki) : IClassFixture<TestPki
     public async Task LookupAsync_WhenWhoAskedFirstStopsWaiting_ShouldStillAnswerTheOthers()
     {
         var pending = new TaskCompletionSource<DnsAnswer<IPAddress>>();
-        var dns = new FakeAddresses(_ => Found("192.0.2.9")) { Later = _ => pending.Task };
+        // The resolver obeys the token it is given, as the real ones do: had it been given the
+        // token of who asked first, the question would end with that caller.
+        var dns = new FakeAddresses(_ => Found("192.0.2.9")) { Later = (_, token) => pending.Task.WaitAsync(token) };
         var fetcher = new HttpSiteFetcher(new WebCheckOptions { Resolver = dns });
         using var impatient = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
 
@@ -87,13 +89,13 @@ public sealed class HttpSiteFetcherDnsTests(TestPki pki) : IClassFixture<TestPki
         };
         var dns = new FakeAddresses(_ => Found("127.0.0.1"))
         {
-            Later = async name =>
+            Later = async (name, _) =>
             {
-                await Task.Delay(name == Host ? 0 : 1500);
+                await Task.Delay(name == Host ? 0 : 3000);
                 return Found("127.0.0.1");
             },
         };
-        var options = Named(site, dns) with { RequestTimeout = TimeSpan.FromMilliseconds(500) };
+        var options = Named(site, dns) with { RequestTimeout = TimeSpan.FromSeconds(1.5) };
 
         var visit = await new HttpSiteFetcher(options).VisitAsync(Host, TestContext.Current.CancellationToken);
 
@@ -124,6 +126,142 @@ public sealed class HttpSiteFetcherDnsTests(TestPki pki) : IClassFixture<TestPki
 
         Assert.Equal(TrailEnd.Response, visit.Https.End);
         Assert.Equal([Host], asked);
+    }
+
+    [Fact(Timeout = 30_000)]
+    public async Task VisitAsync_WhenOnlyHttpsGoesThroughAProxy_ShouldStillResolveThePlainAddressBeforeItsRequest()
+    {
+        // HTTPS_PROXY without HTTP_PROXY: the plain address is reached directly, so its name must be
+        // resolved in advance like any other, or a slow resolver makes it look as if nothing answered.
+        await using var site = new TestSite(pki);
+        var dns = new FakeAddresses(_ => Found("127.0.0.1"))
+        {
+            Later = async (_, _) =>
+            {
+                await Task.Delay(3000);
+                return Found("127.0.0.1");
+            },
+        };
+        var options = Named(site, dns) with
+        {
+            RequestTimeout = TimeSpan.FromSeconds(1.5),
+            Proxy = new FakeProxy(address => address.Scheme == "https" ? new Uri($"http://127.0.0.1:{FakeWebServer.ClosedPort()}") : null),
+        };
+
+        var visit = await new HttpSiteFetcher(options).VisitAsync(Host, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TrailEnd.ChangedScheme, visit.Http.End);
+        Assert.Equal([Host], dns.Names);
+    }
+
+    [Theory(Timeout = 30_000)]
+    [InlineData(DnsStatus.NonExistentDomain)]
+    [InlineData(DnsStatus.NoRecords)]
+    public async Task LookupAsync_WhenTheComputerGivesAPublicAddressForANameThatDoesNotExist_ShouldNotBelieveIt(DnsStatus status)
+    {
+        // What some providers and routers answer in place of "does not exist": their search page.
+        var options = new WebCheckOptions
+        {
+            Resolver = new FakeAddresses(_ => Answer(status)),
+            SystemAddresses = (_, _) => Task.FromResult<IPAddress[]>([IPAddress.Parse("203.0.113.7")]),
+        };
+
+        var answer = await new HttpSiteFetcher(options).LookupAsync("mistyped.test", TestContext.Current.CancellationToken);
+
+        Assert.Equal(status, answer.Status);
+    }
+
+    [Fact(Timeout = 30_000)]
+    public async Task LookupAsync_WhenNoResolverAnsweredAndTheComputerKnowsTheName_ShouldBelieveTheComputer()
+    {
+        var options = new WebCheckOptions
+        {
+            Resolver = new FakeAddresses(_ => Answer(DnsStatus.Error)),
+            SystemAddresses = (_, _) => Task.FromResult<IPAddress[]>([IPAddress.Parse("203.0.113.7")]),
+        };
+
+        var answer = await new HttpSiteFetcher(options).LookupAsync(Host, TestContext.Current.CancellationToken);
+
+        Assert.Equal([IPAddress.Parse("203.0.113.7")], answer.Records);
+    }
+
+    [Fact(Timeout = 30_000)]
+    public async Task LookupAsync_WhenNobodyAnswered_ShouldAskAgainTheNextTime()
+    {
+        var answers = new Queue<DnsAnswer<IPAddress>>([Answer(DnsStatus.Error), Found("127.0.0.1")]);
+        var dns = new FakeAddresses(_ => answers.Dequeue());
+        var options = new WebCheckOptions
+        {
+            Resolver = dns,
+            SystemAddresses = (_, _) => Task.FromResult<IPAddress[]>([]),
+        };
+        var fetcher = new HttpSiteFetcher(options);
+
+        var first = await fetcher.LookupAsync(Host, TestContext.Current.CancellationToken);
+        var second = await fetcher.LookupAsync(Host, TestContext.Current.CancellationToken);
+        var third = await fetcher.LookupAsync(Host, TestContext.Current.CancellationToken);
+
+        Assert.Equal(DnsStatus.Error, first.Status);
+        Assert.Equal(DnsStatus.Ok, second.Status);
+        Assert.Equal(DnsStatus.Ok, third.Status);
+        Assert.Equal([Host, Host], dns.Names);
+    }
+
+    [Fact(Timeout = 30_000)]
+    public async Task VisitAsync_WhenNoDnsAnswersForTheNameOfARedirect_ShouldMarkTheTrailAsUnanswered()
+    {
+        await using var site = new TestSite(pki)
+        {
+            Override = r => r.Secure && r.Host == Host && r.Path == "/" ? FakeResponse.Redirect("https://www.site.test/", 302) : null,
+        };
+        var dns = new FakeAddresses(name => name == Host ? Found("127.0.0.1") : Answer(DnsStatus.Error));
+
+        var visit = await new HttpSiteFetcher(Named(site, dns)).VisitAsync(Host, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TrailEnd.Error, visit.Https.End);
+        Assert.True(visit.Https.Unanswered);
+        Assert.False(visit.Http.Unanswered);
+        Assert.Single(visit.Https.Hops);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public async Task RunAsync_WhenNoDnsAnsweredForANameAlongTheWay_ShouldSayItCouldNotRunInsteadOfReportingAProblem(bool https, bool http)
+    {
+        var unanswered = new Trail([], TrailEnd.Error, null, "https://www.example.com/: the DNS gave no address for www.example.com: timeout", Unanswered: true);
+        var visit = Site.Good() with
+        {
+            Https = https ? unanswered : Site.Good().Https,
+            Http = http ? unanswered with { Error = "http side" } : Site.Good().Http,
+        };
+
+        var failed = Assert.IsType<ScudoDigitale.Core.CheckResult.Failed>(await Make.RunAsync(visit, "WEB-HTTPS-001"));
+
+        Assert.Contains(https ? "www.example.com" : "http side", failed.Error, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("127.0.0.1", true)]
+    [InlineData("10.1.2.3", true)]
+    [InlineData("172.16.0.1", true)]
+    [InlineData("172.31.255.254", true)]
+    [InlineData("172.15.0.1", false)]
+    [InlineData("172.32.0.1", false)]
+    [InlineData("192.168.1.10", true)]
+    [InlineData("192.169.1.10", false)]
+    [InlineData("169.254.10.10", true)]
+    [InlineData("169.253.10.10", false)]
+    [InlineData("203.0.113.7", false)]
+    [InlineData("::1", true)]
+    [InlineData("fe80::1", true)]
+    [InlineData("fd12:3456::1", true)]
+    [InlineData("2001:db8::1", false)]
+    [InlineData("::ffff:192.168.1.10", true)]
+    [InlineData("::ffff:203.0.113.7", false)]
+    public void IsLocal_WhenGivenAnAddress_ShouldTellThisComputerAndPrivateNetworksFromTheInternet(string address, bool expected)
+    {
+        Assert.Equal(expected, HttpSiteFetcher.IsLocal(IPAddress.Parse(address)));
     }
 
     [Fact(Timeout = 30_000)]
@@ -377,7 +515,7 @@ public sealed class HttpSiteFetcherDnsTests(TestPki pki) : IClassFixture<TestPki
         public ConcurrentQueue<string> Names { get; } = new();
 
         /// <summary>An answer that takes its time, instead of the immediate one.</summary>
-        public Func<string, Task<DnsAnswer<IPAddress>>>? Later { get; init; }
+        public Func<string, CancellationToken, Task<DnsAnswer<IPAddress>>>? Later { get; init; }
 
         public Task<DnsAnswer<string>> QueryTxtAsync(string name, CancellationToken cancellationToken) => throw new NotSupportedException();
 
@@ -386,7 +524,7 @@ public sealed class HttpSiteFetcherDnsTests(TestPki pki) : IClassFixture<TestPki
         public Task<DnsAnswer<IPAddress>> QueryAddressesAsync(string name, CancellationToken cancellationToken)
         {
             Names.Enqueue(name);
-            return Later is null ? Task.FromResult(answer(name)) : Later(name);
+            return Later is null ? Task.FromResult(answer(name)) : Later(name, cancellationToken);
         }
     }
 }

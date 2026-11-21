@@ -140,22 +140,16 @@ public sealed class WebChecksTests
         Assert.Null(WebChecks.ProxyFor("example.com", new FakeProxy(_ => throw new InvalidOperationException("no PAC"))));
     }
 
-    [Fact]
-    public void SystemProxyFor_WhenCalled_ShouldReadTheProxyOfTheProcess()
+    [Theory]
+    [InlineData("https", "proxy.lan:8080")]
+    [InlineData("http", "proxy.lan:8080")]
+    [InlineData("ftp", null)]
+    public void ProxyFor_WhenOnlyOneSchemeGoesThroughAProxy_ShouldStillReportIt(string proxied, string? expected)
     {
-        // A known configuration instead of that of the computer running the tests, whose automatic
-        // proxy discovery would be real network traffic.
-        var real = HttpClient.DefaultProxy;
-        try
-        {
-            HttpClient.DefaultProxy = new FakeProxy(_ => new Uri("http://proxy.lan:3128/"));
+        var proxy = new FakeProxy(site => site.Scheme == proxied ? new Uri("http://proxy.lan:8080") : null);
 
-            Assert.Equal("proxy.lan:3128", WebChecks.SystemProxyFor("example.com"));
-        }
-        finally
-        {
-            HttpClient.DefaultProxy = real;
-        }
+        Assert.Equal(expected, WebChecks.ProxyFor("example.com", proxy));
+        Assert.Equal(proxied == "http" ? "proxy.lan:8080" : null, WebChecks.ProxyFor("http", "example.com", proxy));
     }
 
     [Theory]
@@ -236,12 +230,30 @@ public sealed class WebChecksTests
         public Task<bool> IsAuthorizedAsync(Target target, CancellationToken cancellationToken) => Task.FromResult(false);
     }
 
-    private sealed class FakeProxy(Func<Uri, Uri?> proxy) : IWebProxy
+}
+
+/// <summary>Everything that changes a setting of the whole process: never run beside other tests.</summary>
+[CollectionDefinition(nameof(ProcessWideSettings), DisableParallelization = true)]
+public sealed class ProcessWideSettings;
+
+[Collection(nameof(ProcessWideSettings))]
+public sealed class SystemProxyTests
+{
+    [Fact]
+    public void SystemProxyFor_WhenCalled_ShouldReadTheProxyOfTheProcess()
     {
-        public ICredentials? Credentials { get; set; }
+        // A known configuration instead of that of the computer running the tests, whose automatic
+        // proxy discovery would be real network traffic.
+        var real = HttpClient.DefaultProxy;
+        try
+        {
+            HttpClient.DefaultProxy = new FakeProxy(_ => new Uri("http://proxy.lan:3128/"));
 
-        public Uri? GetProxy(Uri destination) => proxy(destination);
-
-        public bool IsBypassed(Uri host) => false;
+            Assert.Equal("proxy.lan:3128", WebChecks.SystemProxyFor("example.com"));
+        }
+        finally
+        {
+            HttpClient.DefaultProxy = real;
+        }
     }
 }

@@ -56,15 +56,26 @@ public static class WebChecks
     /// <returns>Host and port of the proxy, or <see langword="null"/> when the site is reached directly.</returns>
     public static string? SystemProxyFor(string host) => ProxyFor(host, HttpClient.DefaultProxy);
 
-    /// <summary>The proxy a given configuration uses to reach a site, if any.</summary>
+    /// <summary>
+    /// The proxy a given configuration uses to reach a site, if any. A configuration may send only
+    /// HTTPS or only HTTP through a proxy: either counts.
+    /// </summary>
     /// <param name="host">The host name of the site.</param>
     /// <param name="proxy">The proxy configuration.</param>
     /// <returns>Host and port of the proxy, without credentials, or <see langword="null"/>.</returns>
-    internal static string? ProxyFor(string host, IWebProxy proxy)
+    internal static string? ProxyFor(string host, IWebProxy proxy) =>
+        ProxyFor(Uri.UriSchemeHttps, host, proxy) ?? ProxyFor(Uri.UriSchemeHttp, host, proxy);
+
+    /// <summary>The proxy a given configuration uses to reach a site over one scheme, if any.</summary>
+    /// <param name="scheme"><c>http</c> or <c>https</c>.</param>
+    /// <param name="host">The host name of the site.</param>
+    /// <param name="proxy">The proxy configuration.</param>
+    /// <returns>Host and port of the proxy, without credentials, or <see langword="null"/>.</returns>
+    internal static string? ProxyFor(string scheme, string host, IWebProxy proxy)
     {
         try
         {
-            var site = new Uri($"https://{host}/");
+            var site = new Uri($"{scheme}://{host}/");
             return !proxy.IsBypassed(site) && proxy.GetProxy(site) is { } address && address != site ? address.Authority : null;
         }
         catch (Exception)

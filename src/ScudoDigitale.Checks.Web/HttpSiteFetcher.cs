@@ -236,7 +236,8 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
                 TrailEnd.Error,
                 null,
                 $"{SafeUrl.Show(url)}: {cause.Message}",
-                cause is SocketException { SocketErrorCode: SocketError.ConnectionRefused });
+                cause is SocketException { SocketErrorCode: SocketError.ConnectionRefused },
+                cause is UnansweredException);
         }
     }
 
@@ -323,17 +324,7 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
             return await ConnectAsync(() => new Socket(SocketType.Stream, ProtocolType.Tcp), target, cancellationToken).ConfigureAwait(false);
         }
 
-        var answer = await LookupAsync(named.Host, cancellationToken).ConfigureAwait(false);
-        if (answer.Status != DnsStatus.Ok)
-        {
-            throw new IOException(answer.Status switch
-            {
-                DnsStatus.NonExistentDomain => WebFinding.Format(Strings.DnsNameNotFound, named.Host),
-                DnsStatus.NoRecords => WebFinding.Format(Strings.DnsNoAddress, named.Host),
-                _ => WebFinding.Format(Strings.DnsFailed, named.Host, answer.Error),
-            });
-        }
-
+        var answer = Require(named.Host, await LookupAsync(named.Host, cancellationToken).ConfigureAwait(false));
         Exception? last = null;
         foreach (var address in answer.Records)
         {
@@ -368,11 +359,18 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         var lookup = addresses.GetOrAdd(name, n => new Lazy<Task<DnsAnswer<IPAddress>>>(() => AskAsync(n)));
         try
         {
-            return await lookup.Value.WaitAsync(cancellationToken).ConfigureAwait(false);
+            var answer = await lookup.Value.WaitAsync(cancellationToken).ConfigureAwait(false);
+            if (answer.Status == DnsStatus.Error)
+            {
+                // Nobody answered: not remembered, so whoever needs the name next asks again.
+                addresses.TryRemove(KeyValuePair.Create(name, lookup));
+            }
+
+            return answer;
         }
         catch when (lookup.Value.IsCompleted)
         {
-            // A question that broke is asked again by whoever needs it next.
+            // Nor is a question that broke.
             addresses.TryRemove(KeyValuePair.Create(name, lookup));
             throw;
         }
@@ -381,22 +379,62 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
     /// <summary>
     /// Asks the address of the host of a request before the request, outside its deadline: a
     /// resolver that is slow to answer must not make a site that works look unreachable. Through a
-    /// proxy, the proxy resolves the name.
+    /// proxy, the proxy resolves the name; a configuration may use one for HTTPS and none for HTTP,
+    /// so the question is about this very address.
     /// </summary>
     private async Task ResolveAsync(Uri url, CancellationToken cancellationToken)
     {
         if (resolver is not null
             && options.Route(new DnsEndPoint(url.IdnHost, url.Port)) is DnsEndPoint
-            && WebChecks.ProxyFor(url.IdnHost, proxy) is null)
+            && WebChecks.ProxyFor(url.Scheme, url.IdnHost, proxy) is null)
         {
-            await LookupAsync(url.IdnHost, cancellationToken).ConfigureAwait(false);
+            Require(url.IdnHost, await LookupAsync(url.IdnHost, cancellationToken).ConfigureAwait(false));
         }
+    }
+
+    /// <summary>An answer with addresses, or the reason why there are none.</summary>
+    private static DnsAnswer<IPAddress> Require(string name, DnsAnswer<IPAddress> answer) => answer.Status switch
+    {
+        DnsStatus.Ok => answer,
+        DnsStatus.NonExistentDomain => throw new IOException(WebFinding.Format(Strings.DnsNameNotFound, name)),
+        DnsStatus.NoRecords => throw new IOException(WebFinding.Format(Strings.DnsNoAddress, name)),
+        _ => throw new UnansweredException(WebFinding.Format(Strings.DnsFailed, name, answer.Error)),
+    };
+
+    /// <summary>
+    /// Whether an address belongs to this computer or to a private network. Only such an address is
+    /// believed when the operating system knows a name that the public DNS says does not exist: it
+    /// is a site of the local network. A public address there is usually the search page some
+    /// providers and routers return in place of "does not exist", and checking it would report
+    /// the problems of someone else's server.
+    /// </summary>
+    /// <param name="address">The address.</param>
+    /// <returns><see langword="true"/> for loopback, private (RFC 1918, RFC 4193) and link-local addresses.</returns>
+    internal static bool IsLocal(IPAddress address)
+    {
+        if (address.IsIPv4MappedToIPv6)
+        {
+            address = address.MapToIPv4();
+        }
+
+        if (address.AddressFamily == AddressFamily.InterNetworkV6)
+        {
+            return IPAddress.IsLoopback(address) || address.IsIPv6LinkLocal || address.IsIPv6UniqueLocal;
+        }
+
+        var bytes = address.GetAddressBytes();
+        return bytes[0] is 10 or 127
+            || (bytes[0] == 172 && bytes[1] is >= 16 and <= 31)
+            || (bytes[0] == 192 && bytes[1] == 168)
+            || (bytes[0] == 169 && bytes[1] == 254);
     }
 
     /// <summary>
     /// The resolver of the checks first; when it has no address, the operating system, which also
-    /// knows the names of the local network and of the hosts file. Each of them has its own time
-    /// limits, so the question needs no token.
+    /// knows the names of the local network and of the hosts file. When the resolver did not answer
+    /// at all the system is believed; when it said that the name does not exist or has no address,
+    /// only a local address is (see <see cref="IsLocal"/>). Each of them has its own time limits,
+    /// so the question needs no token.
     /// </summary>
     private async Task<DnsAnswer<IPAddress>> AskAsync(string name)
     {
@@ -408,10 +446,11 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
 
         try
         {
-            var known = await options.SystemAddresses(name, CancellationToken.None).ConfigureAwait(false);
-            return known.Length > 0
-                ? DnsAnswer<IPAddress>.Found(known.OrderBy(a => a.AddressFamily == AddressFamily.InterNetworkV6))
-                : answer;
+            var known = (await options.SystemAddresses(name, CancellationToken.None).ConfigureAwait(false))
+                .Where(a => answer.Status == DnsStatus.Error || IsLocal(a))
+                .OrderBy(a => a.AddressFamily == AddressFamily.InterNetworkV6)
+                .ToArray();
+            return known.Length > 0 ? DnsAnswer<IPAddress>.Found(known) : answer;
         }
         catch (Exception)
         {
@@ -419,6 +458,9 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
             return answer;
         }
     }
+
+    /// <summary>No DNS answered for a name: nothing is known about what is behind it.</summary>
+    private sealed class UnansweredException(string message) : IOException(message);
 
     private static async ValueTask<Stream> ConnectAsync(Func<Socket> create, EndPoint target, CancellationToken cancellationToken)
     {

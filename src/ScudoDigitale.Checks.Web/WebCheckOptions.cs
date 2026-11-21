@@ -32,9 +32,10 @@ public sealed record WebCheckOptions
 
     /// <summary>
     /// Which DNS servers give the address of a site. Default <see cref="Core.Dns.DnsSource.Public"/>:
-    /// Cloudflare and then Google over DNS over HTTPS, then the DNS of this computer (ADR-006); a
-    /// name they do not know is then asked to the operating system, which also knows the names of
-    /// the local network and of the hosts file.
+    /// Cloudflare and then Google over DNS over HTTPS, then the DNS of this computer (ADR-006). When
+    /// they have no address the operating system is asked, which also knows the names of the local
+    /// network and of the hosts file; for a name they say does not exist, only a local or private
+    /// address is accepted from it.
     /// With <see cref="Core.Dns.DnsSource.System"/> the name is left to the operating system, as for
     /// any connection. Through a proxy, the proxy resolves the name.
     /// </summary>
