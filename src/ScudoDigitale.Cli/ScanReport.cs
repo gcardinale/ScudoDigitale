@@ -29,15 +29,16 @@ internal sealed class ScanReport(TextWriter output)
 
     /// <summary>Banner, warning, declaration and what is about to run.</summary>
     /// <param name="scope">The declaration.</param>
-    /// <param name="checksPerTarget">How many checks run on each target.</param>
-    public void WriteHeader(ScopeDeclaration scope, int checksPerTarget)
+    /// <param name="checks">The checks about to run: each target is listed with the number of checks of its kind.</param>
+    public void WriteHeader(ScopeDeclaration scope, IReadOnlyList<ICheck> checks)
     {
         output.WriteLine(Attribution.Banner);
         output.WriteLine();
         output.WriteLine(Strings.Disclaimer);
         output.WriteLine();
         output.WriteLine(Format(Strings.Declaration, scope.OperatorName, RoleLabel(scope.OperatorRole), scope.DeclaredAt.ToString("g", CultureInfo.CurrentCulture)));
-        output.WriteLine(Format(Strings.Checking, string.Join(", ", scope.Targets.Select(t => t.Value)), checksPerTarget));
+        var targets = scope.Targets.Select(t => Format(Strings.CheckingTarget, t.Value, AreaLabel(t.Kind), checks.Count(c => c.AppliesTo == t.Kind)));
+        output.WriteLine(Format(Strings.Checking, string.Join(", ", targets)));
     }
 
     /// <summary>The results of every target, the summary and the attribution.</summary>
@@ -53,8 +54,14 @@ internal sealed class ScanReport(TextWriter output)
             all.AddRange(findings);
 
             output.WriteLine();
-            output.WriteLine($"== {Strings.AreaEmail} — {target.Value} ==");
-            WriteFindings(findings);
+            output.WriteLine($"== {AreaLabel(target.Kind)} — {target.Value} ==");
+
+            // "No problems found" is true only if something was actually checked.
+            if (findings.Count > 0 || mine.Any(r => r.Result is CheckResult.Executed))
+            {
+                WriteFindings(findings);
+            }
+
             WriteList(Strings.ChecksPassed, mine.Where(r => r.Result is CheckResult.Executed { Findings.Count: 0 }), "OK", _ => null);
             WriteList(Strings.ChecksSkipped, mine.Where(r => r.Result is CheckResult.Skipped), "--", r => ((CheckResult.Skipped)r.Result).Reason);
             WriteList(Strings.ChecksFailed, mine.Where(r => r.Result is CheckResult.Failed), "!!", r => ((CheckResult.Failed)r.Result).Error);
@@ -73,6 +80,11 @@ internal sealed class ScanReport(TextWriter output)
             runs.Count(r => r.Result is CheckResult.Failed)));
         output.WriteLine(Attribution.Notice);
     }
+
+    /// <summary>User-facing name of the area a kind of target is checked for.</summary>
+    /// <param name="kind">The kind of target.</param>
+    /// <returns>The label.</returns>
+    internal static string AreaLabel(TargetKind kind) => kind == TargetKind.Website ? Strings.AreaWeb : Strings.AreaEmail;
 
     /// <summary>User-facing label of a severity, in upper case.</summary>
     /// <param name="severity">The severity.</param>

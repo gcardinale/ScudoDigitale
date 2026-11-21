@@ -42,9 +42,12 @@ In this order: Bluetooth on macOS → comparison between two reports → Have I 
 - [x] v0.0 skeleton + CI (15/11/2026, CI green on Windows, Linux and macOS)
 - [x] Roadmap updated: beta 0.1 on 01/12/2026 with downloadable executables (17/11/2026)
 - [x] `Checks.Email`: SPF, DMARC, DKIM, MX, 11 checks (19/11/2026, [ADR-006](decisions/ADR-006-check-granularity-and-dns-for-email.md)); MTA-STS, DNSSEC, STARTTLS, DNSBL and BIMI moved after the beta
-- [ ] `Checks.Web`, `Compliance`, `Reporting` (not started on 19/11/2026)
+- [x] `Checks.Web`, first pass: HTTPS, certificate, security headers, cookies, security.txt, 15 passive checks (21/11/2026; checkpoint 1 of 20/11 was missed for websites by one day)
+- [ ] `Checks.Web`, second pass: TLS versions and ciphers (needs ADR-007: same result on the 3 systems), CMS detection, indicative GDPR
+- [ ] `Compliance`, `Reporting` (not started on 21/11/2026)
 - [x] `Cli`: `scudo scan --mail` with text output (19/11/2026)
-- [ ] `Cli`: `--web` and report files, together with `Checks.Web` and `Reporting`
+- [x] `Cli`: `scudo scan --web`, alone or together with `--mail` (21/11/2026)
+- [ ] `Cli`: report files, together with `Reporting`
 - [ ] v0.1 passive, published as beta 0.1 (01/12/2026)
 - [ ] v0.2 network and CVE
 - [ ] v0.3 wireless

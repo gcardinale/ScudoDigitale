@@ -47,7 +47,7 @@
     <value>Questo è uno strumento di autovalutazione: non sostituisce un penetration test né una consulenza legale. Usalo solo su sistemi tuoi o che sei autorizzato a controllare.</value>
   </data>
   <data name="UsageHint" xml:space="preserve">
-    <value>Esegui "scudo scan --mail &lt;dominio&gt;" per controllare la posta di un dominio, oppure "scudo --help" per vedere le opzioni.</value>
+    <value>Esegui "scudo scan --mail &lt;dominio&gt;" per controllare la posta di un dominio, "scudo scan --web &lt;dominio&gt;" per controllarne il sito, oppure "scudo --help" per vedere le opzioni.</value>
   </data>
   <data name="ScanDescription" xml:space="preserve">
     <value>Esegue i controlli sui bersagli indicati e mostra i risultati, dal più urgente.</value>
@@ -68,7 +68,7 @@
     <value>Ruolo di quella persona: Owner (titolare), SecurityOfficer (responsabile della sicurezza) o AppointedPerson (incaricato); predefinito Owner.</value>
   </data>
   <data name="NoTargets" xml:space="preserve">
-    <value>Niente da controllare: indica almeno un dominio con --mail &lt;dominio&gt;.</value>
+    <value>Niente da controllare: indica almeno un dominio con --mail &lt;dominio&gt; oppure --web &lt;dominio&gt;.</value>
   </data>
   <data name="InvalidSelector" xml:space="preserve">
     <value>'{0}' non è un selettore DKIM valido.</value>
@@ -80,7 +80,7 @@
     <value>Dichiarato da {0} ({1}) il {2}.</value>
   </data>
   <data name="Checking" xml:space="preserve">
-    <value>Controllo di {0}: {1} controlli per bersaglio…</value>
+    <value>Controllo di {0}…</value>
   </data>
   <data name="RoleOwner" xml:space="preserve">
     <value>titolare</value>
@@ -150,5 +150,17 @@
   </data>
   <data name="Summary" xml:space="preserve">
     <value>Riepilogo: {0} critici, {1} alti, {2} medi, {3} bassi, {4} informativi · {5} controlli superati, {6} saltati, {7} non eseguiti.</value>
+  </data>
+  <data name="WebOptionDescription" xml:space="preserve">
+    <value>Dominio di cui controllare il sito (HTTPS, certificato, intestazioni di sicurezza, cookie, security.txt) con le richieste di una normale visita; si può ripetere.</value>
+  </data>
+  <data name="InvalidWebTarget" xml:space="preserve">
+    <value>'{0}' non è un sito valido: indica un nome di dominio come example.com.</value>
+  </data>
+  <data name="CheckingTarget" xml:space="preserve">
+    <value>{0} ({1}, {2} controlli)</value>
+  </data>
+  <data name="AreaWeb" xml:space="preserve">
+    <value>Siti web</value>
   </data>
 </root>

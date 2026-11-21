@@ -13,6 +13,7 @@
 // ╚═══════════════════════════════════════════════════════════════╝
 
 using ScudoDigitale.Checks.Email;
+using ScudoDigitale.Checks.Web;
 using ScudoDigitale.Core;
 
 namespace ScudoDigitale.Cli;
@@ -22,13 +23,15 @@ namespace ScudoDigitale.Cli;
 /// the user name.
 /// </summary>
 /// <param name="CreateEmailChecks">Builds the email checks for one run.</param>
+/// <param name="CreateWebChecks">Builds the website checks for one run.</param>
 /// <param name="Now">The current time, for the scope declaration.</param>
 /// <param name="DefaultOperator">Name used when <c>--operator</c> is not given.</param>
 internal sealed record CliServices(
     Func<EmailCheckOptions, IReadOnlyList<ICheck>> CreateEmailChecks,
+    Func<WebCheckOptions, IReadOnlyList<ICheck>> CreateWebChecks,
     Func<DateTimeOffset> Now,
     Func<string> DefaultOperator)
 {
-    /// <summary>The real email checks, the system clock and the user name of this computer.</summary>
-    public static CliServices Default { get; } = new(EmailChecks.Create, () => DateTimeOffset.Now, () => Environment.UserName);
+    /// <summary>The real email and website checks, the system clock and the user name of this computer.</summary>
+    public static CliServices Default { get; } = new(EmailChecks.Create, WebChecks.Create, () => DateTimeOffset.Now, () => Environment.UserName);
 }

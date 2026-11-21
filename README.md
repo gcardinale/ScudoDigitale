@@ -38,7 +38,9 @@ In development, towards the beta of 1 December 2026. See the [roadmap](docs/03-r
 | Area | Status |
 |---|---|
 | ✉️ Email (SPF, DMARC, DKIM, MX) | ✅ working — 11 passive checks, `scudo scan --mail` |
-| 🔒 Websites, GDPR/NIS2 questionnaires, HTML/PDF/JSON report | 🚧 in progress for the beta |
+| 🔒 Websites (HTTPS, certificate, security headers, cookies, security.txt) | ✅ working — 15 passive checks, `scudo scan --web` |
+| 🔒 Websites: TLS versions and ciphers, CMS, cookies before consent | 🚧 in progress for the beta |
+| 📋 GDPR/NIS2 questionnaires, HTML/PDF/JSON report | 🚧 in progress for the beta |
 | 🌐 Local network, CVE database, 📶 Wi-Fi, 🔵 Bluetooth | 🗓️ after the beta (v0.2, v0.3) |
 
 ## Try the email checks (from source)
