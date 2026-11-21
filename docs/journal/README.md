@@ -14,4 +14,4 @@ The journal is honest and factual, with no hype: it is the raw material for publ
 
 ## Entries
 - [2026-W46](2026-W46.md) — project defined, repository published
-- [2026-W47](2026-W47.md) — beta date set, first real checks: email
+- [2026-W47](2026-W47.md) — beta date set, first real checks: email and websites
