@@ -15,11 +15,13 @@
 using System.Net;
 using System.Text;
 
-namespace ScudoDigitale.Checks.Email.Tests;
+using ScudoDigitale.Core.Dns;
+
+namespace ScudoDigitale.Core.Tests;
 
 public sealed class DohResolverTests
 {
-    private static readonly EmailCheckOptions Fast = new() { DnsTimeout = TimeSpan.FromMilliseconds(100) };
+    private static readonly DnsOptions Fast = new() { Timeout = TimeSpan.FromMilliseconds(100) };
 
     [Fact]
     public async Task QueryTxtAsync_WhenAnswered_ShouldSendTheNameAndTypeAsJsonRequest()
@@ -172,7 +174,7 @@ public sealed class DohResolverTests
     public async Task QueryTxtAsync_WhenCallerCancels_ShouldThrow()
     {
         var handler = new FakeHandler(_ => new HttpResponseMessage(HttpStatusCode.OK), hang: true);
-        var slow = new EmailCheckOptions { DnsTimeout = TimeSpan.FromSeconds(10) };
+        var slow = new DnsOptions { Timeout = TimeSpan.FromSeconds(10) };
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         cts.CancelAfter(TimeSpan.FromMilliseconds(100));
 
@@ -261,7 +263,7 @@ public sealed class ResolverChoiceTests
     {
         using var http = new HttpClient();
 
-        var resolver = Assert.IsType<FallbackResolver>(EmailChecks.CreateResolver(new EmailCheckOptions(), http));
+        var resolver = Assert.IsType<FallbackResolver>(DnsResolvers.Create(new DnsOptions(), http));
 
         Assert.Collection(
             resolver.Resolvers,
@@ -275,13 +277,13 @@ public sealed class ResolverChoiceTests
     {
         using var http = new HttpClient();
 
-        Assert.IsType<DnsClientResolver>(EmailChecks.CreateResolver(new EmailCheckOptions { DnsSource = DnsSource.System }, http));
+        Assert.IsType<DnsClientResolver>(DnsResolvers.Create(new DnsOptions { Source = DnsSource.System }, http));
     }
 
     [Fact]
     public void CreateHttpClient_WhenCalled_ShouldSendNoCookiesAndAGenericUserAgent()
     {
-        using var http = EmailChecks.CreateHttpClient();
+        using var http = DnsResolvers.CreateHttpClient();
 
         Assert.Equal("ScudoDigitale", http.DefaultRequestHeaders.UserAgent.ToString());
         Assert.Equal(Timeout.InfiniteTimeSpan, http.Timeout);
@@ -290,7 +292,7 @@ public sealed class ResolverChoiceTests
     [Fact]
     public void CreateHandler_WhenCalled_ShouldNotKeepCookies()
     {
-        using var handler = EmailChecks.CreateHandler();
+        using var handler = DnsResolvers.CreateHandler();
 
         Assert.False(handler.UseCookies);
         Assert.Equal(TimeSpan.FromMinutes(2), handler.PooledConnectionLifetime);

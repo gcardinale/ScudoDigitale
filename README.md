@@ -50,7 +50,7 @@ dotnet run --project src/ScudoDigitale.Cli -- scan --mail example.com
 dotnet run --project src/ScudoDigitale.Cli -- scan --mail example.com --dkim-selector myselector   # your own DKIM selector
 dotnet run --project src/ScudoDigitale.Cli -- scan --help
 ```
-The output lists the problems most urgent first, each with evidence, risk and fix, in English or Italian depending on the system language. The checks read only public DNS records and send no email, so they work on any domain. DNS queries go to Cloudflare and then Google over DNS over HTTPS (they see only the domain names being checked); `--system-dns` uses the DNS of your computer instead.
+The output lists the problems most urgent first, each with evidence, risk and fix, in English or Italian depending on the system language. The email checks read only public DNS records and send no email, so they work on any domain. DNS queries, for email and for websites, go to Cloudflare and then Google over DNS over HTTPS (they see only the domain names being checked); `--system-dns` uses the DNS of your computer instead.
 
 ## Build from source
 Requires .NET SDK 10 or later (pinned in `global.json`).

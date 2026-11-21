@@ -103,9 +103,9 @@ public sealed class ContentSecurityPolicyTests
         var policies = ContentSecurityPolicy.Parse(["default-src 'self', frame-ancestors 'none' ; ;", " ; ", ""]);
 
         Assert.Equal(2, policies.Count);
-        Assert.True(policies[0].Has("default-src"));
-        Assert.False(policies[0].Has("frame-ancestors"));
-        Assert.True(policies[1].Has("frame-ancestors"));
+        Assert.Equal(["'self'"], policies[0].Sources("default-src"));
+        Assert.Null(policies[0].Sources("frame-ancestors"));
+        Assert.Equal(["'none'"], policies[1].Sources("frame-ancestors"));
         Assert.All(policies, p => Assert.False(p.IsEmpty));
     }
 
@@ -238,13 +238,13 @@ public sealed class OtherHeaderChecksTests
     [InlineData("ALLOW-FROM https://partner.example")]
     [InlineData("ALLOWALL")]
     [InlineData("DENY, SAMEORIGIN, nonsense")]
-    public async Task Frame_WhenXFrameOptionsHasAValueBrowsersIgnore_ShouldReportLowWithTheValue(string value)
+    public async Task Frame_WhenXFrameOptionsHasAValueBrowsersIgnore_ShouldReportMediumLikeAMissingHeader(string value)
     {
         var visit = Site.Good().WithPageHeaders(("X-Frame-Options", value));
 
         var finding = await Make.SingleFindingAsync(visit, HeaderChecks.FrameId);
 
-        Assert.Equal(Severity.Low, finding.Severity);
+        Assert.Equal(Severity.Medium, finding.Severity);
         Assert.Equal("X-Frame-Options: " + value, finding.Evidence);
     }
 
@@ -254,6 +254,17 @@ public sealed class OtherHeaderChecksTests
         var visit = Site.Good().WithPageHeaders(("Content-Security-Policy", "frame-ancestors 'self'"), ("X-Frame-Options", "ALLOWALL"));
 
         Assert.Empty(await Make.FindingsAsync(visit, HeaderChecks.FrameId));
+    }
+
+    [Theory]
+    [InlineData("frame-ancestors *")]
+    [InlineData("frame-ancestors 'self' https:")]
+    [InlineData("frame-ancestors http:")]
+    public async Task Frame_WhenFrameAncestorsAllowsAnySite_ShouldNotCountItAsProtection(string policy)
+    {
+        var visit = Site.Good().WithPageHeaders(("Content-Security-Policy", policy));
+
+        Assert.Equal(Severity.Medium, (await Make.SingleFindingAsync(visit, HeaderChecks.FrameId)).Severity);
     }
 
     [Fact]
@@ -289,6 +300,45 @@ public sealed class OtherHeaderChecksTests
     public async Task Nosniff_WhenValueIsNosniffInAnyCase_ShouldFindNothing()
     {
         Assert.Empty(await Make.FindingsAsync(Site.Good().WithHeader("X-Content-Type-Options", " NoSniff "), HeaderChecks.NosniffId));
+    }
+
+    [Fact]
+    public async Task Nosniff_WhenSeveralValuesAreSent_ShouldJudgeTheFirstAsBrowsersDo()
+    {
+        var joined = Site.Good().WithHeader("X-Content-Type-Options", "nosniff, nosniff");
+        var twice = Site.Good().WithHeader("X-Content-Type-Options", "nosniff", "sniff");
+        var wrongFirst = Site.Good().WithHeader("X-Content-Type-Options", "sniff, nosniff");
+
+        Assert.Empty(await Make.FindingsAsync(joined, HeaderChecks.NosniffId));
+        Assert.Empty(await Make.FindingsAsync(twice, HeaderChecks.NosniffId));
+        Assert.Equal("X-Content-Type-Options: sniff, nosniff", (await Make.SingleFindingAsync(wrongFirst, HeaderChecks.NosniffId)).Evidence);
+    }
+
+    [Fact]
+    public async Task Checks_WhenTheAddressOfThePageCarriesASessionIdentifier_ShouldNotShowItInTheEvidence()
+    {
+        // A site that receives no cookie may move the session into the address of its first redirect.
+        var visit = Site.Good() with
+        {
+            Https = Site.Response(
+                Site.RedirectHop("https://example.com/", "/app/;jsessionid=5EC2E7"),
+                Site.Hop("https://example.com/app/;jsessionid=5EC2E7?token=abc")),
+        };
+
+        using var culture = new UiCulture("en-US");
+        var finding = await Make.SingleFindingAsync(visit, HeaderChecks.HstsId);
+
+        Assert.Equal("The response of https://example.com/app/;…?… has no Strict-Transport-Security header.", finding.Evidence);
+    }
+
+    [Theory]
+    [InlineData("https://example.com/", "https://example.com/")]
+    [InlineData("https://example.com/a/b.html#top", "https://example.com/a/b.html")]
+    [InlineData("https://user:pass@example.com:8443/a?x=1&sid=SECRET", "https://example.com:8443/a?…")]
+    [InlineData("http://example.com/app/;jsessionid=SECRET/next?y", "http://example.com/app/;…?…")]
+    public void Show_WhenCalled_ShouldDropPathParametersQueryFragmentAndUserInformation(string url, string expected)
+    {
+        Assert.Equal(expected, SafeUrl.Show(new Uri(url)));
     }
 
     [Fact]
@@ -330,6 +380,27 @@ public sealed class OtherHeaderChecksTests
     public async Task Referrer_WhenEffectivePolicyIsStrict_ShouldFindNothing(string value)
     {
         Assert.Empty(await Make.FindingsAsync(Site.Good().WithHeader("Referrer-Policy", value), HeaderChecks.ReferrerId));
+    }
+
+    [Theory]
+    [InlineData("Always", 1)]
+    [InlineData("default", 1)]
+    [InlineData("never", 0)]
+    [InlineData("origin-when-crossorigin", 0)]
+    public async Task Referrer_WhenMetaElementUsesAnOldValue_ShouldReadItAsBrowsersDo(string content, int findings)
+    {
+        var visit = Site.Good().WithHeader("Referrer-Policy").WithBody($"<meta name=\"referrer\" content=\"{content}\">");
+
+        Assert.Equal(findings, (await Make.FindingsAsync(visit, HeaderChecks.ReferrerId)).Count);
+    }
+
+    [Fact]
+    public async Task Referrer_WhenHeaderUsesAnOldMetaValue_ShouldNotAcceptIt()
+    {
+        using var culture = new UiCulture("en-US");
+        var finding = await Make.SingleFindingAsync(Site.Good().WithHeader("Referrer-Policy", "never"), HeaderChecks.ReferrerId);
+
+        Assert.Equal("No Referrer-Policy", finding.Title);
     }
 
     [Fact]

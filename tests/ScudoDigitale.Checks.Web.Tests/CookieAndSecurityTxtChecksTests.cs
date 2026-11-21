@@ -28,8 +28,29 @@ public sealed class SetCookieTests
         Assert.True(cookie.Secure);
         Assert.True(cookie.HttpOnly);
         Assert.Equal("strict", cookie.SameSite);
-        Assert.Equal("SID=…; Path=/; secure; HTTPONLY; SameSite=Strict; Max-Age=3600", cookie.Display);
+        Assert.Equal("SID=…; Path; secure; HTTPONLY; SameSite=Strict; Max-Age=3600", cookie.Display);
         Assert.DoesNotContain("s3cr3t", cookie.Display, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("a=1; Domain=example.com; Expires=Wed, 21 Oct 2026 07:28:00 GMT", "a=…; Domain; Expires")]
+    [InlineData("a=1; SameSite=La x; Max-Age=1 2", "a=…; SameSite; Max-Age")]
+    [InlineData("a=1; Path=/, other=SECRET; we ird=1; =x; Secure", "a=…; Path; Secure")]
+    public void Display_WhenAttributesCarryValues_ShouldShowOnlyNamesAndPlainSameSiteOrMaxAge(string header, string expected)
+    {
+        Assert.Equal(expected, SetCookie.TryParse(header)!.Display);
+    }
+
+    [Fact]
+    public void ParseAll_WhenSeveralCookiesAreJoinedInOneLine_ShouldTellThemApartWithoutBreakingExpiresDates()
+    {
+        var cookies = SetCookie.ParseAll("a=1; Path=/; Expires=Wed, 21 Oct 2026 07:28:00 GMT, sessionid=SECRET; HttpOnly,lang=it; Secure, ").ToArray();
+
+        Assert.Equal(["a", "sessionid", "lang"], cookies.Select(c => c.Name));
+        Assert.Equal([false, true, false], cookies.Select(c => c.HttpOnly));
+        Assert.Equal([false, false, true], cookies.Select(c => c.Secure));
+        Assert.Equal("a=…; Path; Expires", cookies[0].Display);
+        Assert.All(cookies, c => Assert.DoesNotContain("SECRET", c.Display, StringComparison.Ordinal));
     }
 
     [Fact]
@@ -94,7 +115,21 @@ public sealed class CookieChecksTests
         Assert.Equal(Severity.Medium, finding.Severity);
         Assert.Equal(Confidence.Certain, finding.Confidence);
         Assert.Equal("Cookie without Secure (session)", finding.Title);
-        Assert.Equal("session=…; Path=/; HttpOnly; SameSite=Lax", finding.Evidence);
+        Assert.Equal("session=…; Path; HttpOnly; SameSite=Lax", finding.Evidence);
+    }
+
+    [Fact]
+    public async Task Checks_WhenAProxyJoinedTwoCookiesInOneLine_ShouldJudgeEachOnItsOwnAttributesAndShowNoValue()
+    {
+        var visit = Site.Good().WithHeader("Set-Cookie", "lang=it; Path=/; Secure, sessionid=t0ps3cret; HttpOnly");
+
+        using var culture = new UiCulture("en-US");
+        var secure = await Make.SingleFindingAsync(visit, CookieChecks.SecureId);
+        var httpOnly = await Make.SingleFindingAsync(visit, CookieChecks.HttpOnlyId);
+
+        Assert.Equal("Cookie without Secure (sessionid)", secure.Title);
+        Assert.Equal("Cookie without HttpOnly (lang)", httpOnly.Title);
+        Assert.DoesNotContain("t0ps3cret", secure.Evidence + httpOnly.Evidence, StringComparison.Ordinal);
     }
 
     [Theory]

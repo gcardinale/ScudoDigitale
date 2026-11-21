@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DnsClient" />
+    <Using Include="ScudoDigitale.Core.Dns" />
   </ItemGroup>
 
   <ItemGroup>

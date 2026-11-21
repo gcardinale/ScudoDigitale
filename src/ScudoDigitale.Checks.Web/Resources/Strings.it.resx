@@ -145,6 +145,18 @@
   <data name="HttpsMissingFix" xml:space="preserve">
     <value>Attiva HTTPS con un certificato presso il tuo fornitore di hosting (quasi tutti offrono quello gratuito di Let's Encrypt), poi reindirizza HTTP verso HTTPS.</value>
   </data>
+  <data name="HttpsUnusableTitle" xml:space="preserve">
+    <value>Non è stato possibile raggiungere il sito in HTTPS</value>
+  </data>
+  <data name="HttpsUnusableRisk" xml:space="preserve">
+    <value>Se nemmeno i visitatori riescono a usare HTTPS, tutto ciò che leggono e scrivono viaggia in chiaro. La connessione non è fallita perché la porta è chiusa (vedi la prova): il server può essere lento, oppure offrire solo un protocollo che questo computer non accetta.</value>
+  </data>
+  <data name="HttpsUnusableFix" xml:space="preserve">
+    <value>Apri il sito con https:// in un browser. Se funziona, ripeti il controllo più tardi; se non funziona, attiva HTTPS con un certificato e un protocollo attuali presso il tuo fornitore di hosting.</value>
+  </data>
+  <data name="CertificateNotRead" xml:space="preserve">
+    <value>Non è stato possibile leggere il certificato del sito.</value>
+  </data>
   <data name="HttpsBackToHttpTitle" xml:space="preserve">
     <value>Il sito in HTTPS rimanda i visitatori a HTTP</value>
   </data>
@@ -384,5 +396,14 @@
   </data>
   <data name="SecurityTxtExpiresFix" xml:space="preserve">
     <value>Imposta Expires a una data entro un anno, nella forma 2027-12-31T23:59:59Z, e rinnovala prima che passi.</value>
+  </data>
+  <data name="DnsNameNotFound" xml:space="preserve">
+    <value>il nome {0} non esiste nel DNS</value>
+  </data>
+  <data name="DnsNoAddress" xml:space="preserve">
+    <value>il nome {0} non ha un indirizzo nel DNS</value>
+  </data>
+  <data name="DnsFailed" xml:space="preserve">
+    <value>il DNS non ha dato un indirizzo per {0}: {1}</value>
   </data>
 </root>

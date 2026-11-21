@@ -12,18 +12,9 @@
 // ║ Attribution required (AGPL sec. 7(b)): see NOTICE file        ║
 // ╚═══════════════════════════════════════════════════════════════╝
 
-namespace ScudoDigitale.Checks.Email;
+namespace ScudoDigitale.Core.Dns;
 
-/// <summary>Which DNS servers the email checks ask (ADR-006).</summary>
-public enum DnsSource
-{
-    /// <summary>
-    /// The public resolvers of Cloudflare and then Google over DNS over HTTPS, and the DNS of this
-    /// computer only if neither answers. Encrypted, so a home router cannot intercept or slow it down;
-    /// those two providers see the domain names checked, which are public anyway.
-    /// </summary>
-    Public,
-
-    /// <summary>Only the DNS servers configured on this computer, usually the router.</summary>
-    System,
-}
+/// <summary>An MX record: a mail server of a domain and its preference.</summary>
+/// <param name="Preference">Lower values are tried first.</param>
+/// <param name="Host">Host name without the trailing dot; empty for the null MX "<c>0 .</c>" (RFC 7505).</param>
+public sealed record MailExchange(int Preference, string Host);

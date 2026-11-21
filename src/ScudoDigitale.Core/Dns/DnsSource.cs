@@ -12,31 +12,18 @@
 // ║ Attribution required (AGPL sec. 7(b)): see NOTICE file        ║
 // ╚═══════════════════════════════════════════════════════════════╝
 
-using System.Net;
+namespace ScudoDigitale.Core.Dns;
 
-namespace ScudoDigitale.Checks.Email;
-
-/// <summary>
-/// The DNS queries the email checks need. Implementations report every DNS problem through
-/// <see cref="DnsAnswer{T}"/> and throw only <see cref="OperationCanceledException"/> when cancelled.
-/// </summary>
-internal interface IDnsResolver
+/// <summary>Which DNS servers the email checks ask (ADR-006).</summary>
+public enum DnsSource
 {
-    /// <summary>TXT records of <paramref name="name"/>; the strings of each record are joined.</summary>
-    /// <param name="name">Name to query.</param>
-    /// <param name="cancellationToken">Cancels the query.</param>
-    /// <returns>The answer.</returns>
-    Task<DnsAnswer<string>> QueryTxtAsync(string name, CancellationToken cancellationToken);
+    /// <summary>
+    /// The public resolvers of Cloudflare and then Google over DNS over HTTPS, and the DNS of this
+    /// computer only if neither answers. Encrypted, so a home router cannot intercept or slow it down;
+    /// those two providers see the domain names checked, which are public anyway.
+    /// </summary>
+    Public,
 
-    /// <summary>MX records of <paramref name="name"/>.</summary>
-    /// <param name="name">Name to query.</param>
-    /// <param name="cancellationToken">Cancels the query.</param>
-    /// <returns>The answer.</returns>
-    Task<DnsAnswer<MailExchange>> QueryMxAsync(string name, CancellationToken cancellationToken);
-
-    /// <summary>IPv4 and IPv6 addresses (A and AAAA records) of <paramref name="name"/>.</summary>
-    /// <param name="name">Name to query.</param>
-    /// <param name="cancellationToken">Cancels the query.</param>
-    /// <returns>The answer.</returns>
-    Task<DnsAnswer<IPAddress>> QueryAddressesAsync(string name, CancellationToken cancellationToken);
+    /// <summary>Only the DNS servers configured on this computer, usually the router.</summary>
+    System,
 }

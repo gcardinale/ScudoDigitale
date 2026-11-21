@@ -18,6 +18,7 @@ using ScudoDigitale.Checks.Email;
 using ScudoDigitale.Checks.Web;
 using ScudoDigitale.Cli.Resources;
 using ScudoDigitale.Core;
+using ScudoDigitale.Core.Dns;
 
 namespace ScudoDigitale.Cli;
 
@@ -99,10 +100,11 @@ internal static class ScanCommand
             return InvalidInput;
         }
 
+        var dns = request.SystemDns ? DnsSource.System : DnsSource.Public;
         var options = new EmailCheckOptions
         {
             DkimSelectors = request.DkimSelectors,
-            DnsSource = request.SystemDns ? DnsSource.System : DnsSource.Public,
+            DnsSource = dns,
         };
         var operatorName = FirstNonBlank(request.Operator, services.DefaultOperator()) ?? Strings.UnknownOperator;
         var scope = new ScopeDeclaration(
@@ -116,11 +118,21 @@ internal static class ScanCommand
         ICheck[] checks =
         [
             .. domains.Length > 0 ? services.CreateEmailChecks(options) : [],
-            .. hosts.Count > 0 ? services.CreateWebChecks(new WebCheckOptions()) : [],
+            .. hosts.Count > 0 ? services.CreateWebChecks(new WebCheckOptions { DnsSource = dns }) : [],
         ];
 
         var report = new ScanReport(output);
         report.WriteHeader(scope, checks);
+
+        // A proxy between this computer and the site changes what the certificate checks see: say it.
+        foreach (var host in hosts)
+        {
+            if (services.WebProxyFor(host) is { } proxy)
+            {
+                report.WriteProxyNote(host, proxy);
+            }
+        }
+
         var runs = await new CheckEngine(new PassiveOnlyScopeGuard())
             .RunAsync(checks, Profile.Individual(), scope, cancellationToken)
             .ConfigureAwait(false);

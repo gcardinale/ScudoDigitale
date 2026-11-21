@@ -4,4 +4,8 @@
     <ProjectReference Include="..\..\src\ScudoDigitale.Checks.Email\ScudoDigitale.Checks.Email.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="ScudoDigitale.Core.Dns" />
+  </ItemGroup>
+
 </Project>

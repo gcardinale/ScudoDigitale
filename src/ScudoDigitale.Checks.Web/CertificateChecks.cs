@@ -46,10 +46,17 @@ internal static class CertificateChecks
         yield return new WebCheck(NameId, () => Strings.CertNameCheck, inspector, visit => ForEach(visit, Name));
     }
 
-    private static CheckResult ForEach(SiteVisit visit, Func<SiteVisit, CertificateInfo, Finding?> rule) =>
-        visit.Certificates.Count == 0
+    private static CheckResult ForEach(SiteVisit visit, Func<SiteVisit, CertificateInfo, Finding?> rule)
+    {
+        if (visit.Certificates.Count > 0)
+        {
+            return WebFinding.Executed(visit.Certificates.Select(certificate => rule(visit, certificate)).OfType<Finding>());
+        }
+
+        return visit.Https.End == TrailEnd.Error
             ? new CheckResult.Skipped(Strings.SkippedNoHttps)
-            : WebFinding.Executed(visit.Certificates.Select(certificate => rule(visit, certificate)).OfType<Finding>());
+            : new CheckResult.Failed(Strings.CertificateNotRead);
+    }
 
     private static Finding? Expiry(SiteVisit visit, CertificateInfo certificate)
     {

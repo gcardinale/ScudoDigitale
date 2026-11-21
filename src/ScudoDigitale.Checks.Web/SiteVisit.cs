@@ -52,15 +52,40 @@ internal enum TrailEnd
 /// <param name="End">Why the chain stopped.</param>
 /// <param name="Next">Where the last hop redirects to, when it was not followed.</param>
 /// <param name="Error">What went wrong, when <paramref name="End"/> is <see cref="TrailEnd.Error"/>.</param>
-internal sealed record Trail(IReadOnlyList<Hop> Hops, TrailEnd End, Uri? Next = null, string? Error = null)
+/// <param name="Refused">Whether the error is a refused connection: nothing listens on that port.</param>
+internal sealed record Trail(IReadOnlyList<Hop> Hops, TrailEnd End, Uri? Next = null, string? Error = null, bool Refused = false)
 {
     /// <summary>The addresses visited and the one not followed, for the evidence of a finding.</summary>
-    public string Path => string.Join(" → ", Hops.Select(h => h.Url.AbsoluteUri).Concat(Next is null ? [] : [Next.AbsoluteUri]));
+    public string Path => string.Join(" → ", Hops.Select(h => SafeUrl.Show(h.Url)).Concat(Next is null ? [] : [SafeUrl.Show(Next)]));
 
     /// <summary>A chain whose first request failed.</summary>
     /// <param name="error">What went wrong.</param>
+    /// <param name="refused">Whether the connection was refused.</param>
     /// <returns>The chain.</returns>
-    public static Trail Failed(string error) => new([], TrailEnd.Error, null, error);
+    public static Trail Failed(string error, bool refused = false) => new([], TrailEnd.Error, null, error, refused);
+}
+
+/// <summary>
+/// Addresses as they are shown in a report. A site that receives no cookie may put the session
+/// identifier in the address instead (<c>;jsessionid=…</c>, <c>?sid=…</c>): path parameters and the
+/// query string are therefore never shown.
+/// </summary>
+internal static class SafeUrl
+{
+    /// <summary>The address without path parameters, query string, fragment and user information.</summary>
+    /// <param name="url">An absolute address.</param>
+    /// <returns>The text to show.</returns>
+    public static string Show(Uri url)
+    {
+        var path = url.AbsolutePath;
+        var parameters = path.IndexOf(';', StringComparison.Ordinal);
+        if (parameters >= 0)
+        {
+            path = path[..parameters] + ";…";
+        }
+
+        return $"{url.Scheme}://{url.Authority}{path}{(url.Query.Length > 0 ? "?…" : string.Empty)}";
+    }
 }
 
 /// <summary>How the certificate chain of a server was judged.</summary>

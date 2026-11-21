@@ -145,6 +145,18 @@
   <data name="HttpsMissingFix" xml:space="preserve">
     <value>Enable HTTPS with a certificate at your hosting provider (most offer a free Let's Encrypt one), then redirect HTTP to HTTPS.</value>
   </data>
+  <data name="HttpsUnusableTitle" xml:space="preserve">
+    <value>The site could not be reached over HTTPS</value>
+  </data>
+  <data name="HttpsUnusableRisk" xml:space="preserve">
+    <value>If visitors cannot use HTTPS either, everything they read and type travels in clear. The connection did not fail because the port is closed (see the evidence): the server may be slow, or offer only a protocol this computer does not accept.</value>
+  </data>
+  <data name="HttpsUnusableFix" xml:space="preserve">
+    <value>Open the site with https:// in a browser. If it works, run the check again later; if it does not, enable HTTPS with a current certificate and protocol at your hosting provider.</value>
+  </data>
+  <data name="CertificateNotRead" xml:space="preserve">
+    <value>The certificate of the site could not be read.</value>
+  </data>
   <data name="HttpsBackToHttpTitle" xml:space="preserve">
     <value>The HTTPS site sends visitors back to HTTP</value>
   </data>
@@ -384,5 +396,14 @@
   </data>
   <data name="SecurityTxtExpiresFix" xml:space="preserve">
     <value>Set Expires to a date within one year, in the form 2027-12-31T23:59:59Z, and renew it before it passes.</value>
+  </data>
+  <data name="DnsNameNotFound" xml:space="preserve">
+    <value>the name {0} does not exist in the DNS</value>
+  </data>
+  <data name="DnsNoAddress" xml:space="preserve">
+    <value>the name {0} has no address in the DNS</value>
+  </data>
+  <data name="DnsFailed" xml:space="preserve">
+    <value>the DNS gave no address for {0}: {1}</value>
   </data>
 </root>
