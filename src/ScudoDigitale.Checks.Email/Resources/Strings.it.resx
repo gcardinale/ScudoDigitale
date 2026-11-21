@@ -49,9 +49,6 @@
   <data name="DnsQueryFailed" xml:space="preserve">
     <value>La richiesta DNS per {0} non è riuscita: {1}</value>
   </data>
-  <data name="NoDnsServer" xml:space="preserve">
-    <value>su questo computer non è configurato alcun server DNS</value>
-  </data>
   <data name="DnsNoAnswerInTime" xml:space="preserve">
     <value>nessuna risposta entro {0} secondi</value>
   </data>

@@ -238,13 +238,13 @@ public sealed class OtherHeaderChecksTests
     [InlineData("ALLOW-FROM https://partner.example")]
     [InlineData("ALLOWALL")]
     [InlineData("DENY, SAMEORIGIN, nonsense")]
-    public async Task Frame_WhenXFrameOptionsHasAValueBrowsersIgnore_ShouldReportLowWithTheValue(string value)
+    public async Task Frame_WhenXFrameOptionsHasAValueBrowsersIgnore_ShouldReportMediumLikeAMissingHeader(string value)
     {
         var visit = Site.Good().WithPageHeaders(("X-Frame-Options", value));
 
         var finding = await Make.SingleFindingAsync(visit, HeaderChecks.FrameId);
 
-        Assert.Equal(Severity.Low, finding.Severity);
+        Assert.Equal(Severity.Medium, finding.Severity);
         Assert.Equal("X-Frame-Options: " + value, finding.Evidence);
     }
 

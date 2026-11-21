@@ -397,4 +397,13 @@
   <data name="SecurityTxtExpiresFix" xml:space="preserve">
     <value>Imposta Expires a una data entro un anno, nella forma 2027-12-31T23:59:59Z, e rinnovala prima che passi.</value>
   </data>
+  <data name="DnsNameNotFound" xml:space="preserve">
+    <value>il nome {0} non esiste nel DNS</value>
+  </data>
+  <data name="DnsNoAddress" xml:space="preserve">
+    <value>il nome {0} non ha un indirizzo nel DNS</value>
+  </data>
+  <data name="DnsFailed" xml:space="preserve">
+    <value>il DNS non ha dato un indirizzo per {0}: {1}</value>
+  </data>
 </root>

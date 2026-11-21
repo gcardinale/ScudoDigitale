@@ -41,6 +41,11 @@ internal sealed class ScanReport(TextWriter output)
         output.WriteLine(Format(Strings.Checking, string.Join(", ", targets)));
     }
 
+    /// <summary>Says that the requests to a site go through a proxy, and what that means for the certificate.</summary>
+    /// <param name="host">The site.</param>
+    /// <param name="proxy">Host and port of the proxy.</param>
+    public void WriteProxyNote(string host, string proxy) => output.WriteLine(Format(Strings.WebProxyNote, host, proxy));
+
     /// <summary>The results of every target, the summary and the attribution.</summary>
     /// <param name="scope">The declaration, for the order of the targets.</param>
     /// <param name="runs">What the engine returned.</param>

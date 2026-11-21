@@ -18,6 +18,9 @@ using System.Resources;
 using ScudoDigitale.Checks.Web.Resources;
 using ScudoDigitale.Core;
 
+using System.Net;
+using ScudoDigitale.Core.Dns;
+
 namespace ScudoDigitale.Checks.Web.Tests;
 
 public sealed class WebChecksTests
@@ -98,6 +101,51 @@ public sealed class WebChecksTests
         Assert.Same(endpoint, options.Route(endpoint));
     }
 
+    [Fact]
+    public void DnsSource_WhenSet_ShouldDefaultToThePublicResolversAndAcceptOnlyDefinedValues()
+    {
+        Assert.Equal(DnsSource.Public, new WebCheckOptions().DnsSource);
+        Assert.Equal(DnsSource.System, new WebCheckOptions { DnsSource = DnsSource.System }.DnsSource);
+        Assert.Throws<ArgumentOutOfRangeException>(() => new WebCheckOptions { DnsSource = (DnsSource)9 });
+    }
+
+    [Fact]
+    public void Create_WhenOnlyTheDnsOfTheComputerIsAsked_ShouldBuildTheSameChecks()
+    {
+        Assert.Equal(ExpectedIds, WebChecks.Create(new WebCheckOptions { DnsSource = DnsSource.System }).Select(c => c.Id));
+    }
+
+    [Fact]
+    public void ProxyFor_WhenAProxyIsConfigured_ShouldReturnItsHostAndPortWithoutCredentials()
+    {
+        var proxy = new WebProxy(new Uri("http://mario:secret@proxy.lan:8080"));
+
+        Assert.Equal("proxy.lan:8080", WebChecks.ProxyFor("example.com", proxy));
+    }
+
+    [Fact]
+    public void ProxyFor_WhenTheSiteIsBypassed_ShouldReturnNull()
+    {
+        var proxy = new WebProxy(new Uri("http://proxy.lan:8080"), BypassOnLocal: false, BypassList: [@"example\.com"]);
+
+        Assert.Null(WebChecks.ProxyFor("example.com", proxy));
+        Assert.Equal("proxy.lan:8080", WebChecks.ProxyFor("example.org", proxy));
+    }
+
+    [Fact]
+    public void ProxyFor_WhenTheConfigurationGivesNoProxy_ShouldReturnNull()
+    {
+        Assert.Null(WebChecks.ProxyFor("example.com", new FakeProxy(_ => null)));
+        Assert.Null(WebChecks.ProxyFor("example.com", new FakeProxy(site => site)));
+        Assert.Null(WebChecks.ProxyFor("example.com", new FakeProxy(_ => throw new InvalidOperationException("no PAC"))));
+    }
+
+    [Fact]
+    public void SystemProxyFor_WhenCalled_ShouldAnswerLikeTheConfigurationOfThisComputer()
+    {
+        Assert.Equal(WebChecks.ProxyFor("example.com", HttpClient.DefaultProxy), WebChecks.SystemProxyFor("example.com"));
+    }
+
     [Theory]
     [InlineData(1, true)]
     [InlineData(30_000, true)]
@@ -174,5 +222,14 @@ public sealed class WebChecksTests
     private sealed class DenyAll : IScopeGuard
     {
         public Task<bool> IsAuthorizedAsync(Target target, CancellationToken cancellationToken) => Task.FromResult(false);
+    }
+
+    private sealed class FakeProxy(Func<Uri, Uri?> proxy) : IWebProxy
+    {
+        public ICredentials? Credentials { get; set; }
+
+        public Uri? GetProxy(Uri destination) => proxy(destination);
+
+        public bool IsBypassed(Uri host) => false;
     }
 }

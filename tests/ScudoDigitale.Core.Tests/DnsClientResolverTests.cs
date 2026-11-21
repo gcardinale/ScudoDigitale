@@ -15,11 +15,13 @@
 using System.Net;
 using DnsClient;
 
-namespace ScudoDigitale.Checks.Email.Tests;
+using ScudoDigitale.Core.Dns;
+
+namespace ScudoDigitale.Core.Tests;
 
 public sealed class DnsClientResolverTests
 {
-    private static readonly EmailCheckOptions Fast = new() { DnsTimeout = TimeSpan.FromMilliseconds(300), DnsRetries = 0 };
+    private static readonly DnsOptions Fast = new() { Timeout = TimeSpan.FromMilliseconds(300), Retries = 0 };
 
     private static DnsClientResolver On(FakeDnsServer server) =>
         new([new NameServer(IPAddress.Loopback, server.Port)], Fast);
@@ -102,7 +104,7 @@ public sealed class DnsClientResolverTests
     {
         await using var server = new FakeDnsServer();
         server.Silent.Add("example.com");
-        var slow = new DnsClientResolver([new NameServer(IPAddress.Loopback, server.Port)], new EmailCheckOptions { DnsTimeout = TimeSpan.FromSeconds(30), DnsRetries = 0 });
+        var slow = new DnsClientResolver([new NameServer(IPAddress.Loopback, server.Port)], new DnsOptions { Timeout = TimeSpan.FromSeconds(30), Retries = 0 });
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         cts.CancelAfter(TimeSpan.FromMilliseconds(200));
 

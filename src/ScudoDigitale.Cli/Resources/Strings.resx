@@ -163,4 +163,7 @@
   <data name="AreaWeb" xml:space="preserve">
     <value>Websites</value>
   </data>
+  <data name="WebProxyNote" xml:space="preserve">
+    <value>Note: the requests to {0} go through the proxy configured on this computer ({1}). If that proxy inspects encrypted traffic, the certificate checked is the proxy's, not the site's.</value>
+  </data>
 </root>

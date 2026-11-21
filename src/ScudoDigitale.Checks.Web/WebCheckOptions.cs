@@ -14,6 +14,7 @@
 
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using ScudoDigitale.Core.Dns;
 
 namespace ScudoDigitale.Checks.Web;
 
@@ -27,6 +28,22 @@ public sealed record WebCheckOptions
     public static readonly TimeSpan MaxRequestTimeout = TimeSpan.FromSeconds(30);
 
     private readonly TimeSpan requestTimeout = TimeSpan.FromSeconds(10);
+    private readonly DnsSource dnsSource = DnsSource.Public;
+
+    /// <summary>
+    /// Which DNS servers give the address of a site. Default <see cref="Core.Dns.DnsSource.Public"/>:
+    /// Cloudflare and then Google over DNS over HTTPS, then the DNS of this computer (ADR-006).
+    /// With <see cref="Core.Dns.DnsSource.System"/> the name is left to the operating system, as for
+    /// any connection. Through a proxy, the proxy resolves the name.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">The value is not defined.</exception>
+    public DnsSource DnsSource
+    {
+        get => dnsSource;
+        init => dnsSource = Enum.IsDefined(value)
+            ? value
+            : throw new ArgumentOutOfRangeException(nameof(DnsSource), value, "Unknown DNS source.");
+    }
 
     /// <summary>Timeout of a single request, connection included. Default 10 seconds, at most <see cref="MaxRequestTimeout"/>.</summary>
     /// <exception cref="ArgumentOutOfRangeException">The value is zero, negative or above <see cref="MaxRequestTimeout"/>.</exception>
@@ -44,8 +61,14 @@ public sealed record WebCheckOptions
     /// </summary>
     internal TimeSpan VisitBudget { get; init; } = TimeSpan.FromSeconds(40);
 
-    /// <summary>Where a connection really goes. Internal: tests send it to a local server.</summary>
+    /// <summary>
+    /// Where a connection really goes. Internal: tests send it to a local server, or keep the name
+    /// and change only the port to exercise the resolver.
+    /// </summary>
     internal Func<DnsEndPoint, EndPoint> Route { get; init; } = static endpoint => endpoint;
+
+    /// <summary>The resolver used instead of the one chosen by <see cref="DnsSource"/>. Internal: tests use an in-memory one.</summary>
+    internal IDnsResolver? Resolver { get; init; }
 
     /// <summary>
     /// Authorities trusted instead of those of the operating system. Internal: tests use their own

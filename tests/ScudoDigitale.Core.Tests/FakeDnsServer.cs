@@ -17,7 +17,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace ScudoDigitale.Checks.Email.Tests;
+using ScudoDigitale.Core.Dns;
+
+namespace ScudoDigitale.Core.Tests;
 
 /// <summary>
 /// A minimal authoritative-looking DNS server on UDP loopback, so <see cref="DnsClientResolver"/>

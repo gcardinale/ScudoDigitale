@@ -16,9 +16,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using DnsClient;
 using DnsClient.Protocol;
-using ScudoDigitale.Checks.Email.Resources;
+using ScudoDigitale.Core.Resources;
 
-namespace ScudoDigitale.Checks.Email;
+namespace ScudoDigitale.Core.Dns;
 
 /// <summary>
 /// <see cref="IDnsResolver"/> on DnsClient.NET, using the DNS servers configured on this computer.
@@ -31,7 +31,7 @@ internal sealed class DnsClientResolver : IDnsResolver
 
     /// <summary>Creates a resolver on the DNS servers configured on this computer.</summary>
     /// <param name="options">Timeout and retries.</param>
-    public DnsClientResolver(EmailCheckOptions options)
+    public DnsClientResolver(DnsOptions options)
         : this(SystemNameServers(), options)
     {
     }
@@ -39,7 +39,7 @@ internal sealed class DnsClientResolver : IDnsResolver
     /// <summary>Creates a resolver on the given DNS servers.</summary>
     /// <param name="nameServers">DNS servers to ask; with none, every query fails.</param>
     /// <param name="options">Timeout and retries.</param>
-    internal DnsClientResolver(IReadOnlyCollection<NameServer> nameServers, EmailCheckOptions options)
+    internal DnsClientResolver(IReadOnlyCollection<NameServer> nameServers, DnsOptions options)
     {
         if (nameServers.Count == 0)
         {
@@ -49,8 +49,8 @@ internal sealed class DnsClientResolver : IDnsResolver
         client = new LookupClient(new LookupClientOptions(nameServers.ToArray())
         {
             AutoResolveNameServers = false,
-            Timeout = options.DnsTimeout,
-            Retries = options.DnsRetries,
+            Timeout = options.Timeout,
+            Retries = options.Retries,
             UseCache = true,
             CacheFailedResults = false,
             ThrowDnsErrors = false,

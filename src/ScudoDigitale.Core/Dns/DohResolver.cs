@@ -16,9 +16,9 @@ using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using ScudoDigitale.Checks.Email.Resources;
+using ScudoDigitale.Core.Resources;
 
-namespace ScudoDigitale.Checks.Email;
+namespace ScudoDigitale.Core.Dns;
 
 /// <summary>
 /// <see cref="IDnsResolver"/> on the JSON API of a public DNS over HTTPS service (Cloudflare, Google).
@@ -46,12 +46,12 @@ internal sealed class DohResolver : IDnsResolver
     /// <summary>Creates the resolver.</summary>
     /// <param name="http">Client used for the requests; it is not disposed.</param>
     /// <param name="endpoint">The JSON endpoint, for example <see cref="Cloudflare"/>.</param>
-    /// <param name="options">Its <see cref="EmailCheckOptions.DnsTimeout"/>, tripled to leave room for the TLS handshake, limits each request.</param>
-    public DohResolver(HttpClient http, Uri endpoint, EmailCheckOptions options)
+    /// <param name="options">Its <see cref="DnsOptions.Timeout"/>, tripled to leave room for the TLS handshake, limits each request.</param>
+    public DohResolver(HttpClient http, Uri endpoint, DnsOptions options)
     {
         this.http = http;
         this.endpoint = endpoint;
-        timeout = options.DnsTimeout * 3;
+        timeout = options.Timeout * 3;
     }
 
     /// <inheritdoc />
@@ -155,7 +155,7 @@ internal sealed class DohResolver : IDnsResolver
         }
         catch (OperationCanceledException)
         {
-            return DnsAnswer<T>.Failed($"{endpoint.Host}: {EmailFinding.Format(Strings.DnsNoAnswerInTime, timeout.TotalSeconds)}");
+            return DnsAnswer<T>.Failed($"{endpoint.Host}: {string.Format(CultureInfo.CurrentCulture, Strings.DnsNoAnswerInTime, timeout.TotalSeconds)}");
         }
         catch (Exception ex)
         {

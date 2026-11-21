@@ -65,7 +65,7 @@ public sealed record EmailCheckOptions
     }
 
     /// <summary>
-    /// Which DNS servers answer the queries. Default <see cref="Email.DnsSource.Public"/>: Cloudflare
+    /// Which DNS servers answer the queries. Default <see cref="Core.Dns.DnsSource.Public"/>: Cloudflare
     /// and then Google over DNS over HTTPS, then the DNS of this computer.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">The value is not defined.</exception>
@@ -114,6 +114,9 @@ public sealed record EmailCheckOptions
             ? value
             : throw new ArgumentOutOfRangeException(nameof(MaxConcurrentDnsQueries), value, "Must be between 1 and 32.");
     }
+
+    /// <summary>The DNS settings, in the form the shared resolver takes.</summary>
+    internal DnsOptions Dns => new() { Source = DnsSource, Timeout = DnsTimeout, Retries = DnsRetries };
 
     /// <summary>
     /// Time allowed to the whole DKIM analysis of a domain (25 seconds), well below the 60-second

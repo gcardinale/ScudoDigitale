@@ -147,7 +147,7 @@ internal static class HeaderChecks
         return values.All(v => v is "DENY" or "SAMEORIGIN")
             ? null
             : WebFinding.Create(
-                FrameId, Strings.FrameInvalidTitle, Severity.Low, Confidence.Certain, host,
+                FrameId, Strings.FrameInvalidTitle, Severity.Medium, Confidence.Certain, host,
                 WebFinding.Header(FrameHeader, string.Join(", ", page.Values(FrameHeader))), Strings.FrameInvalidRisk, Strings.FrameFix, "RFC 7034 §2.1");
     }
 

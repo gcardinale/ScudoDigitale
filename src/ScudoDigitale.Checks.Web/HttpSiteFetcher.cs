@@ -20,6 +20,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using ScudoDigitale.Checks.Web.Resources;
 using ScudoDigitale.Core;
+using ScudoDigitale.Core.Dns;
 
 namespace ScudoDigitale.Checks.Web;
 
@@ -29,7 +30,9 @@ namespace ScudoDigitale.Checks.Web;
 /// two standard addresses. Redirects are followed only inside the declared site; no cookie is sent
 /// back, no form is submitted, no other path is requested. The certificate is read from the same
 /// connection, without downloading missing certificates and without asking the authority whether it
-/// was revoked: both would be connections to servers that were not declared.
+/// was revoked: both would be connections to servers that were not declared. The address of the site
+/// is asked to the resolver of ADR-006 (public resolvers over HTTPS, then the DNS of this computer),
+/// because the DNS of a home router loses queries; through a proxy, the proxy resolves the name.
 /// </summary>
 internal sealed class HttpSiteFetcher : ISiteFetcher
 {
@@ -43,12 +46,18 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
     private const string LegacyPath = "/security.txt";
 
     private readonly WebCheckOptions options;
+    private readonly IDnsResolver? resolver;
+    private readonly ConcurrentDictionary<string, Lazy<Task<DnsAnswer<IPAddress>>>> addresses = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Creates the fetcher.</summary>
-    /// <param name="options">Timeouts.</param>
+    /// <param name="options">Timeouts and where the addresses of the sites come from.</param>
     public HttpSiteFetcher(WebCheckOptions options)
     {
         this.options = options;
+
+        // With the DNS of the computer the name is left to the operating system, as for any
+        // connection: it has a cache and asks every configured server, a router included.
+        resolver = options.Resolver ?? (options.DnsSource == DnsSource.System ? null : DnsResolvers.Create());
     }
 
     /// <summary>
@@ -67,6 +76,13 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         using var http = new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan };
         http.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
         http.DefaultRequestHeaders.Accept.ParseAdd("text/html,text/plain;q=0.9,*/*;q=0.8");
+
+        // The address is asked once and before the requests, so a resolver that is slow to answer
+        // does not eat the time of a connection. Through a proxy, the proxy resolves the name.
+        if (resolver is not null && options.Route(new DnsEndPoint(host, 443)) is DnsEndPoint && WebChecks.ProxyFor(host, HttpClient.DefaultProxy) is null)
+        {
+            await LookupAsync(host, cancellationToken).ConfigureAwait(false);
+        }
 
         // Two connections at once, as a browser would open.
         var plain = FollowAsync(http, host, new Uri($"http://{host}/"), null, cancellationToken);
@@ -114,7 +130,10 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
             UseCookies = false,
             AutomaticDecompression = DecompressionMethods.All,
             ConnectTimeout = options.RequestTimeout,
-            ConnectCallback = ConnectAsync,
+            ConnectCallback = (context, cancellationToken) => OpenAsync(
+                options.Route(context.DnsEndPoint),
+                IsDirect(context.InitialRequestMessage.RequestUri, context.DnsEndPoint),
+                cancellationToken),
             SslOptions = new SslClientAuthenticationOptions
             {
                 CertificateChainPolicy = policy,
@@ -269,17 +288,95 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         return new Hop(url, (int)response.StatusCode, headers, body);
     }
 
-    private async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
+    /// <summary>
+    /// Whether a connection goes straight to the host of the request. When it does not, it goes to a
+    /// proxy: its name belongs to the network of this computer and only the system can resolve it.
+    /// </summary>
+    /// <param name="requested">The address of the request the connection is opened for.</param>
+    /// <param name="endpoint">Where the connection is about to go.</param>
+    /// <returns><see langword="true"/> for a direct connection.</returns>
+    internal static bool IsDirect(Uri? requested, DnsEndPoint endpoint) =>
+        requested is not null
+        && requested.Port == endpoint.Port
+        && string.Equals(requested.IdnHost, endpoint.Host, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Opens a connection. The name of a site reached directly is resolved by the resolver of the
+    /// checks and its addresses are tried in order, IPv4 first; any other endpoint is left to the
+    /// system, and so is every name when only the DNS of the computer was asked for.
+    /// </summary>
+    /// <param name="target">Where to connect.</param>
+    /// <param name="direct">Whether <paramref name="target"/> is the site itself and not a proxy.</param>
+    /// <param name="cancellationToken">Stops the attempt.</param>
+    /// <returns>The connection.</returns>
+    /// <exception cref="IOException">The name has no address, or the DNS did not answer.</exception>
+    internal async ValueTask<Stream> OpenAsync(EndPoint target, bool direct, CancellationToken cancellationToken)
     {
-        var socket = new Socket(SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
+        if (target is not DnsEndPoint named || !direct || resolver is null)
+        {
+            return await ConnectAsync(() => new Socket(SocketType.Stream, ProtocolType.Tcp), target, cancellationToken).ConfigureAwait(false);
+        }
+
+        var answer = await LookupAsync(named.Host, cancellationToken).ConfigureAwait(false);
+        if (answer.Status != DnsStatus.Ok)
+        {
+            throw new IOException(answer.Status switch
+            {
+                DnsStatus.NonExistentDomain => WebFinding.Format(Strings.DnsNameNotFound, named.Host),
+                DnsStatus.NoRecords => WebFinding.Format(Strings.DnsNoAddress, named.Host),
+                _ => WebFinding.Format(Strings.DnsFailed, named.Host, answer.Error),
+            });
+        }
+
+        Exception? last = null;
+        foreach (var address in answer.Records)
+        {
+            try
+            {
+                return await ConnectAsync(
+                    () => new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp),
+                    new IPEndPoint(address, named.Port),
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                // The next address may work: a computer without IPv6 cannot use the IPv6 ones.
+                last = ex;
+            }
+        }
+
+        throw last!;
+    }
+
+    /// <summary>The addresses of a name, asked once for the life of the fetcher (one run).</summary>
+    private async Task<DnsAnswer<IPAddress>> LookupAsync(string name, CancellationToken cancellationToken)
+    {
+        var lookup = addresses.GetOrAdd(name, n => new Lazy<Task<DnsAnswer<IPAddress>>>(() => resolver!.QueryAddressesAsync(n, cancellationToken)));
         try
         {
-            await socket.ConnectAsync(options.Route(context.DnsEndPoint), cancellationToken).ConfigureAwait(false);
+            return await lookup.Value.WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // A question that was interrupted is asked again by whoever needs it next.
+            addresses.TryRemove(KeyValuePair.Create(name, lookup));
+            throw;
+        }
+    }
+
+    private static async ValueTask<Stream> ConnectAsync(Func<Socket> create, EndPoint target, CancellationToken cancellationToken)
+    {
+        Socket? socket = null;
+        try
+        {
+            socket = create();
+            socket.NoDelay = true;
+            await socket.ConnectAsync(target, cancellationToken).ConfigureAwait(false);
             return new NetworkStream(socket, ownsSocket: true);
         }
         catch
         {
-            socket.Dispose();
+            socket?.Dispose();
             throw;
         }
     }

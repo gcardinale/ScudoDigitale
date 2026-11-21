@@ -12,10 +12,10 @@
 // ║ Attribution required (AGPL sec. 7(b)): see NOTICE file        ║
 // ╚═══════════════════════════════════════════════════════════════╝
 
-namespace ScudoDigitale.Checks.Email;
+namespace ScudoDigitale.Core.Dns;
 
 /// <summary>How a DNS query ended.</summary>
-internal enum DnsStatus
+public enum DnsStatus
 {
     /// <summary>The name exists and has records of the requested type.</summary>
     Ok,
@@ -35,7 +35,7 @@ internal enum DnsStatus
 /// static methods, so the status and the records always agree.
 /// </summary>
 /// <typeparam name="T">Type of the records.</typeparam>
-internal sealed record DnsAnswer<T>
+public sealed record DnsAnswer<T>
 {
     private DnsAnswer(DnsStatus status, IReadOnlyList<T> records, string? error)
     {

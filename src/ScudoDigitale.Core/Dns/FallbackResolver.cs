@@ -14,7 +14,7 @@
 
 using System.Net;
 
-namespace ScudoDigitale.Checks.Email;
+namespace ScudoDigitale.Core.Dns;
 
 /// <summary>
 /// Asks a list of resolvers in order and moves to the next one only when a query fails. An answer
