@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="InvalidSite" xml:space="preserve">
+    <value>'{0}' non è un indirizzo di sito valido: indica un nome di dominio come example.com.</value>
+  </data>
+  <data name="SiteUnreachable" xml:space="preserve">
+    <value>Il sito {0} non è raggiungibile: {1}</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Errore imprevisto: {0}</value>
+  </data>
+  <data name="NoAnswerInTime" xml:space="preserve">
+    <value>{0}: nessuna risposta entro {1} secondi</value>
+  </data>
+  <data name="VisitOverBudget" xml:space="preserve">
+    <value>La visita a {0} non si è conclusa entro {1} secondi.</value>
+  </data>
+  <data name="TooManyRedirects" xml:space="preserve">
+    <value>Il sito reindirizza più di {0} volte: {1}</value>
+  </data>
+  <data name="PageStatus" xml:space="preserve">
+    <value>La pagina iniziale {0} ha risposto HTTP {1}: intestazioni e cookie non sono stati valutati.</value>
+  </data>
+  <data name="FetchFailed" xml:space="preserve">
+    <value>La richiesta di {0} non è riuscita: {1}</value>
+  </data>
+  <data name="SkippedNoHttps" xml:space="preserve">
+    <value>Saltato: il sito non risponde in HTTPS (vedi WEB-HTTPS-001).</value>
+  </data>
+  <data name="SkippedBackToHttp" xml:space="preserve">
+    <value>Saltato: il sito in HTTPS rimanda i visitatori a HTTP (vedi WEB-HTTPS-001).</value>
+  </data>
+  <data name="SkippedLeftSite" xml:space="preserve">
+    <value>Saltato: il sito rimanda a {0}, fuori dal dominio dichiarato. Esegui il controllo su quel dominio.</value>
+  </data>
+  <data name="SkippedNoCookies" xml:space="preserve">
+    <value>Saltato: il sito non imposta cookie alla prima visita.</value>
+  </data>
+  <data name="EvidenceNoHeader" xml:space="preserve">
+    <value>La risposta di {0} non ha l'intestazione {1}.</value>
+  </data>
+  <data name="EvidenceHttpStatus" xml:space="preserve">
+    <value>{0} ha risposto HTTP {1} senza reindirizzare a HTTPS.</value>
+  </data>
+  <data name="EvidenceCertValidity" xml:space="preserve">
+    <value>{0}: valido dal {1} al {2}.</value>
+  </data>
+  <data name="EvidenceCertNames" xml:space="preserve">
+    <value>{0}: il certificato è rilasciato per {1}.</value>
+  </data>
+  <data name="EvidenceNoSecurityTxt" xml:space="preserve">
+    <value>Nessun file security.txt su {0} (HTTP {1}).</value>
+  </data>
+  <data name="HttpsAvailableCheck" xml:space="preserve">
+    <value>Sito raggiungibile in HTTPS</value>
+  </data>
+  <data name="HttpRedirectCheck" xml:space="preserve">
+    <value>Reindirizzamento da HTTP a HTTPS</value>
+  </data>
+  <data name="CertExpiryCheck" xml:space="preserve">
+    <value>Scadenza del certificato</value>
+  </data>
+  <data name="CertChainCheck" xml:space="preserve">
+    <value>Catena del certificato</value>
+  </data>
+  <data name="CertNameCheck" xml:space="preserve">
+    <value>Nome nel certificato</value>
+  </data>
+  <data name="HstsCheck" xml:space="preserve">
+    <value>HSTS (sempre HTTPS)</value>
+  </data>
+  <data name="CspCheck" xml:space="preserve">
+    <value>Intestazione Content-Security-Policy</value>
+  </data>
+  <data name="FrameCheck" xml:space="preserve">
+    <value>Protezione dal clickjacking</value>
+  </data>
+  <data name="NosniffCheck" xml:space="preserve">
+    <value>Intestazione X-Content-Type-Options</value>
+  </data>
+  <data name="ReferrerCheck" xml:space="preserve">
+    <value>Intestazione Referrer-Policy</value>
+  </data>
+  <data name="PermissionsCheck" xml:space="preserve">
+    <value>Intestazione Permissions-Policy</value>
+  </data>
+  <data name="CookieSecureCheck" xml:space="preserve">
+    <value>Cookie senza Secure</value>
+  </data>
+  <data name="CookieHttpOnlyCheck" xml:space="preserve">
+    <value>Cookie senza HttpOnly</value>
+  </data>
+  <data name="CookieSameSiteCheck" xml:space="preserve">
+    <value>Cookie senza SameSite</value>
+  </data>
+  <data name="SecurityTxtCheck" xml:space="preserve">
+    <value>File security.txt</value>
+  </data>
+  <data name="HttpsMissingTitle" xml:space="preserve">
+    <value>Il sito non risponde in HTTPS</value>
+  </data>
+  <data name="HttpsMissingRisk" xml:space="preserve">
+    <value>Tutto ciò che i visitatori leggono e scrivono viaggia in chiaro: chiunque sia sulla stessa rete può leggerlo o modificare la pagina lungo il percorso.</value>
+  </data>
+  <data name="HttpsMissingFix" xml:space="preserve">
+    <value>Attiva HTTPS con un certificato presso il tuo fornitore di hosting (quasi tutti offrono quello gratuito di Let's Encrypt), poi reindirizza HTTP verso HTTPS.</value>
+  </data>
+  <data name="HttpsBackToHttpTitle" xml:space="preserve">
+    <value>Il sito in HTTPS rimanda i visitatori a HTTP</value>
+  </data>
+  <data name="HttpsBackToHttpRisk" xml:space="preserve">
+    <value>Chi chiede il sito protetto finisce su quello in chiaro, dove la pagina può essere letta e modificata lungo il percorso.</value>
+  </data>
+  <data name="HttpsBackToHttpFix" xml:space="preserve">
+    <value>Togli il reindirizzamento da HTTPS a HTTP (configurazione del server web o indirizzo del sito nelle impostazioni del CMS) e reindirizza invece HTTP verso HTTPS.</value>
+  </data>
+  <data name="HttpNoRedirectTitle" xml:space="preserve">
+    <value>Il sito è servito anche in HTTP, senza reindirizzare a HTTPS</value>
+  </data>
+  <data name="HttpNoRedirectRisk" xml:space="preserve">
+    <value>Chi arriva da un vecchio collegamento o scrive l'indirizzo senza https resta sulla pagina in chiaro, che può essere letta e modificata lungo il percorso.</value>
+  </data>
+  <data name="HttpRedirectFix" xml:space="preserve">
+    <value>Configura il server web perché risponda a ogni richiesta HTTP con un reindirizzamento permanente (301) allo stesso indirizzo in HTTPS, come primo passaggio.</value>
+  </data>
+  <data name="HttpClearHopTitle" xml:space="preserve">
+    <value>Il reindirizzamento a HTTPS passa da un altro indirizzo in chiaro</value>
+  </data>
+  <data name="HttpClearHopRisk" xml:space="preserve">
+    <value>Ogni passaggio in chiaro è un punto in cui il visitatore può essere deviato su un sito falso prima che inizi la connessione protetta.</value>
+  </data>
+  <data name="CertNotYetValidTitle" xml:space="preserve">
+    <value>Certificato non ancora valido ({0})</value>
+  </data>
+  <data name="CertExpiredTitle" xml:space="preserve">
+    <value>Certificato scaduto ({0})</value>
+  </data>
+  <data name="CertExpiredRisk" xml:space="preserve">
+    <value>I browser mostrano un avviso a tutta pagina al posto del sito, e chi prosegue comunque non può più distinguere il sito vero da uno falso.</value>
+  </data>
+  <data name="CertExpiringTitle" xml:space="preserve">
+    <value>Certificato in scadenza fra {1} giorni ({0})</value>
+  </data>
+  <data name="CertExpiringRisk" xml:space="preserve">
+    <value>Quando il certificato scade, i browser mostrano un avviso a tutta pagina al posto del sito.</value>
+  </data>
+  <data name="CertRenewFix" xml:space="preserve">
+    <value>Rinnova il certificato e verifica che il rinnovo automatico funzioni (pannello dell'hosting, oppure l'attività certbot/ACME sul server).</value>
+  </data>
+  <data name="CertIncompleteTitle" xml:space="preserve">
+    <value>Catena del certificato incompleta ({0})</value>
+  </data>
+  <data name="CertIncompleteRisk" xml:space="preserve">
+    <value>Il server non invia il certificato intermedio della sua autorità: alcuni browser e molti programmi non riescono a verificare il sito e lo rifiutano.</value>
+  </data>
+  <data name="CertIncompleteFix" xml:space="preserve">
+    <value>Installa sul server la catena completa fornita dall'autorità (il file «fullchain»), non il solo certificato. Se l'autorità è privata, questo risultato è atteso.</value>
+  </data>
+  <data name="CertUntrustedTitle" xml:space="preserve">
+    <value>Certificato non rilasciato da un'autorità riconosciuta ({0})</value>
+  </data>
+  <data name="CertUntrustedRisk" xml:space="preserve">
+    <value>I browser mostrano un avviso a tutta pagina: i visitatori non possono distinguere il sito vero da uno falso, e imparano a ignorare l'avviso.</value>
+  </data>
+  <data name="CertUntrustedFix" xml:space="preserve">
+    <value>Sostituisci il certificato con uno rilasciato da un'autorità pubblica (per esempio quello gratuito di Let's Encrypt).</value>
+  </data>
+  <data name="CertNameTitle" xml:space="preserve">
+    <value>Il certificato non copre il nome del sito ({0})</value>
+  </data>
+  <data name="CertNameRisk" xml:space="preserve">
+    <value>I browser mostrano un avviso a tutta pagina, perché il certificato appartiene a un altro nome: il visitatore non può sapere di chi è il sito.</value>
+  </data>
+  <data name="CertNameFix" xml:space="preserve">
+    <value>Fai rilasciare un certificato che elenchi tutti i nomi del sito, con e senza www.</value>
+  </data>
+  <data name="HstsMissingTitle" xml:space="preserve">
+    <value>HSTS non attivo</value>
+  </data>
+  <data name="HstsInvalidTitle" xml:space="preserve">
+    <value>Intestazione HSTS non valida (manca max-age)</value>
+  </data>
+  <data name="HstsDisabledTitle" xml:space="preserve">
+    <value>HSTS disattivato (max-age=0)</value>
+  </data>
+  <data name="HstsMissingRisk" xml:space="preserve">
+    <value>Senza HSTS il browser può ancora provare prima il sito in chiaro; su una rete non fidata quella prima richiesta può essere intercettata e il visitatore trattenuto su una copia falsa.</value>
+  </data>
+  <data name="HstsFix" xml:space="preserve">
+    <value>Invia l'intestazione Strict-Transport-Security: max-age=31536000; includeSubDomains in ogni risposta HTTPS, dopo aver verificato che tutto il sito funzioni in HTTPS.</value>
+  </data>
+  <data name="HstsShortTitle" xml:space="preserve">
+    <value>HSTS con durata breve (meno di 6 mesi)</value>
+  </data>
+  <data name="HstsShortRisk" xml:space="preserve">
+    <value>La protezione decade per chi non torna sul sito entro quel tempo, e alla visita successiva è di nuovo esposto.</value>
+  </data>
+  <data name="CspMissingTitle" xml:space="preserve">
+    <value>Content-Security-Policy assente</value>
+  </data>
+  <data name="CspMissingRisk" xml:space="preserve">
+    <value>Se un malintenzionato riesce a inserire uno script in una pagina (un commento, un campo di un modulo, un plugin compromesso), il browser lo esegue senza alcun limite.</value>
+  </data>
+  <data name="CspMissingFix" xml:space="preserve">
+    <value>Aggiungi un'intestazione Content-Security-Policy che elenchi da dove possono arrivare gli script; parti da Content-Security-Policy-Report-Only per vedere che cosa bloccherebbe, poi rendila effettiva.</value>
+  </data>
+  <data name="CspReportOnlyTitle" xml:space="preserve">
+    <value>Content-Security-Policy in sola segnalazione</value>
+  </data>
+  <data name="CspReportOnlyRisk" xml:space="preserve">
+    <value>Il criterio si limita a segnalare: nulla viene bloccato, quindi uno script inserito viene comunque eseguito.</value>
+  </data>
+  <data name="CspReportOnlyFix" xml:space="preserve">
+    <value>Quando le segnalazioni sono pulite, invia lo stesso criterio nell'intestazione Content-Security-Policy.</value>
+  </data>
+  <data name="CspWeakTitle" xml:space="preserve">
+    <value>Content-Security-Policy che non limita gli script</value>
+  </data>
+  <data name="CspWeakRisk" xml:space="preserve">
+    <value>Il criterio ammette script in linea, eval o script da qualunque sito, quindi non ferma uno script inserito da un malintenzionato.</value>
+  </data>
+  <data name="CspWeakFix" xml:space="preserve">
+    <value>Imposta script-src senza 'unsafe-inline', 'unsafe-eval' e caratteri jolly: elenca i siti che usi, oppure usa i nonce con 'strict-dynamic'.</value>
+  </data>
+  <data name="FrameMissingTitle" xml:space="preserve">
+    <value>Il sito può essere mostrato dentro altri siti (nessuna protezione dal clickjacking)</value>
+  </data>
+  <data name="FrameMissingRisk" xml:space="preserve">
+    <value>Un altro sito può mostrare il tuo in un riquadro invisibile e far premere i suoi pulsanti ai visitatori a loro insaputa.</value>
+  </data>
+  <data name="FrameFix" xml:space="preserve">
+    <value>Invia Content-Security-Policy: frame-ancestors 'self' (oppure 'none'), e X-Frame-Options: SAMEORIGIN per i browser più vecchi.</value>
+  </data>
+  <data name="FrameInvalidTitle" xml:space="preserve">
+    <value>X-Frame-Options con un valore che i browser ignorano</value>
+  </data>
+  <data name="FrameInvalidRisk" xml:space="preserve">
+    <value>Solo DENY e SAMEORIGIN vengono rispettati: con qualunque altro valore il sito può comunque essere mostrato dentro altri siti.</value>
+  </data>
+  <data name="NosniffMissingTitle" xml:space="preserve">
+    <value>X-Content-Type-Options assente</value>
+  </data>
+  <data name="NosniffInvalidTitle" xml:space="preserve">
+    <value>X-Content-Type-Options diverso da nosniff</value>
+  </data>
+  <data name="NosniffRisk" xml:space="preserve">
+    <value>Il browser può indovinare il tipo di un file dal contenuto, ed eseguire come script un file caricato come immagine o documento.</value>
+  </data>
+  <data name="NosniffFix" xml:space="preserve">
+    <value>Invia l'intestazione X-Content-Type-Options: nosniff in ogni risposta.</value>
+  </data>
+  <data name="ReferrerMissingTitle" xml:space="preserve">
+    <value>Referrer-Policy assente</value>
+  </data>
+  <data name="ReferrerMissingRisk" xml:space="preserve">
+    <value>Che cosa gli altri siti vengono a sapere della pagina di provenienza è lasciato al comportamento predefinito di ogni browser; quelli vecchi inviano l'indirizzo completo, che può contenere dati personali.</value>
+  </data>
+  <data name="ReferrerFix" xml:space="preserve">
+    <value>Invia l'intestazione Referrer-Policy: strict-origin-when-cross-origin (oppure no-referrer).</value>
+  </data>
+  <data name="ReferrerWeakTitle" xml:space="preserve">
+    <value>Referrer-Policy che invia l'indirizzo completo agli altri siti</value>
+  </data>
+  <data name="ReferrerWeakRisk" xml:space="preserve">
+    <value>Ogni sito esterno collegato o caricato dalla pagina riceve l'indirizzo completo su cui si trovava il visitatore, compresi gli eventuali dati personali che contiene.</value>
+  </data>
+  <data name="PermissionsMissingTitle" xml:space="preserve">
+    <value>Permissions-Policy assente</value>
+  </data>
+  <data name="PermissionsMissingRisk" xml:space="preserve">
+    <value>Gli script e i riquadri di terze parti nella pagina possono chiedere fotocamera, microfono o posizione come se fossero il sito stesso.</value>
+  </data>
+  <data name="PermissionsFix" xml:space="preserve">
+    <value>Invia un'intestazione Permissions-Policy che spenga ciò che il sito non usa, per esempio camera=(), microphone=(), geolocation=().</value>
+  </data>
+  <data name="CookieNoSecureTitle" xml:space="preserve">
+    <value>Cookie senza Secure ({0})</value>
+  </data>
+  <data name="CookieNoSecureRisk" xml:space="preserve">
+    <value>Il browser invia il cookie anche sulle connessioni in chiaro, dove chiunque sia sulla stessa rete può leggerlo.</value>
+  </data>
+  <data name="CookieNoSecureFix" xml:space="preserve">
+    <value>Aggiungi l'attributo Secure al cookie (nell'applicazione, nel CMS o nelle impostazioni del server web).</value>
+  </data>
+  <data name="CookieNoHttpOnlyTitle" xml:space="preserve">
+    <value>Cookie senza HttpOnly ({0})</value>
+  </data>
+  <data name="CookieNoHttpOnlyRisk" xml:space="preserve">
+    <value>Qualunque script della pagina può leggere il cookie: uno script inserito da un malintenzionato può rubarlo e, se è un cookie di sessione, impadronirsi dell'account.</value>
+  </data>
+  <data name="CookieNoHttpOnlyFix" xml:space="preserve">
+    <value>Aggiungi l'attributo HttpOnly, a meno che gli script del sito debbano davvero leggere questo cookie.</value>
+  </data>
+  <data name="CookieSameSiteNoneTitle" xml:space="preserve">
+    <value>Cookie con SameSite=None ma senza Secure ({0})</value>
+  </data>
+  <data name="CookieSameSiteNoneRisk" xml:space="preserve">
+    <value>Il cookie è pensato per essere inviato anche da altri siti, e viaggia pure in chiaro; i browser attuali lo rifiutano, quindi ciò che ne dipende può non funzionare.</value>
+  </data>
+  <data name="CookieSameSiteNoneFix" xml:space="preserve">
+    <value>Aggiungi Secure, oppure usa SameSite=Lax se il cookie non serve da altri siti.</value>
+  </data>
+  <data name="CookieNoSameSiteTitle" xml:space="preserve">
+    <value>Cookie senza SameSite ({0})</value>
+  </data>
+  <data name="CookieNoSameSiteRisk" xml:space="preserve">
+    <value>Che il cookie sia inviato o no con le richieste avviate da altri siti dipende dal comportamento predefinito di ogni browser; dove viene inviato, un altro sito può agire a nome del visitatore.</value>
+  </data>
+  <data name="CookieNoSameSiteFix" xml:space="preserve">
+    <value>Aggiungi SameSite=Lax (oppure Strict) al cookie.</value>
+  </data>
+  <data name="SecurityTxtMissingTitle" xml:space="preserve">
+    <value>File security.txt assente</value>
+  </data>
+  <data name="SecurityTxtMissingRisk" xml:space="preserve">
+    <value>Chi trova un problema di sicurezza nel sito non sa a chi dirlo, e la segnalazione può non arrivarti mai.</value>
+  </data>
+  <data name="SecurityTxtMissingFix" xml:space="preserve">
+    <value>Pubblica /.well-known/security.txt come testo semplice con almeno Contact: mailto:&lt;indirizzo&gt; ed Expires: &lt;data entro un anno&gt;.</value>
+  </data>
+  <data name="SecurityTxtElsewhereTitle" xml:space="preserve">
+    <value>security.txt rimanda a un altro indirizzo, non seguito</value>
+  </data>
+  <data name="SecurityTxtElsewhereFix" xml:space="preserve">
+    <value>Apri l'indirizzo indicato nella prova e verifica che il file abbia Contact e un Expires futuro; il reindirizzamento a un altro dominio è ammesso.</value>
+  </data>
+  <data name="SecurityTxtNoContactTitle" xml:space="preserve">
+    <value>security.txt senza contatto</value>
+  </data>
+  <data name="SecurityTxtNoContactRisk" xml:space="preserve">
+    <value>Il file esiste ma non dice a chi scrivere, quindi non serve a chi vuole segnalare un problema.</value>
+  </data>
+  <data name="SecurityTxtNoContactFix" xml:space="preserve">
+    <value>Aggiungi una riga Contact: mailto:&lt;indirizzo&gt; (oppure l'indirizzo di un modulo web).</value>
+  </data>
+  <data name="SecurityTxtNoExpiresTitle" xml:space="preserve">
+    <value>security.txt senza una data di scadenza valida</value>
+  </data>
+  <data name="SecurityTxtExpiredTitle" xml:space="preserve">
+    <value>security.txt scaduto</value>
+  </data>
+  <data name="SecurityTxtExpiresRisk" xml:space="preserve">
+    <value>Senza una data di scadenza attuale, chi legge il file non può fidarsi che il contatto sia ancora quello giusto.</value>
+  </data>
+  <data name="SecurityTxtExpiresFix" xml:space="preserve">
+    <value>Imposta Expires a una data entro un anno, nella forma 2027-12-31T23:59:59Z, e rinnovala prima che passi.</value>
+  </data>
+</root>
