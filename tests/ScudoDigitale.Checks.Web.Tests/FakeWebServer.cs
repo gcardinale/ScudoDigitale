@@ -317,6 +317,8 @@ internal sealed class TestSite : IAsyncDisposable
     {
         RequestTimeout = timeout ?? TimeSpan.FromSeconds(10),
         TrustedRoots = trustTestRoot ? [pki.Root] : [],
+        Proxy = new NoProxy(),
+        SystemAddresses = (_, _) => Task.FromException<IPAddress[]>(new System.Net.Sockets.SocketException((int)System.Net.Sockets.SocketError.HostNotFound)),
         Route = endpoint => new IPEndPoint(
             IPAddress.Loopback,
             endpoint.Port != 443 ? server.HttpPort : HttpsListens ? server.HttpsPort : closedPort),
@@ -363,4 +365,14 @@ internal sealed class TestSite : IAsyncDisposable
             _ => FakeResponse.NotFound,
         };
     }
+}
+
+/// <summary>No proxy at all: the proxy settings of the computer running the tests are never read.</summary>
+internal sealed class NoProxy : IWebProxy
+{
+    public ICredentials? Credentials { get; set; }
+
+    public Uri? GetProxy(Uri destination) => null;
+
+    public bool IsBypassed(Uri host) => true;
 }

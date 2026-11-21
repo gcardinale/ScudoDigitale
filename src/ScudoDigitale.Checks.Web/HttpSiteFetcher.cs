@@ -32,7 +32,8 @@ namespace ScudoDigitale.Checks.Web;
 /// connection, without downloading missing certificates and without asking the authority whether it
 /// was revoked: both would be connections to servers that were not declared. The address of the site
 /// is asked to the resolver of ADR-006 (public resolvers over HTTPS, then the DNS of this computer),
-/// because the DNS of a home router loses queries; through a proxy, the proxy resolves the name.
+/// because the DNS of a home router loses queries, and then to the operating system, which also
+/// knows the names of the local network; through a proxy, the proxy resolves the name.
 /// </summary>
 internal sealed class HttpSiteFetcher : ISiteFetcher
 {
@@ -47,6 +48,7 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
 
     private readonly WebCheckOptions options;
     private readonly IDnsResolver? resolver;
+    private readonly IWebProxy proxy;
     private readonly ConcurrentDictionary<string, Lazy<Task<DnsAnswer<IPAddress>>>> addresses = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Creates the fetcher.</summary>
@@ -58,6 +60,7 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         // With the DNS of the computer the name is left to the operating system, as for any
         // connection: it has a cache and asks every configured server, a router included.
         resolver = options.Resolver ?? (options.DnsSource == DnsSource.System ? null : DnsResolvers.Create());
+        proxy = options.Proxy ?? HttpClient.DefaultProxy;
     }
 
     /// <summary>
@@ -76,13 +79,6 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         using var http = new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan };
         http.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
         http.DefaultRequestHeaders.Accept.ParseAdd("text/html,text/plain;q=0.9,*/*;q=0.8");
-
-        // The address is asked once and before the requests, so a resolver that is slow to answer
-        // does not eat the time of a connection. Through a proxy, the proxy resolves the name.
-        if (resolver is not null && options.Route(new DnsEndPoint(host, 443)) is DnsEndPoint && WebChecks.ProxyFor(host, HttpClient.DefaultProxy) is null)
-        {
-            await LookupAsync(host, cancellationToken).ConfigureAwait(false);
-        }
 
         // Two connections at once, as a browser would open.
         var plain = FollowAsync(http, host, new Uri($"http://{host}/"), null, cancellationToken);
@@ -124,7 +120,7 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
             policy.CustomTrustStore.AddRange(roots);
         }
 
-        return new SocketsHttpHandler
+        var handler = new SocketsHttpHandler
         {
             AllowAutoRedirect = false,
             UseCookies = false,
@@ -132,7 +128,7 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
             ConnectTimeout = options.RequestTimeout,
             ConnectCallback = (context, cancellationToken) => OpenAsync(
                 options.Route(context.DnsEndPoint),
-                IsDirect(context.InitialRequestMessage.RequestUri, context.DnsEndPoint),
+                IsDirect(context.InitialRequestMessage, context.DnsEndPoint),
                 cancellationToken),
             SslOptions = new SslClientAuthenticationOptions
             {
@@ -144,6 +140,12 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
                     Record(certificates, ((SslStream)sender).TargetHostName, certificate, chain, errors),
             },
         };
+        if (options.Proxy is { } replacement)
+        {
+            handler.Proxy = replacement;
+        }
+
+        return handler;
     }
 
     /// <summary>
@@ -191,6 +193,7 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         {
             while (true)
             {
+                await ResolveAsync(url, cancellationToken).ConfigureAwait(false);
                 var hop = await GetAsync(http, url, bodyType, cancellationToken).ConfigureAwait(false);
                 hops.Add(hop);
                 if (Redirect(hop) is not { } next)
@@ -291,12 +294,15 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
     /// <summary>
     /// Whether a connection goes straight to the host of the request. When it does not, it goes to a
     /// proxy: its name belongs to the network of this computer and only the system can resolve it.
+    /// The tunnel towards an HTTPS site is opened with a CONNECT request addressed to the proxy
+    /// itself, which would otherwise look like a direct connection.
     /// </summary>
-    /// <param name="requested">The address of the request the connection is opened for.</param>
+    /// <param name="request">The request the connection is opened for.</param>
     /// <param name="endpoint">Where the connection is about to go.</param>
     /// <returns><see langword="true"/> for a direct connection.</returns>
-    internal static bool IsDirect(Uri? requested, DnsEndPoint endpoint) =>
-        requested is not null
+    internal static bool IsDirect(HttpRequestMessage request, DnsEndPoint endpoint) =>
+        request.Method != HttpMethod.Connect
+        && request.RequestUri is { } requested
         && requested.Port == endpoint.Port
         && string.Equals(requested.IdnHost, endpoint.Host, StringComparison.OrdinalIgnoreCase);
 
@@ -338,9 +344,10 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
                     new IPEndPoint(address, named.Port),
                     cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            catch (Exception ex)
             {
                 // The next address may work: a computer without IPv6 cannot use the IPv6 ones.
+                // After a cancellation every other attempt ends at once in the same way.
                 last = ex;
             }
         }
@@ -348,19 +355,68 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         throw last!;
     }
 
-    /// <summary>The addresses of a name, asked once for the life of the fetcher (one run).</summary>
-    private async Task<DnsAnswer<IPAddress>> LookupAsync(string name, CancellationToken cancellationToken)
+    /// <summary>
+    /// The addresses of a name, asked once for the life of the fetcher (one run). The question
+    /// belongs to the fetcher, not to who asks first: whoever stops waiting leaves it running for
+    /// the others.
+    /// </summary>
+    /// <param name="name">The host name.</param>
+    /// <param name="cancellationToken">Stops waiting, not the question.</param>
+    /// <returns>The answer.</returns>
+    internal async Task<DnsAnswer<IPAddress>> LookupAsync(string name, CancellationToken cancellationToken)
     {
-        var lookup = addresses.GetOrAdd(name, n => new Lazy<Task<DnsAnswer<IPAddress>>>(() => resolver!.QueryAddressesAsync(n, cancellationToken)));
+        var lookup = addresses.GetOrAdd(name, n => new Lazy<Task<DnsAnswer<IPAddress>>>(() => AskAsync(n)));
         try
         {
             return await lookup.Value.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch
+        catch when (lookup.Value.IsCompleted)
         {
-            // A question that was interrupted is asked again by whoever needs it next.
+            // A question that broke is asked again by whoever needs it next.
             addresses.TryRemove(KeyValuePair.Create(name, lookup));
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Asks the address of the host of a request before the request, outside its deadline: a
+    /// resolver that is slow to answer must not make a site that works look unreachable. Through a
+    /// proxy, the proxy resolves the name.
+    /// </summary>
+    private async Task ResolveAsync(Uri url, CancellationToken cancellationToken)
+    {
+        if (resolver is not null
+            && options.Route(new DnsEndPoint(url.IdnHost, url.Port)) is DnsEndPoint
+            && WebChecks.ProxyFor(url.IdnHost, proxy) is null)
+        {
+            await LookupAsync(url.IdnHost, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// The resolver of the checks first; when it has no address, the operating system, which also
+    /// knows the names of the local network and of the hosts file. Each of them has its own time
+    /// limits, so the question needs no token.
+    /// </summary>
+    private async Task<DnsAnswer<IPAddress>> AskAsync(string name)
+    {
+        var answer = await resolver!.QueryAddressesAsync(name, CancellationToken.None).ConfigureAwait(false);
+        if (answer.Status == DnsStatus.Ok)
+        {
+            return answer;
+        }
+
+        try
+        {
+            var known = await options.SystemAddresses(name, CancellationToken.None).ConfigureAwait(false);
+            return known.Length > 0
+                ? DnsAnswer<IPAddress>.Found(known.OrderBy(a => a.AddressFamily == AddressFamily.InterNetworkV6))
+                : answer;
+        }
+        catch (Exception)
+        {
+            // The system does not know the name either: what the resolver said stands.
+            return answer;
         }
     }
 

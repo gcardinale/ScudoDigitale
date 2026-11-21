@@ -65,9 +65,10 @@ internal sealed class DohResolver : IDnsResolver
     /// <inheritdoc />
     public async Task<DnsAnswer<IPAddress>> QueryAddressesAsync(string name, CancellationToken cancellationToken)
     {
-        var v4 = await QueryAsync(name, TypeA, ParseAddress, cancellationToken).ConfigureAwait(false);
-        var v6 = await QueryAsync(name, TypeAaaa, ParseAddress, cancellationToken).ConfigureAwait(false);
-        return DnsClientResolver.Combine(v4, v6);
+        // Both questions at once: a service that does not answer costs one timeout, not two.
+        var v4 = QueryAsync(name, TypeA, ParseAddress, cancellationToken);
+        var v6 = QueryAsync(name, TypeAaaa, ParseAddress, cancellationToken);
+        return DnsClientResolver.Combine(await v4.ConfigureAwait(false), await v6.ConfigureAwait(false));
     }
 
     /// <summary>

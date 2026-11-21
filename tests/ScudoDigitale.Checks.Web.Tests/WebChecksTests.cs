@@ -141,9 +141,21 @@ public sealed class WebChecksTests
     }
 
     [Fact]
-    public void SystemProxyFor_WhenCalled_ShouldAnswerLikeTheConfigurationOfThisComputer()
+    public void SystemProxyFor_WhenCalled_ShouldReadTheProxyOfTheProcess()
     {
-        Assert.Equal(WebChecks.ProxyFor("example.com", HttpClient.DefaultProxy), WebChecks.SystemProxyFor("example.com"));
+        // A known configuration instead of that of the computer running the tests, whose automatic
+        // proxy discovery would be real network traffic.
+        var real = HttpClient.DefaultProxy;
+        try
+        {
+            HttpClient.DefaultProxy = new FakeProxy(_ => new Uri("http://proxy.lan:3128/"));
+
+            Assert.Equal("proxy.lan:3128", WebChecks.SystemProxyFor("example.com"));
+        }
+        finally
+        {
+            HttpClient.DefaultProxy = real;
+        }
     }
 
     [Theory]

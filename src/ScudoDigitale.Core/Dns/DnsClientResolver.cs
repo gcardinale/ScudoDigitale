@@ -74,9 +74,10 @@ internal sealed class DnsClientResolver : IDnsResolver
     /// <inheritdoc />
     public async Task<DnsAnswer<IPAddress>> QueryAddressesAsync(string name, CancellationToken cancellationToken)
     {
-        var v4 = await QueryAsync(name, QueryType.A, r => r.Answers.ARecords().Select(a => a.Address), cancellationToken).ConfigureAwait(false);
-        var v6 = await QueryAsync(name, QueryType.AAAA, r => r.Answers.AaaaRecords().Select(a => a.Address), cancellationToken).ConfigureAwait(false);
-        return Combine(v4, v6);
+        // Both questions at once: a server that does not answer costs one timeout, not two.
+        var v4 = QueryAsync(name, QueryType.A, r => r.Answers.ARecords().Select(a => a.Address), cancellationToken);
+        var v6 = QueryAsync(name, QueryType.AAAA, r => r.Answers.AaaaRecords().Select(a => a.Address), cancellationToken);
+        return Combine(await v4.ConfigureAwait(false), await v6.ConfigureAwait(false));
     }
 
     /// <summary>

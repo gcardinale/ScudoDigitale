@@ -3,7 +3,7 @@
 - **Content:** contracts, engine, prioritization, Attribution
 - **Release:** v0.0
 - **Status:** 🟢 v0.0 done (15/11/2026), review fixes applied; shared DNS resolver added on 21/11/2026
-- **Test coverage:** 99.8% lines (538/539), 97.8% branches (178/182) — 237 tests
+- **Test coverage:** 99.8% lines (538/539), 97.8% branches (178/182) — 240 tests
 
 ## Done
 - Contracts: `ICheck`, `CheckContext`, `CheckResult` (`Executed` / `Skipped` / `Failed`), `Finding`, `PrioritizedFinding`, `Severity`, `Confidence`, `CheckArea`, `ScopeRequirement`, `Target` / `TargetKind`, `Profile` / `ProfileKind`, `ScopeDeclaration` / `OperatorRole`, `IScopeGuard`.

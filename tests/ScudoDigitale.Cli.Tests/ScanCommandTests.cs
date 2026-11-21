@@ -381,7 +381,9 @@ public sealed class ScanCommandTests
 
         Assert.Equal(11, services.CreateEmailChecks(new EmailCheckOptions()).Count);
         Assert.Equal(15, services.CreateWebChecks(new WebCheckOptions()).Count);
-        Assert.Equal(WebChecks.SystemProxyFor("example.com"), services.WebProxyFor("example.com"));
+
+        // Compared, not called: reading the proxy of this computer could start its automatic discovery.
+        Assert.Equal(WebChecks.SystemProxyFor, services.WebProxyFor);
         Assert.InRange(services.Now(), DateTimeOffset.Now.AddMinutes(-1), DateTimeOffset.Now.AddMinutes(1));
         Assert.Equal(Environment.UserName, services.DefaultOperator());
     }
