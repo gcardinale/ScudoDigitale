@@ -60,7 +60,7 @@ internal static class SecurityTxtChecks
         {
             return WebFinding.Executed(WebFinding.Create(
                 FileId, Strings.SecurityTxtMissingTitle, Severity.Info, Confidence.Certain, visit.Host,
-                WebFinding.Format(Strings.EvidenceNoSecurityTxt, file.Url, file.Status),
+                WebFinding.Format(Strings.EvidenceNoSecurityTxt, SafeUrl.Show(file.Url), file.Status),
                 Strings.SecurityTxtMissingRisk, Strings.SecurityTxtMissingFix, Rfc + " §3"));
         }
 
@@ -70,7 +70,7 @@ internal static class SecurityTxtChecks
         {
             findings.Add(WebFinding.Create(
                 FileId, Strings.SecurityTxtNoContactTitle, Severity.Low, Confidence.Certain, visit.Host,
-                file.Url.AbsoluteUri, Strings.SecurityTxtNoContactRisk, Strings.SecurityTxtNoContactFix, Rfc + " §2.5.3"));
+                SafeUrl.Show(file.Url), Strings.SecurityTxtNoContactRisk, Strings.SecurityTxtNoContactFix, Rfc + " §2.5.3"));
         }
 
         var expires = fields.FirstOrDefault(f => f.Name == "expires").Value;
@@ -78,13 +78,13 @@ internal static class SecurityTxtChecks
         {
             findings.Add(WebFinding.Create(
                 FileId, Strings.SecurityTxtNoExpiresTitle, Severity.Low, Confidence.Certain, visit.Host,
-                file.Url.AbsoluteUri, Strings.SecurityTxtExpiresRisk, Strings.SecurityTxtExpiresFix, Rfc + " §2.5.5"));
+                SafeUrl.Show(file.Url), Strings.SecurityTxtExpiresRisk, Strings.SecurityTxtExpiresFix, Rfc + " §2.5.5"));
         }
         else if (until < visit.VisitedAt)
         {
             findings.Add(WebFinding.Create(
                 FileId, Strings.SecurityTxtExpiredTitle, Severity.Low, Confidence.Certain, visit.Host,
-                $"{file.Url.AbsoluteUri} — Expires: {expires}", Strings.SecurityTxtExpiresRisk, Strings.SecurityTxtExpiresFix, Rfc + " §2.5.5"));
+                $"{SafeUrl.Show(file.Url)} — Expires: {expires}", Strings.SecurityTxtExpiresRisk, Strings.SecurityTxtExpiresFix, Rfc + " §2.5.5"));
         }
 
         return WebFinding.Executed(findings);

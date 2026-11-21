@@ -48,6 +48,15 @@ internal static class HeaderChecks
     private const string ReferrerHeader = "Referrer-Policy";
     private const string PermissionsHeader = "Permissions-Policy";
 
+    /// <summary>Old values of <c>meta name="referrer"</c> that browsers still map to a policy.</summary>
+    private static readonly Dictionary<string, string> LegacyReferrerValues = new(StringComparer.Ordinal)
+    {
+        ["never"] = "no-referrer",
+        ["default"] = "no-referrer-when-downgrade",
+        ["always"] = "unsafe-url",
+        ["origin-when-crossorigin"] = "origin-when-cross-origin",
+    };
+
     private static readonly string[] ReferrerPolicies =
     [
         "no-referrer", "no-referrer-when-downgrade", "same-origin", "origin", "strict-origin",
@@ -119,8 +128,10 @@ internal static class HeaderChecks
 
     private static Finding? Frame(string host, Hop page)
     {
-        // frame-ancestors is ignored in a meta element: only the header counts.
-        if (ContentSecurityPolicy.Parse(page.Values(CspHeader)).Any(policy => policy.Has("frame-ancestors")))
+        // frame-ancestors is ignored in a meta element: only the header counts. A list that allows
+        // any site protects nothing.
+        if (ContentSecurityPolicy.Parse(page.Values(CspHeader))
+            .Any(policy => policy.Sources("frame-ancestors") is { } ancestors && !ancestors.Any(a => a is "*" or "http:" or "https:")))
         {
             return null;
         }
@@ -143,7 +154,10 @@ internal static class HeaderChecks
     private static Finding? Nosniff(string host, Hop page)
     {
         var values = page.Values(NosniffHeader).ToArray();
-        if (values.Any(v => v.Trim().Equals("nosniff", StringComparison.OrdinalIgnoreCase)))
+
+        // As browsers do (Fetch): of several values, joined by commas or sent twice, the first counts.
+        var first = values.SelectMany(v => v.Split(',')).Select(v => v.Trim()).FirstOrDefault();
+        if (string.Equals(first, "nosniff", StringComparison.OrdinalIgnoreCase))
         {
             return null;
         }
@@ -163,7 +177,9 @@ internal static class HeaderChecks
     private static Finding? Referrer(string host, Hop page)
     {
         const string Reference = "W3C Referrer Policy";
-        var values = page.Values(ReferrerHeader).Concat(HtmlMeta.Contents(page.Body, "name", "referrer")).ToArray();
+        var meta = HtmlMeta.Contents(page.Body, "name", "referrer")
+            .Select(content => LegacyReferrerValues.GetValueOrDefault(content.Trim().ToLowerInvariant(), content));
+        var values = page.Values(ReferrerHeader).Concat(meta).ToArray();
 
         // Of a list, browsers use the last policy they know.
         var policy = values.SelectMany(v => v.Split(',')).Select(v => v.Trim().ToLowerInvariant()).LastOrDefault(v => ReferrerPolicies.Contains(v));

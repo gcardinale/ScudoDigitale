@@ -122,13 +122,39 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
                 // The handshake is always accepted: a wrong certificate is a finding, and the headers
                 // of the page are still worth reading. Nothing confidential is ever sent.
                 RemoteCertificateValidationCallback = (sender, certificate, chain, errors) =>
-                {
-                    var host = ((SslStream)sender).TargetHostName;
-                    certificates.TryAdd(host, CertificateInspector.Describe(host, (X509Certificate2)certificate!, chain!, errors));
-                    return true;
-                },
+                    Record(certificates, ((SslStream)sender).TargetHostName, certificate, chain, errors),
             },
         };
+    }
+
+    /// <summary>
+    /// Records the certificate a host presented. A certificate that cannot be read is not recorded,
+    /// and the certificate checks say so: an exception here would break the handshake and make a site
+    /// that does answer over HTTPS look as if it did not.
+    /// </summary>
+    /// <param name="certificates">Where the certificate is recorded; the first one of a host is kept.</param>
+    /// <param name="host">The host that was contacted.</param>
+    /// <param name="certificate">Its certificate, if it sent one.</param>
+    /// <param name="chain">The chain built during the handshake.</param>
+    /// <param name="errors">The errors found during the handshake.</param>
+    /// <returns>Always <see langword="true"/>: the handshake goes on.</returns>
+    internal static bool Record(
+        ConcurrentDictionary<string, CertificateInfo> certificates,
+        string host,
+        X509Certificate? certificate,
+        X509Chain? chain,
+        SslPolicyErrors errors)
+    {
+        try
+        {
+            certificates.TryAdd(host, CertificateInspector.Describe(host, (X509Certificate2)certificate!, chain!, errors));
+        }
+        catch (Exception)
+        {
+            // Not recorded: see the summary.
+        }
+
+        return true;
     }
 
     /// <summary>Requests an address and follows its redirects while they stay inside the site and on the same scheme.</summary>
@@ -158,7 +184,8 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
                     return new Trail(hops, TrailEnd.ChangedScheme, next);
                 }
 
-                if (!HostName.IsInSite(site, next.Host))
+                // Another port of the same host is not the website: browsers refuse most of them too.
+                if (!next.IsDefaultPort || !HostName.IsInSite(site, next.IdnHost))
                 {
                     return new Trail(hops, TrailEnd.LeftSite, next);
                 }
@@ -177,11 +204,17 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         }
         catch (OperationCanceledException)
         {
-            return new Trail(hops, TrailEnd.Error, null, WebFinding.Format(Strings.NoAnswerInTime, url, options.RequestTimeout.TotalSeconds));
+            return new Trail(hops, TrailEnd.Error, null, WebFinding.Format(Strings.NoAnswerInTime, SafeUrl.Show(url), options.RequestTimeout.TotalSeconds));
         }
         catch (Exception ex)
         {
-            return new Trail(hops, TrailEnd.Error, null, $"{url}: {ex.GetBaseException().Message}");
+            var cause = ex.GetBaseException();
+            return new Trail(
+                hops,
+                TrailEnd.Error,
+                null,
+                $"{SafeUrl.Show(url)}: {cause.Message}",
+                cause is SocketException { SocketErrorCode: SocketError.ConnectionRefused });
         }
     }
 
@@ -219,10 +252,18 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
             && response.StatusCode == HttpStatusCode.OK
             && string.Equals(response.Content.Headers.ContentType?.MediaType, bodyType, StringComparison.OrdinalIgnoreCase))
         {
-            var stream = await response.Content.ReadAsStreamAsync(deadline.Token).ConfigureAwait(false);
-            var buffer = new byte[MaxBodyBytes];
-            var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false, deadline.Token).ConfigureAwait(false);
-            body = Encoding.UTF8.GetString(buffer, 0, read);
+            try
+            {
+                var stream = await response.Content.ReadAsStreamAsync(deadline.Token).ConfigureAwait(false);
+                var buffer = new byte[MaxBodyBytes];
+                var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false, deadline.Token).ConfigureAwait(false);
+                body = Encoding.UTF8.GetString(buffer, 0, read);
+            }
+            catch (Exception) when (!cancellationToken.IsCancellationRequested)
+            {
+                // The headers arrived: a page that is slow or breaks off is still an answer, and its
+                // headers are still evaluated. Only what the page itself would have added is lost.
+            }
         }
 
         return new Hop(url, (int)response.StatusCode, headers, body);

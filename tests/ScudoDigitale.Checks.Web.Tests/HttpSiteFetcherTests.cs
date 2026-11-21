@@ -226,6 +226,7 @@ public sealed class HttpSiteFetcherTests(TestPki pki) : IClassFixture<TestPki>
         var visit = await new HttpSiteFetcher(site.Options()).VisitAsync(Host, TestContext.Current.CancellationToken);
 
         Assert.Equal(TrailEnd.Error, visit.Https.End);
+        Assert.True(visit.Https.Refused);
         Assert.StartsWith("https://site.test/: ", visit.Https.Error, StringComparison.Ordinal);
         Assert.Empty(visit.Https.Hops);
         Assert.Null(visit.SecurityTxt);
@@ -243,6 +244,7 @@ public sealed class HttpSiteFetcherTests(TestPki pki) : IClassFixture<TestPki>
         var visit = await new HttpSiteFetcher(site.Options(TimeSpan.FromMilliseconds(500))).VisitAsync(Host, TestContext.Current.CancellationToken);
 
         Assert.Equal(TrailEnd.Error, visit.Http.End);
+        Assert.False(visit.Https.Refused);
         Assert.Equal("http://site.test/: no answer within 0.5 seconds", visit.Http.Error);
         Assert.Equal("https://site.test/: no answer within 0.5 seconds", visit.Https.Error);
     }
@@ -325,6 +327,52 @@ public sealed class HttpSiteFetcherTests(TestPki pki) : IClassFixture<TestPki>
         var visit = await new HttpSiteFetcher(site.Options()).VisitAsync(Host, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpSiteFetcher.MaxBodyBytes, visit.Https.Hops[^1].Body!.Length);
+    }
+
+    [Fact(Timeout = 30_000)]
+    public async Task VisitAsync_WhenThePageBreaksOffAfterItsHeaders_ShouldKeepTheAnswerAndItsHeaders()
+    {
+        // A slow or broken page is still an answer over HTTPS: saying "no HTTPS" would be false.
+        await using var site = new TestSite(pki)
+        {
+            Override = r => r.Secure && r.Path == "/"
+                ? new FakeResponse(200, "text/html", "<html>", ("Strict-Transport-Security", "max-age=31536000")) { Stalls = true }
+                : null,
+        };
+
+        var visit = await new HttpSiteFetcher(site.Options(TimeSpan.FromMilliseconds(800))).VisitAsync(Host, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TrailEnd.Response, visit.Https.End);
+        var page = Assert.Single(visit.Https.Hops);
+        Assert.Equal(200, page.Status);
+        Assert.Null(page.Body);
+        Assert.Equal("max-age=31536000", Assert.Single(page.Values("Strict-Transport-Security")));
+        Assert.NotNull(visit.SecurityTxt);
+    }
+
+    [Fact(Timeout = 30_000)]
+    public async Task VisitAsync_WhenRedirectPointsToAnotherPortOfTheSite_ShouldStopWithoutContactingIt()
+    {
+        var port = FakeWebServer.ClosedPort();
+        await using var site = new TestSite(pki)
+        {
+            Override = r => r.Secure && r.Path == "/" ? FakeResponse.Redirect($"https://site.test:{port}/admin") : null,
+        };
+
+        var visit = await new HttpSiteFetcher(site.Options()).VisitAsync(Host, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TrailEnd.LeftSite, visit.Https.End);
+        Assert.Equal(port, visit.Https.Next!.Port);
+        Assert.DoesNotContain(site.Requests, r => r.Path == "/admin");
+    }
+
+    [Fact]
+    public void Record_WhenCertificateCannotBeRead_ShouldLetTheHandshakeGoOnAndRecordNothing()
+    {
+        var certificates = new ConcurrentDictionary<string, CertificateInfo>();
+
+        Assert.True(HttpSiteFetcher.Record(certificates, "site.test", null, null, System.Net.Security.SslPolicyErrors.RemoteCertificateNotAvailable));
+        Assert.Empty(certificates);
     }
 
     [Fact(Timeout = 30_000)]

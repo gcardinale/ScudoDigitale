@@ -37,12 +37,18 @@ internal static class HttpsChecks
         yield return new WebCheck(RedirectId, () => Strings.HttpRedirectCheck, inspector, Redirect);
     }
 
-    private static CheckResult Available(SiteVisit visit) => visit.Https.End switch
+    private static CheckResult Available(SiteVisit visit) => visit.Https switch
     {
-        TrailEnd.Error => WebFinding.Executed(WebFinding.Create(
+        { End: TrailEnd.Error, Refused: true } => WebFinding.Executed(WebFinding.Create(
             AvailableId, Strings.HttpsMissingTitle, Severity.High, Confidence.Certain, visit.Host,
             visit.Https.Error, Strings.HttpsMissingRisk, Strings.HttpsMissingFix, Reference)),
-        TrailEnd.ChangedScheme => WebFinding.Executed(WebFinding.Create(
+
+        // No answer in time, a broken handshake, a protocol this computer does not accept: HTTPS may
+        // be there and simply not usable from here, so the finding does not claim more than that.
+        { End: TrailEnd.Error } => WebFinding.Executed(WebFinding.Create(
+            AvailableId, Strings.HttpsUnusableTitle, Severity.High, Confidence.ToBeVerified, visit.Host,
+            visit.Https.Error, Strings.HttpsUnusableRisk, Strings.HttpsUnusableFix, Reference)),
+        { End: TrailEnd.ChangedScheme } => WebFinding.Executed(WebFinding.Create(
             AvailableId, Strings.HttpsBackToHttpTitle, Severity.High, Confidence.Certain, visit.Host,
             visit.Https.Path, Strings.HttpsBackToHttpRisk, Strings.HttpsBackToHttpFix, Reference)),
         _ => WebFinding.Executed(),

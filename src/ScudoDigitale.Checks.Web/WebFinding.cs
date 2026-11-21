@@ -71,7 +71,7 @@ internal static class WebFinding
         { End: TrailEnd.LeftSite } trail => new CheckResult.Skipped(Format(Strings.SkippedLeftSite, trail.Next!.Host)),
         { End: TrailEnd.TooManyRedirects } trail => TooManyRedirects(trail),
         var trail when trail.Hops[^1].Status >= 400 =>
-            new CheckResult.Failed(Format(Strings.PageStatus, trail.Hops[^1].Url, trail.Hops[^1].Status)),
+            new CheckResult.Failed(Format(Strings.PageStatus, SafeUrl.Show(trail.Hops[^1].Url), trail.Hops[^1].Status)),
         _ => null,
     };
 
@@ -90,7 +90,7 @@ internal static class WebFinding
     /// <param name="page">The response.</param>
     /// <param name="header">The header name.</param>
     /// <returns>The text.</returns>
-    public static string NoHeader(Hop page, string header) => Format(Strings.EvidenceNoHeader, page.Url, header);
+    public static string NoHeader(Hop page, string header) => Format(Strings.EvidenceNoHeader, SafeUrl.Show(page.Url), header);
 
     /// <summary>Evidence for a header value, shortened when very long.</summary>
     /// <param name="header">The header name.</param>

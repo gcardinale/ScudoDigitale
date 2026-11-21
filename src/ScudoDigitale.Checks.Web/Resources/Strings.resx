@@ -145,6 +145,18 @@
   <data name="HttpsMissingFix" xml:space="preserve">
     <value>Enable HTTPS with a certificate at your hosting provider (most offer a free Let's Encrypt one), then redirect HTTP to HTTPS.</value>
   </data>
+  <data name="HttpsUnusableTitle" xml:space="preserve">
+    <value>The site could not be reached over HTTPS</value>
+  </data>
+  <data name="HttpsUnusableRisk" xml:space="preserve">
+    <value>If visitors cannot use HTTPS either, everything they read and type travels in clear. The connection did not fail because the port is closed (see the evidence): the server may be slow, or offer only a protocol this computer does not accept.</value>
+  </data>
+  <data name="HttpsUnusableFix" xml:space="preserve">
+    <value>Open the site with https:// in a browser. If it works, run the check again later; if it does not, enable HTTPS with a current certificate and protocol at your hosting provider.</value>
+  </data>
+  <data name="CertificateNotRead" xml:space="preserve">
+    <value>The certificate of the site could not be read.</value>
+  </data>
   <data name="HttpsBackToHttpTitle" xml:space="preserve">
     <value>The HTTPS site sends visitors back to HTTP</value>
   </data>
