@@ -15,6 +15,7 @@
 using System.CommandLine;
 using System.Globalization;
 using ScudoDigitale.Checks.Email;
+using ScudoDigitale.Checks.Web;
 using ScudoDigitale.Cli.Resources;
 using ScudoDigitale.Core;
 
@@ -22,7 +23,8 @@ namespace ScudoDigitale.Cli;
 
 /// <summary>
 /// <c>scudo scan</c>: runs the checks on the declared targets and prints the results. In v0.1 the
-/// only targets are domains for the email checks (<c>--mail</c>).
+/// targets are domains for the email checks (<c>--mail</c>) and websites for the passive website
+/// checks (<c>--web</c>); the two can be given together, also for the same domain.
 /// </summary>
 internal static class ScanCommand
 {
@@ -35,15 +37,17 @@ internal static class ScanCommand
     public static Command Create(CliServices services)
     {
         var mail = new Option<string[]>("--mail") { Description = Strings.MailOptionDescription, HelpName = "domain" };
+        var web = new Option<string[]>("--web") { Description = Strings.WebOptionDescription, HelpName = "domain" };
         var selectors = new Option<string[]>("--dkim-selector") { Description = Strings.DkimSelectorOptionDescription, HelpName = "selector" };
         var systemDns = new Option<bool>("--system-dns") { Description = Strings.SystemDnsOptionDescription };
         var operatorName = new Option<string>("--operator") { Description = Strings.OperatorOptionDescription, HelpName = "name" };
         var role = new Option<OperatorRole>("--role") { Description = Strings.RoleOptionDescription, DefaultValueFactory = _ => OperatorRole.Owner };
 
-        var command = new Command("scan", Strings.ScanDescription) { mail, selectors, systemDns, operatorName, role };
+        var command = new Command("scan", Strings.ScanDescription) { mail, web, selectors, systemDns, operatorName, role };
         command.SetAction((parseResult, cancellationToken) => RunAsync(
             new ScanRequest(
                 parseResult.GetValue(mail) ?? [],
+                parseResult.GetValue(web) ?? [],
                 parseResult.GetValue(selectors) ?? [],
                 parseResult.GetValue(systemDns),
                 parseResult.GetValue(operatorName),
@@ -70,10 +74,23 @@ internal static class ScanCommand
         CancellationToken cancellationToken)
     {
         var domains = request.Domains.Where(d => !string.IsNullOrWhiteSpace(d)).ToArray();
-        if (domains.Length == 0)
+        var sites = request.Websites.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+        if (domains.Length + sites.Length == 0)
         {
             await error.WriteLineAsync(Strings.NoTargets).ConfigureAwait(false);
             return InvalidInput;
+        }
+
+        var hosts = new List<string>();
+        foreach (var site in sites)
+        {
+            if (!WebChecks.TryNormalizeTarget(site, out var host))
+            {
+                await error.WriteLineAsync(Format(Strings.InvalidWebTarget, site)).ConfigureAwait(false);
+                return InvalidInput;
+            }
+
+            hosts.Add(host);
         }
 
         if (request.DkimSelectors.FirstOrDefault(s => !IsSelector(s)) is { } invalid)
@@ -91,12 +108,19 @@ internal static class ScanCommand
         var scope = new ScopeDeclaration(
             operatorName,
             request.Role,
-            domains.Select(d => new Target(TargetKind.Domain, d)),
+            domains.Select(d => new Target(TargetKind.Domain, d))
+                .Concat(hosts.Select(h => new Target(TargetKind.Website, h))),
             services.Now());
-        var checks = services.CreateEmailChecks(options);
+
+        // Each area is built only when asked for: the engine runs a check on the targets of its kind.
+        ICheck[] checks =
+        [
+            .. domains.Length > 0 ? services.CreateEmailChecks(options) : [],
+            .. hosts.Count > 0 ? services.CreateWebChecks(new WebCheckOptions()) : [],
+        ];
 
         var report = new ScanReport(output);
-        report.WriteHeader(scope, checks.Count);
+        report.WriteHeader(scope, checks);
         var runs = await new CheckEngine(new PassiveOnlyScopeGuard())
             .RunAsync(checks, Profile.Individual(), scope, cancellationToken)
             .ConfigureAwait(false);
@@ -124,12 +148,14 @@ internal static class ScanCommand
 
 /// <summary>The options of <c>scudo scan</c>, after parsing.</summary>
 /// <param name="Domains">Values of <c>--mail</c>.</param>
+/// <param name="Websites">Values of <c>--web</c>.</param>
 /// <param name="DkimSelectors">Values of <c>--dkim-selector</c>.</param>
 /// <param name="SystemDns">Whether <c>--system-dns</c> was given.</param>
 /// <param name="Operator">Value of <c>--operator</c>, if any.</param>
 /// <param name="Role">Value of <c>--role</c>.</param>
 internal sealed record ScanRequest(
     IReadOnlyList<string> Domains,
+    IReadOnlyList<string> Websites,
     IReadOnlyList<string> DkimSelectors,
     bool SystemDns,
     string? Operator,

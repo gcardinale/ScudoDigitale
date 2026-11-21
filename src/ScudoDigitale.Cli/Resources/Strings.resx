@@ -47,7 +47,7 @@
     <value>This is a self-assessment tool: it does not replace a penetration test or legal advice. Use it only on systems you own or are authorized to check.</value>
   </data>
   <data name="UsageHint" xml:space="preserve">
-    <value>Run "scudo scan --mail &lt;domain&gt;" to check the email setup of a domain, or "scudo --help" to see the options.</value>
+    <value>Run "scudo scan --mail &lt;domain&gt;" to check the email setup of a domain, "scudo scan --web &lt;domain&gt;" to check its website, or "scudo --help" to see the options.</value>
   </data>
   <data name="ScanDescription" xml:space="preserve">
     <value>Runs the checks on the given targets and prints the results, most urgent first.</value>
@@ -68,7 +68,7 @@
     <value>Role of that person: Owner, SecurityOfficer or AppointedPerson (default: Owner).</value>
   </data>
   <data name="NoTargets" xml:space="preserve">
-    <value>Nothing to check: give at least one domain with --mail &lt;domain&gt;.</value>
+    <value>Nothing to check: give at least one domain with --mail &lt;domain&gt; or --web &lt;domain&gt;.</value>
   </data>
   <data name="InvalidSelector" xml:space="preserve">
     <value>'{0}' is not a valid DKIM selector.</value>
@@ -80,7 +80,7 @@
     <value>Declared by {0} ({1}) on {2}.</value>
   </data>
   <data name="Checking" xml:space="preserve">
-    <value>Checking {0}: {1} checks per target…</value>
+    <value>Checking {0}…</value>
   </data>
   <data name="RoleOwner" xml:space="preserve">
     <value>owner</value>
@@ -150,5 +150,17 @@
   </data>
   <data name="Summary" xml:space="preserve">
     <value>Summary: {0} critical, {1} high, {2} medium, {3} low, {4} info · {5} checks passed, {6} skipped, {7} could not run.</value>
+  </data>
+  <data name="WebOptionDescription" xml:space="preserve">
+    <value>Domain whose website is checked (HTTPS, certificate, security headers, cookies, security.txt) with the requests of a normal visit; can be repeated.</value>
+  </data>
+  <data name="InvalidWebTarget" xml:space="preserve">
+    <value>'{0}' is not a valid website: use a domain name such as example.com.</value>
+  </data>
+  <data name="CheckingTarget" xml:space="preserve">
+    <value>{0} ({1}, {2} checks)</value>
+  </data>
+  <data name="AreaWeb" xml:space="preserve">
+    <value>Websites</value>
   </data>
 </root>

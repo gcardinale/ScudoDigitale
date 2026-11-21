@@ -14,6 +14,7 @@
 
 using System.Globalization;
 using ScudoDigitale.Checks.Email;
+using ScudoDigitale.Checks.Web;
 using ScudoDigitale.Core;
 
 namespace ScudoDigitale.Cli.Tests;
@@ -36,7 +37,7 @@ public sealed class ScanCommandTests
         Assert.Contains("does not replace a penetration test", output, StringComparison.Ordinal);
         // The date format belongs to the platform: ICU (Linux, macOS) puts a narrow no-break space before "AM".
         Assert.Contains($"Declared by Mario Rossi (security officer) on {Now.ToString("g", CultureInfo.CurrentCulture)}.", output, StringComparison.Ordinal);
-        Assert.Contains("Checking example.com: 5 checks per target", output, StringComparison.Ordinal);
+        Assert.Contains("Checking example.com (Email, 5 checks)…", output, StringComparison.Ordinal);
         Assert.Contains("== Email — example.com ==", output, StringComparison.Ordinal);
 
         var high = output.IndexOf("[HIGH] MAIL-SPF-002  Title of MAIL-SPF-002", StringComparison.Ordinal);
@@ -85,6 +86,21 @@ public sealed class ScanCommandTests
         Assert.Contains("Summary: 0 critical, 0 high, 0 medium, 0 low, 0 info · 2 checks passed, 0 skipped, 0 could not run.", output, StringComparison.Ordinal);
         Assert.DoesNotContain("Checks skipped", output, StringComparison.Ordinal);
         Assert.DoesNotContain("Checks that could not run", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Scan_WhenNoCheckCouldRun_ShouldNotClaimThatNoProblemsWereFound()
+    {
+        var fake = new FakeChecks(Failed("MAIL-SPF-001"), Skipped("MAIL-DKIM-002"));
+
+        using var culture = new UiCulture("en-US");
+        var (exitCode, output, _) = await RunAsync(fake, "scan", "--mail", "example.com");
+
+        Assert.Equal(0, exitCode);
+        Assert.DoesNotContain("No problems found.", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("Problems found", output, StringComparison.Ordinal);
+        Assert.Contains("!! MAIL-SPF-001  Check MAIL-SPF-001: DNS timeout", output, StringComparison.Ordinal);
+        Assert.Contains("0 checks passed, 1 skipped, 1 could not run.", output, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -138,6 +154,105 @@ public sealed class ScanCommandTests
     }
 
     [Fact]
+    public async Task Scan_WhenOnlyAWebsiteIsGiven_ShouldRunOnlyTheWebsiteChecksUnderTheWebsitesSection()
+    {
+        var mail = Passed("MAIL-SPF-001");
+        var web = new FakeCheck("WEB-HSTS-001", WebFinding("WEB-HSTS-001"), appliesTo: TargetKind.Website);
+        var fake = new FakeChecks(mail, web, WebPassed("WEB-CERT-001"));
+
+        using var culture = new UiCulture("en-US");
+        var (exitCode, output, error) = await RunAsync(fake, "scan", "--web", "Example.COM");
+
+        Assert.Equal(0, exitCode);
+        Assert.Empty(error);
+        Assert.Contains("Checking example.com (Websites, 2 checks)…", output, StringComparison.Ordinal);
+        Assert.Contains("== Websites — example.com ==", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("== Email", output, StringComparison.Ordinal);
+        Assert.Contains("[MEDIUM] WEB-HSTS-001  Title of WEB-HSTS-001", output, StringComparison.Ordinal);
+        Assert.Contains("  OK WEB-CERT-001  Check WEB-CERT-001", output, StringComparison.Ordinal);
+        Assert.Contains("Summary: 0 critical, 0 high, 1 medium, 0 low, 0 info · 1 checks passed, 0 skipped, 0 could not run.", output, StringComparison.Ordinal);
+        Assert.Equal(["Website:example.com"], web.Targets);
+        Assert.False(mail.Ran);
+        Assert.Null(fake.Options);
+        Assert.NotNull(fake.WebOptions);
+    }
+
+    [Fact]
+    public async Task Scan_WhenOnlyMailIsGiven_ShouldNotBuildTheWebsiteChecks()
+    {
+        var fake = new FakeChecks(Passed("MAIL-SPF-001"), WebPassed("WEB-CERT-001"));
+
+        var (_, output, _) = await RunAsync(fake, "scan", "--mail", "example.com");
+
+        Assert.Null(fake.WebOptions);
+        Assert.DoesNotContain("WEB-CERT-001", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Scan_WhenMailAndWebAreGivenForTheSameDomain_ShouldRunEachAreaOnItsOwnTargetInTwoSections()
+    {
+        var mail = Passed("MAIL-SPF-001");
+        var web = WebPassed("WEB-CERT-001");
+        var fake = new FakeChecks(mail, web);
+
+        using var culture = new UiCulture("it-IT");
+        var (exitCode, output, _) = await RunAsync(fake, "scan", "--mail", "example.com", "--web", "example.com", "--web", "shop.example.org");
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("Controllo di example.com (Posta, 1 controlli), example.com (Siti web, 1 controlli), shop.example.org (Siti web, 1 controlli)…", output, StringComparison.Ordinal);
+        var posta = output.IndexOf("== Posta — example.com ==", StringComparison.Ordinal);
+        var sito = output.IndexOf("== Siti web — example.com ==", StringComparison.Ordinal);
+        var negozio = output.IndexOf("== Siti web — shop.example.org ==", StringComparison.Ordinal);
+        Assert.True(posta > 0 && sito > posta && negozio > sito, output);
+        Assert.Equal(["Domain:example.com"], mail.Targets);
+        Assert.Equal(["Website:example.com", "Website:shop.example.org"], web.Targets.Order());
+        Assert.Contains("3 controlli superati", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Scan_WhenWebsiteIsGivenAsUrlOrTwice_ShouldCheckItsHostOnce()
+    {
+        var web = WebPassed("WEB-CERT-001");
+
+        using var culture = new UiCulture("en-US");
+        var (_, output, _) = await RunAsync(new FakeChecks(web), "scan", "--web", "https://Example.com/contacts", "--web", "example.com.", "--web", " ");
+
+        Assert.Equal(["Website:example.com"], web.Targets);
+        Assert.Equal(1, CountOf(output, "== Websites — example.com =="));
+    }
+
+    [Theory]
+    [InlineData("not a site")]
+    [InlineData("192.168.1.1")]
+    [InlineData("https://example.com:8443/")]
+    public async Task Scan_WhenWebsiteIsNotValid_ShouldExitWithTwoNamingItAndRunNothing(string value)
+    {
+        var web = WebPassed("WEB-CERT-001");
+        var fake = new FakeChecks(Passed("MAIL-SPF-001"), web);
+
+        using var culture = new UiCulture("en-US");
+        var (exitCode, output, error) = await RunAsync(fake, "scan", "--mail", "example.com", "--web", "example.org", "--web", value);
+
+        Assert.Equal(ScanCommand.InvalidInput, exitCode);
+        Assert.Contains($"'{value}' is not a valid website: use a domain name such as example.com.", error, StringComparison.Ordinal);
+        Assert.Empty(output);
+        Assert.False(web.Ran);
+        Assert.Null(fake.Options);
+        Assert.Null(fake.WebOptions);
+    }
+
+    [Fact]
+    public async Task Scan_WhenWebsiteCheckIsActive_ShouldNeverRunIt()
+    {
+        var active = new FakeCheck("WEB-FILES-001", new CheckResult.Executed([]), ScopeRequirement.ActiveOwnedOnly, TargetKind.Website);
+
+        var (_, output, _) = await RunAsync(new FakeChecks(active), "scan", "--web", "example.com");
+
+        Assert.False(active.Ran);
+        Assert.Contains("-- WEB-FILES-001", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Scan_WhenSelectorIsInvalid_ShouldExitWithTwoNamingIt()
     {
         var fake = new FakeChecks(Passed("MAIL-SPF-001"));
@@ -178,7 +293,7 @@ public sealed class ScanCommandTests
     public async Task Scan_WhenNoUserNameIsAvailable_ShouldDeclareTheOperatorAsNotDeclared()
     {
         var fake = new FakeChecks(Passed("MAIL-SPF-001"));
-        var services = new CliServices(fake.Create, () => Now, () => " ");
+        var services = new CliServices(fake.Create, fake.CreateWeb, () => Now, () => " ");
 
         using var culture = new UiCulture("en-US");
         using var output = new StringWriter(CultureInfo.InvariantCulture);
@@ -224,6 +339,7 @@ public sealed class ScanCommandTests
         var services = CliServices.Default;
 
         Assert.Equal(11, services.CreateEmailChecks(new EmailCheckOptions()).Count);
+        Assert.Equal(15, services.CreateWebChecks(new WebCheckOptions()).Count);
         Assert.InRange(services.Now(), DateTimeOffset.Now.AddMinutes(-1), DateTimeOffset.Now.AddMinutes(1));
         Assert.Equal(Environment.UserName, services.DefaultOperator());
     }
@@ -243,7 +359,7 @@ public sealed class ScanCommandTests
     {
         using var output = new StringWriter(CultureInfo.InvariantCulture);
         using var error = new StringWriter(CultureInfo.InvariantCulture);
-        var services = new CliServices(fake.Create, () => Now, () => "tester");
+        var services = new CliServices(fake.Create, fake.CreateWeb, () => Now, () => "tester");
         var exitCode = await CliApp.RunAsync(args, output, error, services, TestContext.Current.CancellationToken);
         return (exitCode, output.ToString(), error.ToString());
     }
@@ -270,39 +386,64 @@ public sealed class ScanCommandTests
 
     private static FakeCheck Passed(string id) => new(id, new CheckResult.Executed([]));
 
+    private static FakeCheck WebPassed(string id) => new(id, new CheckResult.Executed([]), appliesTo: TargetKind.Website);
+
+    private static CheckResult WebFinding(string id) => new CheckResult.Executed(
+    [
+        new Finding(id, CheckArea.Web, "Title of " + id, Severity.Medium, Confidence.Certain, "example.com") { Evidence = "evidence of " + id },
+    ]);
+
     private static FakeCheck Skipped(string id) => new(id, new CheckResult.Skipped("no key to look at"));
 
     private static FakeCheck Failed(string id) => new(id, new CheckResult.Failed("DNS timeout"));
 
-    /// <summary>Hands out the given checks and records the options they were built with.</summary>
+    /// <summary>
+    /// Hands out the given checks (those for domains as email checks, those for websites as website
+    /// checks) and records the options they were built with.
+    /// </summary>
     private sealed class FakeChecks(params ICheck[] checks)
     {
         public EmailCheckOptions? Options { get; private set; }
 
+        public WebCheckOptions? WebOptions { get; private set; }
+
         public IReadOnlyList<ICheck> Create(EmailCheckOptions options)
         {
             Options = options;
-            return checks;
+            return [.. checks.Where(c => c.AppliesTo == TargetKind.Domain)];
+        }
+
+        public IReadOnlyList<ICheck> CreateWeb(WebCheckOptions options)
+        {
+            WebOptions = options;
+            return [.. checks.Where(c => c.AppliesTo == TargetKind.Website)];
         }
     }
 
-    private sealed class FakeCheck(string id, CheckResult result, ScopeRequirement scope = ScopeRequirement.Passive) : ICheck
+    private sealed class FakeCheck(string id, CheckResult result, ScopeRequirement scope = ScopeRequirement.Passive, TargetKind appliesTo = TargetKind.Domain) : ICheck
     {
         public bool Ran { get; private set; }
+
+        public List<string> Targets { get; } = [];
 
         public string Id => id;
 
         public string Title => "Check " + id;
 
-        public CheckArea Area => CheckArea.Email;
+        public CheckArea Area => appliesTo == TargetKind.Website ? CheckArea.Web : CheckArea.Email;
 
-        public TargetKind AppliesTo => TargetKind.Domain;
+        public TargetKind AppliesTo => appliesTo;
 
         public ScopeRequirement Scope => scope;
 
         public Task<CheckResult> RunAsync(CheckContext context, CancellationToken cancellationToken)
         {
             Ran = true;
+            lock (Targets)
+            {
+                Targets.Add(context.Target.ToString());
+            }
+
             return Task.FromResult(result);
         }
     }
