@@ -26,7 +26,7 @@ public sealed class HttpsChecksTests
         var visit = Site.Good() with
         {
             Http = Site.Response(Site.Hop("http://example.com/")),
-            Https = Trail.Failed("https://example.com/: connection refused"),
+            Https = Trail.Failed("https://example.com/: connection refused", refused: true),
             Certificates = [],
             SecurityTxt = null,
         };
@@ -38,6 +38,26 @@ public sealed class HttpsChecksTests
         Assert.Equal(Confidence.Certain, finding.Confidence);
         Assert.Equal("The site does not answer over HTTPS", finding.Title);
         Assert.Equal("https://example.com/: connection refused", finding.Evidence);
+    }
+
+    [Fact]
+    public async Task Available_WhenHttpsFailsForAnotherReasonThanAClosedPort_ShouldNotClaimThatThereIsNoHttps()
+    {
+        var visit = Site.Good() with
+        {
+            Http = Site.Response(Site.Hop("http://example.com/")),
+            Https = Trail.Failed("https://example.com/: no answer within 10 seconds"),
+            Certificates = [],
+            SecurityTxt = null,
+        };
+
+        using var culture = new UiCulture("en-US");
+        var finding = await Make.SingleFindingAsync(visit, HttpsChecks.AvailableId);
+
+        Assert.Equal(Severity.High, finding.Severity);
+        Assert.Equal(Confidence.ToBeVerified, finding.Confidence);
+        Assert.Equal("The site could not be reached over HTTPS", finding.Title);
+        Assert.Equal("https://example.com/: no answer within 10 seconds", finding.Evidence);
     }
 
     [Fact]
@@ -159,6 +179,20 @@ public sealed class CertificateChecksTests
         var skipped = Assert.IsType<CheckResult.Skipped>(await Make.RunAsync(visit, id));
 
         Assert.Equal("Skipped: the site does not answer over HTTPS (see WEB-HTTPS-001).", skipped.Reason);
+    }
+
+    [Theory]
+    [InlineData(CertificateChecks.ExpiryId)]
+    [InlineData(CertificateChecks.ChainId)]
+    [InlineData(CertificateChecks.NameId)]
+    public async Task Checks_WhenHttpsAnswersButItsCertificateCouldNotBeRead_ShouldFailSayingSo(string id)
+    {
+        var visit = Site.Good() with { Certificates = [] };
+
+        using var culture = new UiCulture("it-IT");
+        var failed = Assert.IsType<CheckResult.Failed>(await Make.RunAsync(visit, id));
+
+        Assert.Equal("Non è stato possibile leggere il certificato del sito.", failed.Error);
     }
 
     [Theory]

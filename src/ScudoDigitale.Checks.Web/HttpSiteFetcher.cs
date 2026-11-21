@@ -20,6 +20,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using ScudoDigitale.Checks.Web.Resources;
 using ScudoDigitale.Core;
+using ScudoDigitale.Core.Dns;
 
 namespace ScudoDigitale.Checks.Web;
 
@@ -29,7 +30,10 @@ namespace ScudoDigitale.Checks.Web;
 /// two standard addresses. Redirects are followed only inside the declared site; no cookie is sent
 /// back, no form is submitted, no other path is requested. The certificate is read from the same
 /// connection, without downloading missing certificates and without asking the authority whether it
-/// was revoked: both would be connections to servers that were not declared.
+/// was revoked: both would be connections to servers that were not declared. The address of the site
+/// is asked to the resolver of ADR-006 (public resolvers over HTTPS, then the DNS of this computer),
+/// because the DNS of a home router loses queries, and then to the operating system, which also
+/// knows the names of the local network; through a proxy, the proxy resolves the name.
 /// </summary>
 internal sealed class HttpSiteFetcher : ISiteFetcher
 {
@@ -43,12 +47,20 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
     private const string LegacyPath = "/security.txt";
 
     private readonly WebCheckOptions options;
+    private readonly IDnsResolver? resolver;
+    private readonly IWebProxy proxy;
+    private readonly ConcurrentDictionary<string, Lazy<Task<DnsAnswer<IPAddress>>>> addresses = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Creates the fetcher.</summary>
-    /// <param name="options">Timeouts.</param>
+    /// <param name="options">Timeouts and where the addresses of the sites come from.</param>
     public HttpSiteFetcher(WebCheckOptions options)
     {
         this.options = options;
+
+        // With the DNS of the computer the name is left to the operating system, as for any
+        // connection: it has a cache and asks every configured server, a router included.
+        resolver = options.Resolver ?? (options.DnsSource == DnsSource.System ? null : DnsResolvers.Create());
+        proxy = options.Proxy ?? HttpClient.DefaultProxy;
     }
 
     /// <summary>
@@ -108,13 +120,16 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
             policy.CustomTrustStore.AddRange(roots);
         }
 
-        return new SocketsHttpHandler
+        var handler = new SocketsHttpHandler
         {
             AllowAutoRedirect = false,
             UseCookies = false,
             AutomaticDecompression = DecompressionMethods.All,
             ConnectTimeout = options.RequestTimeout,
-            ConnectCallback = ConnectAsync,
+            ConnectCallback = (context, cancellationToken) => OpenAsync(
+                options.Route(context.DnsEndPoint),
+                IsDirect(context.InitialRequestMessage, context.DnsEndPoint),
+                cancellationToken),
             SslOptions = new SslClientAuthenticationOptions
             {
                 CertificateChainPolicy = policy,
@@ -122,13 +137,45 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
                 // The handshake is always accepted: a wrong certificate is a finding, and the headers
                 // of the page are still worth reading. Nothing confidential is ever sent.
                 RemoteCertificateValidationCallback = (sender, certificate, chain, errors) =>
-                {
-                    var host = ((SslStream)sender).TargetHostName;
-                    certificates.TryAdd(host, CertificateInspector.Describe(host, (X509Certificate2)certificate!, chain!, errors));
-                    return true;
-                },
+                    Record(certificates, ((SslStream)sender).TargetHostName, certificate, chain, errors),
             },
         };
+        if (options.Proxy is { } replacement)
+        {
+            handler.Proxy = replacement;
+        }
+
+        return handler;
+    }
+
+    /// <summary>
+    /// Records the certificate a host presented. A certificate that cannot be read is not recorded,
+    /// and the certificate checks say so: an exception here would break the handshake and make a site
+    /// that does answer over HTTPS look as if it did not.
+    /// </summary>
+    /// <param name="certificates">Where the certificate is recorded; the first one of a host is kept.</param>
+    /// <param name="host">The host that was contacted.</param>
+    /// <param name="certificate">Its certificate, if it sent one.</param>
+    /// <param name="chain">The chain built during the handshake.</param>
+    /// <param name="errors">The errors found during the handshake.</param>
+    /// <returns>Always <see langword="true"/>: the handshake goes on.</returns>
+    internal static bool Record(
+        ConcurrentDictionary<string, CertificateInfo> certificates,
+        string host,
+        X509Certificate? certificate,
+        X509Chain? chain,
+        SslPolicyErrors errors)
+    {
+        try
+        {
+            certificates.TryAdd(host, CertificateInspector.Describe(host, (X509Certificate2)certificate!, chain!, errors));
+        }
+        catch (Exception)
+        {
+            // Not recorded: see the summary.
+        }
+
+        return true;
     }
 
     /// <summary>Requests an address and follows its redirects while they stay inside the site and on the same scheme.</summary>
@@ -146,6 +193,7 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         {
             while (true)
             {
+                await ResolveAsync(url, cancellationToken).ConfigureAwait(false);
                 var hop = await GetAsync(http, url, bodyType, cancellationToken).ConfigureAwait(false);
                 hops.Add(hop);
                 if (Redirect(hop) is not { } next)
@@ -158,7 +206,8 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
                     return new Trail(hops, TrailEnd.ChangedScheme, next);
                 }
 
-                if (!HostName.IsInSite(site, next.Host))
+                // Another port of the same host is not the website: browsers refuse most of them too.
+                if (!next.IsDefaultPort || !HostName.IsInSite(site, next.IdnHost))
                 {
                     return new Trail(hops, TrailEnd.LeftSite, next);
                 }
@@ -177,11 +226,18 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
         }
         catch (OperationCanceledException)
         {
-            return new Trail(hops, TrailEnd.Error, null, WebFinding.Format(Strings.NoAnswerInTime, url, options.RequestTimeout.TotalSeconds));
+            return new Trail(hops, TrailEnd.Error, null, WebFinding.Format(Strings.NoAnswerInTime, SafeUrl.Show(url), options.RequestTimeout.TotalSeconds));
         }
         catch (Exception ex)
         {
-            return new Trail(hops, TrailEnd.Error, null, $"{url}: {ex.GetBaseException().Message}");
+            var cause = ex.GetBaseException();
+            return new Trail(
+                hops,
+                TrailEnd.Error,
+                null,
+                $"{SafeUrl.Show(url)}: {cause.Message}",
+                cause is SocketException { SocketErrorCode: SocketError.ConnectionRefused },
+                cause is UnansweredException);
         }
     }
 
@@ -219,26 +275,206 @@ internal sealed class HttpSiteFetcher : ISiteFetcher
             && response.StatusCode == HttpStatusCode.OK
             && string.Equals(response.Content.Headers.ContentType?.MediaType, bodyType, StringComparison.OrdinalIgnoreCase))
         {
-            var stream = await response.Content.ReadAsStreamAsync(deadline.Token).ConfigureAwait(false);
-            var buffer = new byte[MaxBodyBytes];
-            var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false, deadline.Token).ConfigureAwait(false);
-            body = Encoding.UTF8.GetString(buffer, 0, read);
+            try
+            {
+                var stream = await response.Content.ReadAsStreamAsync(deadline.Token).ConfigureAwait(false);
+                var buffer = new byte[MaxBodyBytes];
+                var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false, deadline.Token).ConfigureAwait(false);
+                body = Encoding.UTF8.GetString(buffer, 0, read);
+            }
+            catch (Exception) when (!cancellationToken.IsCancellationRequested)
+            {
+                // The headers arrived: a page that is slow or breaks off is still an answer, and its
+                // headers are still evaluated. Only what the page itself would have added is lost.
+            }
         }
 
         return new Hop(url, (int)response.StatusCode, headers, body);
     }
 
-    private async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
+    /// <summary>
+    /// Whether a connection goes straight to the host of the request. When it does not, it goes to a
+    /// proxy: its name belongs to the network of this computer and only the system can resolve it.
+    /// The tunnel towards an HTTPS site is opened with a CONNECT request addressed to the proxy
+    /// itself, which would otherwise look like a direct connection.
+    /// </summary>
+    /// <param name="request">The request the connection is opened for.</param>
+    /// <param name="endpoint">Where the connection is about to go.</param>
+    /// <returns><see langword="true"/> for a direct connection.</returns>
+    internal static bool IsDirect(HttpRequestMessage request, DnsEndPoint endpoint) =>
+        request.Method != HttpMethod.Connect
+        && request.RequestUri is { } requested
+        && requested.Port == endpoint.Port
+        && string.Equals(requested.IdnHost, endpoint.Host, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Opens a connection. The name of a site reached directly is resolved by the resolver of the
+    /// checks and its addresses are tried in order, IPv4 first; any other endpoint is left to the
+    /// system, and so is every name when only the DNS of the computer was asked for.
+    /// </summary>
+    /// <param name="target">Where to connect.</param>
+    /// <param name="direct">Whether <paramref name="target"/> is the site itself and not a proxy.</param>
+    /// <param name="cancellationToken">Stops the attempt.</param>
+    /// <returns>The connection.</returns>
+    /// <exception cref="IOException">The name has no address, or the DNS did not answer.</exception>
+    internal async ValueTask<Stream> OpenAsync(EndPoint target, bool direct, CancellationToken cancellationToken)
     {
-        var socket = new Socket(SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
+        if (target is not DnsEndPoint named || !direct || resolver is null)
+        {
+            return await ConnectAsync(() => new Socket(SocketType.Stream, ProtocolType.Tcp), target, cancellationToken).ConfigureAwait(false);
+        }
+
+        var answer = Require(named.Host, await LookupAsync(named.Host, cancellationToken).ConfigureAwait(false));
+        Exception? last = null;
+        foreach (var address in answer.Records)
+        {
+            try
+            {
+                return await ConnectAsync(
+                    () => new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp),
+                    new IPEndPoint(address, named.Port),
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // The next address may work: a computer without IPv6 cannot use the IPv6 ones.
+                // After a cancellation every other attempt ends at once in the same way.
+                last = ex;
+            }
+        }
+
+        throw last!;
+    }
+
+    /// <summary>
+    /// The addresses of a name, asked once for the life of the fetcher (one run). The question
+    /// belongs to the fetcher, not to who asks first: whoever stops waiting leaves it running for
+    /// the others.
+    /// </summary>
+    /// <param name="name">The host name.</param>
+    /// <param name="cancellationToken">Stops waiting, not the question.</param>
+    /// <returns>The answer.</returns>
+    internal async Task<DnsAnswer<IPAddress>> LookupAsync(string name, CancellationToken cancellationToken)
+    {
+        var lookup = addresses.GetOrAdd(name, n => new Lazy<Task<DnsAnswer<IPAddress>>>(() => AskAsync(n)));
         try
         {
-            await socket.ConnectAsync(options.Route(context.DnsEndPoint), cancellationToken).ConfigureAwait(false);
+            var answer = await lookup.Value.WaitAsync(cancellationToken).ConfigureAwait(false);
+            if (answer.Status == DnsStatus.Error)
+            {
+                // Nobody answered: not remembered, so whoever needs the name next asks again.
+                addresses.TryRemove(KeyValuePair.Create(name, lookup));
+            }
+
+            return answer;
+        }
+        catch when (lookup.Value.IsCompleted)
+        {
+            // Nor is a question that broke.
+            addresses.TryRemove(KeyValuePair.Create(name, lookup));
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Asks the address of the host of a request before the request, outside its deadline: a
+    /// resolver that is slow to answer must not make a site that works look unreachable. Through a
+    /// proxy, the proxy resolves the name; a configuration may use one for HTTPS and none for HTTP,
+    /// so the question is about this very address.
+    /// </summary>
+    private async Task ResolveAsync(Uri url, CancellationToken cancellationToken)
+    {
+        if (resolver is not null
+            && options.Route(new DnsEndPoint(url.IdnHost, url.Port)) is DnsEndPoint
+            && WebChecks.ProxyFor(url.Scheme, url.IdnHost, proxy) is null)
+        {
+            Require(url.IdnHost, await LookupAsync(url.IdnHost, cancellationToken).ConfigureAwait(false));
+        }
+    }
+
+    /// <summary>An answer with addresses, or the reason why there are none.</summary>
+    private static DnsAnswer<IPAddress> Require(string name, DnsAnswer<IPAddress> answer) => answer.Status switch
+    {
+        DnsStatus.Ok => answer,
+        DnsStatus.NonExistentDomain => throw new IOException(WebFinding.Format(Strings.DnsNameNotFound, name)),
+        DnsStatus.NoRecords => throw new IOException(WebFinding.Format(Strings.DnsNoAddress, name)),
+        _ => throw new UnansweredException(WebFinding.Format(Strings.DnsFailed, name, answer.Error)),
+    };
+
+    /// <summary>
+    /// Whether an address belongs to this computer or to a private network. Only such an address is
+    /// believed when the operating system knows a name that the public DNS says does not exist: it
+    /// is a site of the local network. A public address there is usually the search page some
+    /// providers and routers return in place of "does not exist", and checking it would report
+    /// the problems of someone else's server.
+    /// </summary>
+    /// <param name="address">The address.</param>
+    /// <returns><see langword="true"/> for loopback, private (RFC 1918, RFC 4193) and link-local addresses.</returns>
+    internal static bool IsLocal(IPAddress address)
+    {
+        if (address.IsIPv4MappedToIPv6)
+        {
+            address = address.MapToIPv4();
+        }
+
+        if (address.AddressFamily == AddressFamily.InterNetworkV6)
+        {
+            return IPAddress.IsLoopback(address) || address.IsIPv6LinkLocal || address.IsIPv6UniqueLocal;
+        }
+
+        var bytes = address.GetAddressBytes();
+        return bytes[0] is 10 or 127
+            || (bytes[0] == 172 && bytes[1] is >= 16 and <= 31)
+            || (bytes[0] == 192 && bytes[1] == 168)
+            || (bytes[0] == 169 && bytes[1] == 254);
+    }
+
+    /// <summary>
+    /// The resolver of the checks first; when it has no address, the operating system, which also
+    /// knows the names of the local network and of the hosts file. When the resolver did not answer
+    /// at all the system is believed; when it said that the name does not exist or has no address,
+    /// only a local address is (see <see cref="IsLocal"/>). Each of them has its own time limits,
+    /// so the question needs no token.
+    /// </summary>
+    private async Task<DnsAnswer<IPAddress>> AskAsync(string name)
+    {
+        var answer = await resolver!.QueryAddressesAsync(name, CancellationToken.None).ConfigureAwait(false);
+        if (answer.Status == DnsStatus.Ok)
+        {
+            return answer;
+        }
+
+        try
+        {
+            var known = (await options.SystemAddresses(name, CancellationToken.None).ConfigureAwait(false))
+                .Where(a => answer.Status == DnsStatus.Error || IsLocal(a))
+                .OrderBy(a => a.AddressFamily == AddressFamily.InterNetworkV6)
+                .ToArray();
+            return known.Length > 0 ? DnsAnswer<IPAddress>.Found(known) : answer;
+        }
+        catch (Exception)
+        {
+            // The system does not know the name either: what the resolver said stands.
+            return answer;
+        }
+    }
+
+    /// <summary>No DNS answered for a name: nothing is known about what is behind it.</summary>
+    private sealed class UnansweredException(string message) : IOException(message);
+
+    private static async ValueTask<Stream> ConnectAsync(Func<Socket> create, EndPoint target, CancellationToken cancellationToken)
+    {
+        Socket? socket = null;
+        try
+        {
+            socket = create();
+            socket.NoDelay = true;
+            await socket.ConnectAsync(target, cancellationToken).ConfigureAwait(false);
             return new NetworkStream(socket, ownsSocket: true);
         }
         catch
         {
-            socket.Dispose();
+            socket?.Dispose();
             throw;
         }
     }

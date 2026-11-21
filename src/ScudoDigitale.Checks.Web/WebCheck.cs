@@ -68,10 +68,11 @@ internal sealed class WebCheck : ICheck
             }
 
             var visit = await inspector.GetAsync(host, cancellationToken).ConfigureAwait(false);
-            if (visit.Http.End == TrailEnd.Error && visit.Https.End == TrailEnd.Error)
+            if ((visit.Http.End == TrailEnd.Error && visit.Https.End == TrailEnd.Error) || visit.Https.Unanswered || visit.Http.Unanswered)
             {
-                // Nothing was observed: reporting problems here would be inventing them.
-                return new CheckResult.Failed(WebFinding.Format(Strings.SiteUnreachable, host, visit.Https.Error));
+                // Nothing was observed, or a name along the way got no answer from the DNS:
+                // reporting problems here would be inventing them.
+                return new CheckResult.Failed(WebFinding.Format(Strings.SiteUnreachable, host, visit.Https.Error ?? visit.Http.Error));
             }
 
             return rule(visit);

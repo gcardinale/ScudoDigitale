@@ -16,9 +16,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using DnsClient;
 using DnsClient.Protocol;
-using ScudoDigitale.Checks.Email.Resources;
+using ScudoDigitale.Core.Resources;
 
-namespace ScudoDigitale.Checks.Email;
+namespace ScudoDigitale.Core.Dns;
 
 /// <summary>
 /// <see cref="IDnsResolver"/> on DnsClient.NET, using the DNS servers configured on this computer.
@@ -31,7 +31,7 @@ internal sealed class DnsClientResolver : IDnsResolver
 
     /// <summary>Creates a resolver on the DNS servers configured on this computer.</summary>
     /// <param name="options">Timeout and retries.</param>
-    public DnsClientResolver(EmailCheckOptions options)
+    public DnsClientResolver(DnsOptions options)
         : this(SystemNameServers(), options)
     {
     }
@@ -39,7 +39,7 @@ internal sealed class DnsClientResolver : IDnsResolver
     /// <summary>Creates a resolver on the given DNS servers.</summary>
     /// <param name="nameServers">DNS servers to ask; with none, every query fails.</param>
     /// <param name="options">Timeout and retries.</param>
-    internal DnsClientResolver(IReadOnlyCollection<NameServer> nameServers, EmailCheckOptions options)
+    internal DnsClientResolver(IReadOnlyCollection<NameServer> nameServers, DnsOptions options)
     {
         if (nameServers.Count == 0)
         {
@@ -49,8 +49,8 @@ internal sealed class DnsClientResolver : IDnsResolver
         client = new LookupClient(new LookupClientOptions(nameServers.ToArray())
         {
             AutoResolveNameServers = false,
-            Timeout = options.DnsTimeout,
-            Retries = options.DnsRetries,
+            Timeout = options.Timeout,
+            Retries = options.Retries,
             UseCache = true,
             CacheFailedResults = false,
             ThrowDnsErrors = false,
@@ -74,9 +74,10 @@ internal sealed class DnsClientResolver : IDnsResolver
     /// <inheritdoc />
     public async Task<DnsAnswer<IPAddress>> QueryAddressesAsync(string name, CancellationToken cancellationToken)
     {
-        var v4 = await QueryAsync(name, QueryType.A, r => r.Answers.ARecords().Select(a => a.Address), cancellationToken).ConfigureAwait(false);
-        var v6 = await QueryAsync(name, QueryType.AAAA, r => r.Answers.AaaaRecords().Select(a => a.Address), cancellationToken).ConfigureAwait(false);
-        return Combine(v4, v6);
+        // Both questions at once: a server that does not answer costs one timeout, not two.
+        var v4 = QueryAsync(name, QueryType.A, r => r.Answers.ARecords().Select(a => a.Address), cancellationToken);
+        var v6 = QueryAsync(name, QueryType.AAAA, r => r.Answers.AaaaRecords().Select(a => a.Address), cancellationToken);
+        return Combine(await v4.ConfigureAwait(false), await v6.ConfigureAwait(false));
     }
 
     /// <summary>

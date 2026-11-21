@@ -16,6 +16,7 @@ using System.Globalization;
 using ScudoDigitale.Checks.Email;
 using ScudoDigitale.Checks.Web;
 using ScudoDigitale.Core;
+using ScudoDigitale.Core.Dns;
 
 namespace ScudoDigitale.Cli.Tests;
 
@@ -276,6 +277,46 @@ public sealed class ScanCommandTests
         Assert.Equal(DnsSource.System, fake.Options.DnsSource);
     }
 
+    [Theory]
+    [InlineData(false, DnsSource.Public)]
+    [InlineData(true, DnsSource.System)]
+    public async Task Scan_WhenWebsiteIsChecked_ShouldUseTheSameDnsSourceAsTheEmailChecks(bool systemDns, DnsSource expected)
+    {
+        var fake = new FakeChecks(WebPassed("WEB-HTTPS-001"));
+        string[] args = systemDns ? ["scan", "--web", "example.com", "--system-dns"] : ["scan", "--web", "example.com"];
+
+        await RunAsync(fake, args);
+
+        Assert.Equal(expected, fake.WebOptions!.DnsSource);
+    }
+
+    [Fact]
+    public async Task Scan_WhenASiteIsReachedThroughAProxy_ShouldSayItBeforeTheResultsAndOnlyForThatSite()
+    {
+        var fake = new FakeChecks(WebPassed("WEB-CERT-001"));
+        fake.Proxies["example.com"] = "proxy.lan:8080";
+
+        using var culture = new UiCulture("en-US");
+        var (exitCode, output, _) = await RunAsync(fake, "scan", "--web", "example.com", "--web", "example.org");
+
+        Assert.Equal(0, exitCode);
+        var note = output.IndexOf("Note: the requests to example.com go through the proxy configured on this computer (proxy.lan:8080).", StringComparison.Ordinal);
+        Assert.InRange(note, 0, output.IndexOf("== Websites", StringComparison.Ordinal));
+        Assert.Contains("the certificate checked is the proxy's, not the site's", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("requests to example.org", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Scan_WhenNoProxyIsUsed_ShouldNotMentionOne()
+    {
+        var fake = new FakeChecks(WebPassed("WEB-CERT-001"));
+
+        using var culture = new UiCulture("en-US");
+        var (_, output, _) = await RunAsync(fake, "scan", "--web", "example.com");
+
+        Assert.DoesNotContain("proxy", output, StringComparison.OrdinalIgnoreCase);
+    }
+
     [Fact]
     public async Task Scan_WhenDefaultsAreUsed_ShouldAskPublicDnsAndDeclareTheUserAsOwner()
     {
@@ -293,7 +334,7 @@ public sealed class ScanCommandTests
     public async Task Scan_WhenNoUserNameIsAvailable_ShouldDeclareTheOperatorAsNotDeclared()
     {
         var fake = new FakeChecks(Passed("MAIL-SPF-001"));
-        var services = new CliServices(fake.Create, fake.CreateWeb, () => Now, () => " ");
+        var services = new CliServices(fake.Create, fake.CreateWeb, fake.ProxyFor, () => Now, () => " ");
 
         using var culture = new UiCulture("en-US");
         using var output = new StringWriter(CultureInfo.InvariantCulture);
@@ -340,6 +381,9 @@ public sealed class ScanCommandTests
 
         Assert.Equal(11, services.CreateEmailChecks(new EmailCheckOptions()).Count);
         Assert.Equal(15, services.CreateWebChecks(new WebCheckOptions()).Count);
+
+        // Compared, not called: reading the proxy of this computer could start its automatic discovery.
+        Assert.Equal(WebChecks.SystemProxyFor, services.WebProxyFor);
         Assert.InRange(services.Now(), DateTimeOffset.Now.AddMinutes(-1), DateTimeOffset.Now.AddMinutes(1));
         Assert.Equal(Environment.UserName, services.DefaultOperator());
     }
@@ -359,7 +403,7 @@ public sealed class ScanCommandTests
     {
         using var output = new StringWriter(CultureInfo.InvariantCulture);
         using var error = new StringWriter(CultureInfo.InvariantCulture);
-        var services = new CliServices(fake.Create, fake.CreateWeb, () => Now, () => "tester");
+        var services = new CliServices(fake.Create, fake.CreateWeb, fake.ProxyFor, () => Now, () => "tester");
         var exitCode = await CliApp.RunAsync(args, output, error, services, TestContext.Current.CancellationToken);
         return (exitCode, output.ToString(), error.ToString());
     }
@@ -406,6 +450,11 @@ public sealed class ScanCommandTests
         public EmailCheckOptions? Options { get; private set; }
 
         public WebCheckOptions? WebOptions { get; private set; }
+
+        /// <summary>Sites reached through a proxy, and the proxy.</summary>
+        public Dictionary<string, string> Proxies { get; } = [];
+
+        public string? ProxyFor(string host) => Proxies.GetValueOrDefault(host);
 
         public IReadOnlyList<ICheck> Create(EmailCheckOptions options)
         {

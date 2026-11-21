@@ -52,8 +52,7 @@ internal static class CookieChecks
         // Redirects set cookies too; of two cookies with the same name the browser keeps the last.
         var cookies = visit.Https.Hops
             .SelectMany(hop => hop.Values("Set-Cookie"))
-            .Select(SetCookie.TryParse)
-            .OfType<SetCookie>()
+            .SelectMany(SetCookie.ParseAll)
             .GroupBy(cookie => cookie.Name, StringComparer.Ordinal)
             .Select(group => group.Last())
             .ToArray();

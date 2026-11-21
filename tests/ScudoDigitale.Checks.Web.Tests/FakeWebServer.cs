@@ -31,6 +31,9 @@ internal sealed record FakeResponse(int Status, string? ContentType = null, stri
     public static FakeResponse Redirect(string location, int status = 301) => new(status, null, string.Empty, ("Location", location));
 
     public static FakeResponse NotFound { get; } = new(404, "text/html", "<h1>Not found</h1>");
+
+    /// <summary>Whether the body breaks off: more is announced than is ever sent.</summary>
+    public bool Stalls { get; init; }
 }
 
 /// <summary>
@@ -123,7 +126,8 @@ internal sealed class FakeWebServer : IAsyncDisposable
             }
 
             var body = Encoding.UTF8.GetBytes(response.Body);
-            var head = new StringBuilder($"HTTP/1.1 {response.Status} Status\r\nConnection: close\r\nContent-Length: {body.Length}\r\n");
+            var announced = response.Stalls ? body.Length + 10_000 : body.Length;
+            var head = new StringBuilder($"HTTP/1.1 {response.Status} Status\r\nConnection: close\r\nContent-Length: {announced}\r\n");
             if (response.ContentType is not null)
             {
                 head.Append($"Content-Type: {response.ContentType}\r\n");
@@ -137,6 +141,11 @@ internal sealed class FakeWebServer : IAsyncDisposable
             await stream.WriteAsync(Encoding.ASCII.GetBytes(head + "\r\n"), stop.Token);
             await stream.WriteAsync(body, stop.Token);
             await stream.FlushAsync(stop.Token);
+            if (response.Stalls)
+            {
+                await Task.Delay(Timeout.Infinite, stop.Token);
+            }
+
             if (stream is SslStream ssl)
             {
                 await ssl.ShutdownAsync();
@@ -254,7 +263,9 @@ public sealed class TestPki : IDisposable
         }
 
         // Windows can use a server certificate for TLS only when its key is stored, not in memory:
-        // going through a PFX stores it for as long as the certificate object lives.
+        // going through a PFX stores it for as long as the certificate object lives. No certificate
+        // goes into any store; the key file is removed on Dispose, so a test run that is killed can
+        // leave an orphan key file in the user's key container (harmless, a test key).
         using (withKey)
         {
             var stored = X509CertificateLoader.LoadPkcs12(withKey.Export(X509ContentType.Pfx), null);
@@ -306,6 +317,8 @@ internal sealed class TestSite : IAsyncDisposable
     {
         RequestTimeout = timeout ?? TimeSpan.FromSeconds(10),
         TrustedRoots = trustTestRoot ? [pki.Root] : [],
+        Proxy = new NoProxy(),
+        SystemAddresses = (_, _) => Task.FromException<IPAddress[]>(new System.Net.Sockets.SocketException((int)System.Net.Sockets.SocketError.HostNotFound)),
         Route = endpoint => new IPEndPoint(
             IPAddress.Loopback,
             endpoint.Port != 443 ? server.HttpPort : HttpsListens ? server.HttpsPort : closedPort),
@@ -352,4 +365,24 @@ internal sealed class TestSite : IAsyncDisposable
             _ => FakeResponse.NotFound,
         };
     }
+}
+
+/// <summary>A proxy configuration decided by the test.</summary>
+internal sealed class FakeProxy(Func<Uri, Uri?> proxy) : IWebProxy
+{
+    public ICredentials? Credentials { get; set; }
+
+    public Uri? GetProxy(Uri destination) => proxy(destination);
+
+    public bool IsBypassed(Uri host) => false;
+}
+
+/// <summary>No proxy at all: the proxy settings of the computer running the tests are never read.</summary>
+internal sealed class NoProxy : IWebProxy
+{
+    public ICredentials? Credentials { get; set; }
+
+    public Uri? GetProxy(Uri destination) => null;
+
+    public bool IsBypassed(Uri host) => true;
 }

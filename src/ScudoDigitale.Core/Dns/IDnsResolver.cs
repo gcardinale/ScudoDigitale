@@ -12,9 +12,31 @@
 // ║ Attribution required (AGPL sec. 7(b)): see NOTICE file        ║
 // ╚═══════════════════════════════════════════════════════════════╝
 
-namespace ScudoDigitale.Checks.Email;
+using System.Net;
 
-/// <summary>An MX record: a mail server of a domain and its preference.</summary>
-/// <param name="Preference">Lower values are tried first.</param>
-/// <param name="Host">Host name without the trailing dot; empty for the null MX "<c>0 .</c>" (RFC 7505).</param>
-internal sealed record MailExchange(int Preference, string Host);
+namespace ScudoDigitale.Core.Dns;
+
+/// <summary>
+/// The DNS queries the checks need. Implementations report every DNS problem through
+/// <see cref="DnsAnswer{T}"/> and throw only <see cref="OperationCanceledException"/> when cancelled.
+/// </summary>
+public interface IDnsResolver
+{
+    /// <summary>TXT records of <paramref name="name"/>; the strings of each record are joined.</summary>
+    /// <param name="name">Name to query.</param>
+    /// <param name="cancellationToken">Cancels the query.</param>
+    /// <returns>The answer.</returns>
+    Task<DnsAnswer<string>> QueryTxtAsync(string name, CancellationToken cancellationToken);
+
+    /// <summary>MX records of <paramref name="name"/>.</summary>
+    /// <param name="name">Name to query.</param>
+    /// <param name="cancellationToken">Cancels the query.</param>
+    /// <returns>The answer.</returns>
+    Task<DnsAnswer<MailExchange>> QueryMxAsync(string name, CancellationToken cancellationToken);
+
+    /// <summary>IPv4 and IPv6 addresses (A and AAAA records) of <paramref name="name"/>.</summary>
+    /// <param name="name">Name to query.</param>
+    /// <param name="cancellationToken">Cancels the query.</param>
+    /// <returns>The answer.</returns>
+    Task<DnsAnswer<IPAddress>> QueryAddressesAsync(string name, CancellationToken cancellationToken);
+}

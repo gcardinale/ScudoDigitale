@@ -13,6 +13,7 @@
 // ╚═══════════════════════════════════════════════════════════════╝
 
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using ScudoDigitale.Core;
 
 namespace ScudoDigitale.Checks.Web;
@@ -45,6 +46,44 @@ public static class WebChecks
     /// <returns><see langword="true"/> if the value names a website.</returns>
     public static bool TryNormalizeTarget(string? value, [NotNullWhen(true)] out string? host) =>
         HostName.TryNormalize(value, out host);
+
+    /// <summary>
+    /// The proxy this computer uses to reach a site, if any. The requests of the checks go through
+    /// it, as those of a browser do; a proxy that inspects encrypted traffic shows its own
+    /// certificate instead of the site's, so the report must say that a proxy is in the way.
+    /// </summary>
+    /// <param name="host">The host name of the site.</param>
+    /// <returns>Host and port of the proxy, or <see langword="null"/> when the site is reached directly.</returns>
+    public static string? SystemProxyFor(string host) => ProxyFor(host, HttpClient.DefaultProxy);
+
+    /// <summary>
+    /// The proxy a given configuration uses to reach a site, if any. A configuration may send only
+    /// HTTPS or only HTTP through a proxy: either counts.
+    /// </summary>
+    /// <param name="host">The host name of the site.</param>
+    /// <param name="proxy">The proxy configuration.</param>
+    /// <returns>Host and port of the proxy, without credentials, or <see langword="null"/>.</returns>
+    internal static string? ProxyFor(string host, IWebProxy proxy) =>
+        ProxyFor(Uri.UriSchemeHttps, host, proxy) ?? ProxyFor(Uri.UriSchemeHttp, host, proxy);
+
+    /// <summary>The proxy a given configuration uses to reach a site over one scheme, if any.</summary>
+    /// <param name="scheme"><c>http</c> or <c>https</c>.</param>
+    /// <param name="host">The host name of the site.</param>
+    /// <param name="proxy">The proxy configuration.</param>
+    /// <returns>Host and port of the proxy, without credentials, or <see langword="null"/>.</returns>
+    internal static string? ProxyFor(string scheme, string host, IWebProxy proxy)
+    {
+        try
+        {
+            var site = new Uri($"{scheme}://{host}/");
+            return !proxy.IsBypassed(site) && proxy.GetProxy(site) is { } address && address != site ? address.Authority : null;
+        }
+        catch (Exception)
+        {
+            // A proxy configuration that cannot be read is not a reason to stop the run.
+            return null;
+        }
+    }
 
     /// <summary>Creates the website checks on a given fetcher.</summary>
     /// <param name="fetcher">Visits the sites.</param>

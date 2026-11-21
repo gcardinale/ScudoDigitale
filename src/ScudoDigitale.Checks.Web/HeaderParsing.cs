@@ -62,10 +62,10 @@ internal sealed class ContentSecurityPolicy
     public static IReadOnlyList<ContentSecurityPolicy> Parse(IEnumerable<string> values) =>
         [.. values.SelectMany(value => value.Split(',')).Select(ParseOne).Where(policy => !policy.IsEmpty)];
 
-    /// <summary>Whether the policy has a directive.</summary>
+    /// <summary>The values of a directive, in lower case.</summary>
     /// <param name="name">Directive name, in lower case.</param>
-    /// <returns><see langword="true"/> if present.</returns>
-    public bool Has(string name) => directives.ContainsKey(name);
+    /// <returns>The values, or <see langword="null"/> when the policy does not have the directive.</returns>
+    public IReadOnlyList<string>? Sources(string name) => directives.GetValueOrDefault(name);
 
     /// <summary>
     /// Whether the policy really limits which scripts run: it has <c>script-src</c> (or
@@ -149,9 +149,12 @@ internal static partial class HtmlMeta
 internal sealed partial record SetCookie(string Name, IReadOnlyList<string> Attributes, bool Secure, bool HttpOnly, string? SameSite)
 {
     /// <summary>
-    /// The cookie without its value, which can be a session token and has no place in a report.
+    /// The cookie as shown in a report: its name and the names of its attributes. The value can be a
+    /// session token and is never shown; of the attributes only <c>SameSite</c> and <c>Max-Age</c>
+    /// keep their value, and only when it is a plain word or number, so nothing a server puts in a
+    /// header can end up in the report by way of an attribute.
     /// </summary>
-    public string Display => string.Join("; ", Attributes.Prepend(Name + "=…"));
+    public string Display => string.Join("; ", Attributes.Select(ShowAttribute).OfType<string>().Prepend(Name + "=…"));
 
     /// <summary>
     /// Whether the name looks like that of a session or login cookie. Anti-forgery tokens are left
@@ -159,6 +162,15 @@ internal sealed partial record SetCookie(string Name, IReadOnlyList<string> Attr
     /// </summary>
     public bool LooksLikeSession =>
         SessionName().IsMatch(Name) && !Name.Contains("srf", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The cookies of a <c>Set-Cookie</c> header line. Some proxies join several cookies into one
+    /// line separated by commas: they are told apart, so each one is judged on its own attributes.
+    /// </summary>
+    /// <param name="header">The header value.</param>
+    /// <returns>The cookies that could be read.</returns>
+    public static IEnumerable<SetCookie> ParseAll(string header) =>
+        NextCookie().Split(header).Select(TryParse).OfType<SetCookie>();
 
     /// <summary>Parses a <c>Set-Cookie</c> header value.</summary>
     /// <param name="header">The header value.</param>
@@ -172,7 +184,8 @@ internal sealed partial record SetCookie(string Name, IReadOnlyList<string> Attr
             return null;
         }
 
-        var attributes = parts.Skip(1).ToArray();
+        // A stray comma can be left by whatever joined several cookies into one line.
+        var attributes = parts.Skip(1).Select(a => a.Trim(',', ' ')).Where(a => a.Length > 0).ToArray();
         var sameSite = attributes
             .Select(a => a.Split('=', 2, StringSplitOptions.TrimEntries))
             .Where(a => a.Length == 2 && a[0].Equals("SameSite", StringComparison.OrdinalIgnoreCase))
@@ -186,6 +199,27 @@ internal sealed partial record SetCookie(string Name, IReadOnlyList<string> Attr
             sameSite);
     }
 
+    private static string? ShowAttribute(string attribute)
+    {
+        var parts = attribute.Split('=', 2, StringSplitOptions.TrimEntries);
+        if (!Word().IsMatch(parts[0]))
+        {
+            return null;
+        }
+
+        var keepsValue = parts.Length == 2
+            && (parts[0].Equals("SameSite", StringComparison.OrdinalIgnoreCase) || parts[0].Equals("Max-Age", StringComparison.OrdinalIgnoreCase))
+            && Word().IsMatch(parts[1]);
+        return keepsValue ? $"{parts[0]}={parts[1]}" : parts[0];
+    }
+
     [GeneratedRegex("sess|sid|auth|token|login", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex SessionName();
+
+    /// <summary>A comma followed by <c>name=</c>: the start of another cookie, not the comma of an <c>Expires</c> date.</summary>
+    [GeneratedRegex(@",\s*(?=[^;,=\s]+=)", RegexOptions.CultureInvariant)]
+    private static partial Regex NextCookie();
+
+    [GeneratedRegex(@"\A[A-Za-z0-9-]+\z", RegexOptions.CultureInvariant)]
+    private static partial Regex Word();
 }

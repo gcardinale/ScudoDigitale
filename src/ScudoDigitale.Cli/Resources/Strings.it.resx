@@ -163,4 +163,7 @@
   <data name="AreaWeb" xml:space="preserve">
     <value>Siti web</value>
   </data>
+  <data name="WebProxyNote" xml:space="preserve">
+    <value>Nota: le richieste verso {0} passano dal proxy configurato su questo computer ({1}). Se quel proxy ispeziona il traffico cifrato, il certificato controllato è quello del proxy, non quello del sito.</value>
+  </data>
 </root>

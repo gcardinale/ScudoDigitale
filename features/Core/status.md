@@ -2,8 +2,8 @@
 
 - **Content:** contracts, engine, prioritization, Attribution
 - **Release:** v0.0
-- **Status:** 🟢 v0.0 done (15/11/2026), review fixes applied
-- **Test coverage:** 100% lines (230/230), 95% branches (99/104) — 169 tests
+- **Status:** 🟢 v0.0 done (15/11/2026), review fixes applied; shared DNS resolver added on 21/11/2026
+- **Test coverage:** 99.8% lines (538/539), 97.8% branches (178/182) — 240 tests
 
 ## Done
 - Contracts: `ICheck`, `CheckContext`, `CheckResult` (`Executed` / `Skipped` / `Failed`), `Finding`, `PrioritizedFinding`, `Severity`, `Confidence`, `CheckArea`, `ScopeRequirement`, `Target` / `TargetKind`, `Profile` / `ProfileKind`, `ScopeDeclaration` / `OperatorRole`, `IScopeGuard`.
@@ -13,6 +13,7 @@
 - `FindingPrioritizer`: KEV → Critical, CVSS qualitative rating, EPSS ≥ 0.1 raises one level, total ordering; returns `PrioritizedFinding`, so prioritizing again gives the same result.
 - `Attribution`: `Notice`, `Banner`, `ReportFooter(version)` (only the leading words are localized).
 - Localized engine messages in `Resources/Strings.resx` + `Strings.it.resx`.
+- `ScudoDigitale.Core.Dns` (21/11/2026, moved from `Checks.Email` so that the website checks can use it too, ADR-006): `IDnsResolver` (TXT, MX, addresses) with `DnsAnswer` / `DnsStatus`, `DnsOptions` (source, timeout, retries), `DnsSource`, and `DnsResolvers.Create`: Cloudflare and then Google over DNS over HTTPS, then the DNS of the computer through DnsClient.NET; `DnsSource.System` uses only the latter. Core now references DnsClient.NET. Tested on real DNS packets with an in-process UDP DNS server.
 - ADR-005 (15/11/2026): `ICheck.Title` (validated, carried by `CheckRun.CheckTitle`); `ScopeDeclaration` accepts no targets for a questionnaire-only assessment.
 - Counter-checks: 11 at v0.0 and 13 after the review fixes, each one turning the expected test red. 3 more for ADR-005.
 
