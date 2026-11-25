@@ -17,6 +17,7 @@ using System.Globalization;
 using ScudoDigitale.Checks.Email;
 using ScudoDigitale.Checks.Web;
 using ScudoDigitale.Cli.Resources;
+using ScudoDigitale.Compliance;
 using ScudoDigitale.Core;
 using ScudoDigitale.Core.Dns;
 using ScudoDigitale.Reporting;
@@ -27,7 +28,8 @@ namespace ScudoDigitale.Cli;
 /// <c>scudo scan</c>: runs the checks on the declared targets and prints the results. In v0.1 the
 /// targets are domains for the email checks (<c>--mail</c>) and websites for the passive website
 /// checks (<c>--web</c>); the two can be given together, also for the same domain. With
-/// <c>--report</c> the results are also written as HTML, PDF and JSON.
+/// <c>--report</c> the results are also written as HTML, PDF and JSON. With <c>--gdpr</c> and
+/// <c>--nis2</c> the questionnaires are answered too (ADR-008), in the terminal or from <c>--answers</c>.
 /// </summary>
 internal static class ScanCommand
 {
@@ -49,8 +51,13 @@ internal static class ScanCommand
         var operatorName = new Option<string>("--operator") { Description = Strings.OperatorOptionDescription, HelpName = "name" };
         var role = new Option<OperatorRole>("--role") { Description = Strings.RoleOptionDescription, DefaultValueFactory = _ => OperatorRole.Owner };
         var report = new Option<string>("--report") { Description = Strings.ReportOptionDescription, HelpName = "folder" };
+        var profile = new Option<ProfileKind>("--profile") { Description = Strings.ProfileOptionDescription, DefaultValueFactory = _ => ProfileKind.Individual };
+        var company = new Option<string>("--company") { Description = Strings.CompanyOptionDescription, HelpName = "name" };
+        var gdpr = new Option<bool>("--gdpr") { Description = Strings.GdprOptionDescription };
+        var nis2 = new Option<bool>("--nis2") { Description = Strings.Nis2OptionDescription };
+        var answers = new Option<string>("--answers") { Description = Strings.AnswersOptionDescription, HelpName = "file" };
 
-        var command = new Command("scan", Strings.ScanDescription) { mail, web, selectors, systemDns, operatorName, role, report };
+        var command = new Command("scan", Strings.ScanDescription) { mail, web, selectors, systemDns, operatorName, role, report, profile, company, gdpr, nis2, answers };
         command.SetAction((parseResult, cancellationToken) => RunAsync(
             new ScanRequest(
                 parseResult.GetValue(mail) ?? [],
@@ -59,7 +66,12 @@ internal static class ScanCommand
                 parseResult.GetValue(systemDns),
                 parseResult.GetValue(operatorName),
                 parseResult.GetValue(role),
-                parseResult.GetValue(report)),
+                parseResult.GetValue(report),
+                parseResult.GetValue(profile),
+                parseResult.GetValue(company),
+                parseResult.GetValue(gdpr),
+                parseResult.GetValue(nis2),
+                parseResult.GetValue(answers)),
             services,
             parseResult.InvocationConfiguration.Output,
             parseResult.InvocationConfiguration.Error,
@@ -86,7 +98,7 @@ internal static class ScanCommand
     {
         var domains = request.Domains.Where(d => !string.IsNullOrWhiteSpace(d)).ToArray();
         var sites = request.Websites.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-        if (domains.Length + sites.Length == 0)
+        if (domains.Length + sites.Length == 0 && !request.Gdpr && !request.Nis2)
         {
             await error.WriteLineAsync(Strings.NoTargets).ConfigureAwait(false);
             return InvalidInput;
@@ -114,6 +126,35 @@ internal static class ScanCommand
         {
             await error.WriteLineAsync(Format(Strings.InvalidSelector, invalid)).ConfigureAwait(false);
             return InvalidInput;
+        }
+
+        if (request.Profile == ProfileKind.Company && string.IsNullOrWhiteSpace(request.Company))
+        {
+            await error.WriteLineAsync(Strings.CompanyNameRequired).ConfigureAwait(false);
+            return InvalidInput;
+        }
+
+        if (request.Nis2 && request.Profile != ProfileKind.Company)
+        {
+            await error.WriteLineAsync(Strings.Nis2NeedsCompany).ConfigureAwait(false);
+            return InvalidInput;
+        }
+
+        var profile = request.Profile == ProfileKind.Company ? Profile.Company(request.Company!) : Profile.Individual();
+        Questionnaire[] questionnaires =
+        [
+            .. request.Gdpr ? [QuestionnaireCatalog.GdprFor(profile.Kind)] : Array.Empty<Questionnaire>(),
+            .. request.Nis2 ? [QuestionnaireCatalog.Get(QuestionnaireCatalog.Nis2)] : Array.Empty<Questionnaire>(),
+        ];
+
+        IReadOnlyDictionary<string, string>? givenAnswers = null;
+        if (request.AnswersFile is { } answersFile)
+        {
+            givenAnswers = await ReadAnswersAsync(answersFile, questionnaires, error, cancellationToken).ConfigureAwait(false);
+            if (givenAnswers is null)
+            {
+                return InvalidInput;
+            }
         }
 
         var dns = request.SystemDns ? DnsSource.System : DnsSource.Public;
@@ -153,18 +194,34 @@ internal static class ScanCommand
             }
         }
 
-        var profile = Profile.Individual();
+        // The questions come before the checks: the user is at the keyboard now, not after a minute of DNS.
+        var culture = CultureInfo.CurrentUICulture;
+        var allAnswers = givenAnswers
+            ?? (questionnaires.Length > 0 ? QuestionnairePrompt.Ask(questionnaires, services.Input ?? Console.In, output, culture) : new Dictionary<string, string>());
+
         var runs = await new CheckEngine(new PassiveOnlyScopeGuard())
             .RunAsync(checks, profile, scope, cancellationToken)
             .ConfigureAwait(false);
-        report.WriteResults(scope, runs);
+
+        // The technical findings feed the art. 32 question, only when some technical check ran (ADR-008).
+        var technical = runs.Count == 0
+            ? null
+            : FindingPrioritizer.Prioritize(runs.Select(r => r.Result).OfType<CheckResult.Executed>().SelectMany(r => r.Findings));
+        var subject = profile.CompanyName ?? operatorName;
+        var outcomes = questionnaires.Select(q => QuestionnaireEvaluator.Evaluate(q, allAnswers, subject, technical, culture)).ToArray();
+        report.WriteResults(scope, runs, outcomes);
 
         if (request.ReportFolder is null)
         {
             return 0;
         }
 
-        var document = ReportBuilder.Build(scope, profile, runs, ProgramVersion.Current, services.Now(), notes);
+        notes.AddRange(outcomes.Select(o => Format(Strings.QuestionnaireNote, o.Questionnaire.Title.In(culture), o.Questionnaire.Id, o.Questionnaire.Version, o.Questionnaire.Notice.In(culture))));
+        var sections = outcomes.Select(o => ReportBuilder.QuestionnaireSection(
+            o.Questionnaire.Area,
+            o.Findings,
+            o.Passed.Select(p => new ReportCheck(p.Id, p.Label, p.Detail))));
+        var document = ReportBuilder.Build(scope, profile, runs, ProgramVersion.Current, services.Now(), notes, sections);
         try
         {
             var paths = await ReportFiles.WriteAsync(document, request.ReportFolder, cancellationToken).ConfigureAwait(false);
@@ -177,6 +234,38 @@ internal static class ScanCommand
             await error.WriteLineAsync(Format(Strings.ReportNotWritten, request.ReportFolder, e.Message)).ConfigureAwait(false);
             return ReportNotWritten;
         }
+    }
+
+    private static async Task<IReadOnlyDictionary<string, string>?> ReadAnswersAsync(
+        string path,
+        IReadOnlyList<Questionnaire> questionnaires,
+        TextWriter error,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyDictionary<string, string> answers;
+        try
+        {
+            answers = AnswersFile.Read(await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException or ArgumentException or NotSupportedException)
+        {
+            await error.WriteLineAsync(Format(Strings.AnswersNotRead, path, e.Message)).ConfigureAwait(false);
+            return null;
+        }
+
+        var problems = AnswersFile.Validate(answers, questionnaires);
+        if (problems.Count == 0)
+        {
+            return answers;
+        }
+
+        await error.WriteLineAsync(Format(Strings.AnswersInvalid, path)).ConfigureAwait(false);
+        foreach (var problem in problems)
+        {
+            await error.WriteLineAsync("  " + problem).ConfigureAwait(false);
+        }
+
+        return null;
     }
 
     private static bool IsSelector(string selector)
@@ -205,6 +294,11 @@ internal static class ScanCommand
 /// <param name="Operator">Value of <c>--operator</c>, if any.</param>
 /// <param name="Role">Value of <c>--role</c>.</param>
 /// <param name="ReportFolder">Value of <c>--report</c>: where to write the report files; <see langword="null"/> for none.</param>
+/// <param name="Profile">Value of <c>--profile</c>.</param>
+/// <param name="Company">Value of <c>--company</c>, required for a company.</param>
+/// <param name="Gdpr">Whether <c>--gdpr</c> was given.</param>
+/// <param name="Nis2">Whether <c>--nis2</c> was given.</param>
+/// <param name="AnswersFile">Value of <c>--answers</c>: the file of answers; <see langword="null"/> to ask in the terminal.</param>
 internal sealed record ScanRequest(
     IReadOnlyList<string> Domains,
     IReadOnlyList<string> Websites,
@@ -212,4 +306,9 @@ internal sealed record ScanRequest(
     bool SystemDns,
     string? Operator,
     OperatorRole Role,
-    string? ReportFolder = null);
+    string? ReportFolder = null,
+    ProfileKind Profile = ProfileKind.Individual,
+    string? Company = null,
+    bool Gdpr = false,
+    bool Nis2 = false,
+    string? AnswersFile = null);

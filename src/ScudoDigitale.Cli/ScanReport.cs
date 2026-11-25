@@ -14,6 +14,7 @@
 
 using System.Globalization;
 using ScudoDigitale.Cli.Resources;
+using ScudoDigitale.Compliance;
 using ScudoDigitale.Core;
 
 namespace ScudoDigitale.Cli;
@@ -37,8 +38,12 @@ internal sealed class ScanReport(TextWriter output)
         output.WriteLine(Strings.Disclaimer);
         output.WriteLine();
         output.WriteLine(Format(Strings.Declaration, scope.OperatorName, RoleLabel(scope.OperatorRole), scope.DeclaredAt.ToString("g", CultureInfo.CurrentCulture)));
-        var targets = scope.Targets.Select(t => Format(Strings.CheckingTarget, t.Value, AreaLabel(t.Kind), checks.Count(c => c.AppliesTo == t.Kind)));
-        output.WriteLine(Format(Strings.Checking, string.Join(", ", targets)));
+        // A questionnaire-only assessment has nothing to list here.
+        if (scope.Targets.Count > 0)
+        {
+            var targets = scope.Targets.Select(t => Format(Strings.CheckingTarget, t.Value, AreaLabel(t.Kind), checks.Count(c => c.AppliesTo == t.Kind)));
+            output.WriteLine(Format(Strings.Checking, string.Join(", ", targets)));
+        }
     }
 
     /// <summary>Prints a note the reader must know before the results, for example that a site is reached through a proxy.</summary>
@@ -48,7 +53,8 @@ internal sealed class ScanReport(TextWriter output)
     /// <summary>The results of every target, the summary and the attribution.</summary>
     /// <param name="scope">The declaration, for the order of the targets.</param>
     /// <param name="runs">What the engine returned.</param>
-    public void WriteResults(ScopeDeclaration scope, IReadOnlyList<CheckRun> runs)
+    /// <param name="questionnaires">What the questionnaires gave, if any; each gets a section after the targets.</param>
+    public void WriteResults(ScopeDeclaration scope, IReadOnlyList<CheckRun> runs, IReadOnlyList<QuestionnaireOutcome>? questionnaires = null)
     {
         var all = new List<PrioritizedFinding>();
         foreach (var target in scope.Targets)
@@ -69,6 +75,28 @@ internal sealed class ScanReport(TextWriter output)
             WriteList(Strings.ChecksPassed, mine.Where(r => r.Result is CheckResult.Executed { Findings.Count: 0 }), "OK", _ => null);
             WriteList(Strings.ChecksSkipped, mine.Where(r => r.Result is CheckResult.Skipped), "--", r => ((CheckResult.Skipped)r.Result).Reason);
             WriteList(Strings.ChecksFailed, mine.Where(r => r.Result is CheckResult.Failed), "!!", r => ((CheckResult.Failed)r.Result).Error);
+        }
+
+        foreach (var outcome in questionnaires ?? [])
+        {
+            var findings = FindingPrioritizer.Prioritize(outcome.Findings);
+            all.AddRange(findings);
+
+            output.WriteLine();
+            output.WriteLine($"== {outcome.Questionnaire.Title.In(CultureInfo.CurrentUICulture)} ==");
+            if (findings.Count > 0 || outcome.Passed.Count > 0)
+            {
+                WriteFindings(findings);
+            }
+
+            if (outcome.Passed.Count > 0)
+            {
+                output.WriteLine(Strings.QuestionsPassed);
+                foreach (var passed in outcome.Passed)
+                {
+                    output.WriteLine(passed.Detail is null ? $"  OK {passed.Id}  {passed.Label}" : $"  OK {passed.Id}  {passed.Label}: {passed.Detail}");
+                }
+            }
         }
 
         output.WriteLine();

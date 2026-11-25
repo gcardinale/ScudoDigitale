@@ -1,0 +1,117 @@
+{
+  "id": "gdpr-individual",
+  "version": "2026-11-25",
+  "area": "Gdpr",
+  "profile": "Individual",
+  "title": {
+    "en": "Protecting your personal data: good practices",
+    "it": "Proteggere i propri dati personali: buone pratiche"
+  },
+  "notice": {
+    "en": "Indicative. The GDPR does not apply to purely personal or household activities (art. 2(2)(c)): these questions are good practices that protect your own data and accounts, not legal obligations.",
+    "it": "Indicativo. Il GDPR non si applica alle attività a carattere esclusivamente personale o domestico (art. 2, par. 2, lett. c): queste domande sono buone pratiche che proteggono i tuoi dati e i tuoi account, non obblighi di legge."
+  },
+  "questions": [
+    {
+      "id": "GDPR-BACKUP-001",
+      "kind": "YesNo",
+      "label": { "en": "Backup of personal files", "it": "Copia dei file personali" },
+      "text": {
+        "en": "Do you keep a copy of your important files (photos, documents) on a disk or a service separate from your computer, and have you tried restoring a file from it in the last year?",
+        "it": "Tieni una copia dei file importanti (foto, documenti) su un disco o un servizio separato dal computer, e nell'ultimo anno hai provato a recuperare un file da quella copia?"
+      },
+      "finding": { "en": "No tested backup of personal files", "it": "Nessuna copia provata dei file personali" },
+      "severity": "High",
+      "risk": {
+        "en": "A broken disk, a theft or ransomware can delete years of photos and documents for good.",
+        "it": "Un disco rotto, un furto o un ransomware possono cancellare per sempre anni di foto e documenti."
+      },
+      "fix": {
+        "en": "Keep at least one copy on an external disk or a cloud service, disconnect the disk when you are not using it, and restore one file once a year to check that the copy works.",
+        "it": "Tieni almeno una copia su un disco esterno o su un servizio cloud, scollega il disco quando non lo usi, e una volta l'anno recupera un file per verificare che la copia funzioni."
+      },
+      "references": []
+    },
+    {
+      "id": "GDPR-PASSWORD-001",
+      "kind": "YesNo",
+      "label": { "en": "Different passwords", "it": "Password diverse" },
+      "text": {
+        "en": "Do you use a different password for every important account, kept in a password manager?",
+        "it": "Usi una password diversa per ogni account importante, conservata in un gestore di password?"
+      },
+      "finding": { "en": "The same passwords on several accounts", "it": "Le stesse password su più account" },
+      "severity": "Medium",
+      "risk": {
+        "en": "When one site loses its passwords, whoever has them tries them on your email and your bank too.",
+        "it": "Quando un sito perde le sue password, chi le ottiene le prova anche sulla tua posta e sulla tua banca."
+      },
+      "fix": {
+        "en": "Install a password manager (several are free and open source), start from the email and the bank, and let it generate a different password for each account.",
+        "it": "Installa un gestore di password (ne esistono di gratuiti e open source), comincia dalla posta e dalla banca, e fagli generare una password diversa per ogni account."
+      },
+      "references": []
+    },
+    {
+      "id": "GDPR-MFA-001",
+      "kind": "YesNo",
+      "label": { "en": "Two-factor authentication", "it": "Verifica in due passaggi" },
+      "text": {
+        "en": "Is two-factor authentication (a code on the phone, an app or a key) active on your email, your bank and your main social accounts?",
+        "it": "La verifica in due passaggi (un codice sul telefono, un'app o una chiave) è attiva sulla posta, sulla banca e sui principali social?"
+      },
+      "finding": { "en": "Two-factor authentication not active on the main accounts", "it": "Verifica in due passaggi non attiva sugli account principali" },
+      "severity": "High",
+      "risk": {
+        "en": "A stolen password is enough to take over the account; with the email, every other account can be reset.",
+        "it": "Basta una password rubata per prendere l'account; con la posta si possono reimpostare tutti gli altri."
+      },
+      "fix": {
+        "en": "Turn on two-factor authentication in the security settings of the email first, then of the other accounts; prefer an authenticator app to SMS.",
+        "it": "Attiva la verifica in due passaggi nelle impostazioni di sicurezza, prima della posta, poi degli altri account; preferisci un'app di autenticazione agli SMS."
+      },
+      "references": []
+    },
+    {
+      "id": "GDPR-UPDATE-001",
+      "kind": "YesNo",
+      "label": { "en": "Automatic updates", "it": "Aggiornamenti automatici" },
+      "text": {
+        "en": "Are automatic updates on for the operating system, the browser and the phone?",
+        "it": "Gli aggiornamenti automatici sono attivi per il sistema operativo, il browser e il telefono?"
+      },
+      "finding": { "en": "Automatic updates not active", "it": "Aggiornamenti automatici non attivi" },
+      "severity": "High",
+      "risk": {
+        "en": "Known flaws stay open: many attacks use vulnerabilities fixed months earlier.",
+        "it": "Le falle note restano aperte: molti attacchi sfruttano vulnerabilità corrette da mesi."
+      },
+      "fix": {
+        "en": "Turn on automatic updates in the settings of the system, the browser and the phone, and replace devices that no longer receive them.",
+        "it": "Attiva gli aggiornamenti automatici nelle impostazioni del sistema, del browser e del telefono, e sostituisci i dispositivi che non li ricevono più."
+      },
+      "references": []
+    },
+    {
+      "id": "GDPR-DEVICE-001",
+      "kind": "YesNo",
+      "label": { "en": "Shared devices", "it": "Dispositivi condivisi" },
+      "text": {
+        "en": "On the devices you share with others, does each person have their own account, and is the screen locked with a PIN or a password?",
+        "it": "Sui dispositivi che condividi con altri, ognuno ha il proprio account e lo schermo si blocca con un PIN o una password?"
+      },
+      "finding": { "en": "Shared devices without separate accounts", "it": "Dispositivi condivisi senza account separati" },
+      "severity": "Low",
+      "risk": {
+        "en": "Whoever uses the device sees the mail, the photos and the open accounts of the others.",
+        "it": "Chi usa il dispositivo vede la posta, le foto e gli account aperti degli altri."
+      },
+      "fix": {
+        "en": "Create one account per person on the shared computer, and lock the screen after a few minutes of inactivity.",
+        "it": "Crea un account per persona sul computer condiviso, e blocca lo schermo dopo pochi minuti di inattività."
+      },
+      "references": [],
+      "allowNotApplicable": true
+    }
+  ]
+}

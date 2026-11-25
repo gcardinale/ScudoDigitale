@@ -2,8 +2,8 @@
 
 - **Content:** scan, db update, report commands
 - **Release:** v0.1
-- **Status:** 🟡 `scan --mail` (19/11/2026), `scan --web` (21/11/2026) and `scan --report` (25/11/2026) working; questionnaires, `db update`, `report diff` to do
-- **Test coverage:** 100% lines (244/244), 100% branches (73/73) — 43 tests
+- **Status:** 🟡 `scan --mail` (19/11/2026), `scan --web` (21/11/2026), `scan --report` and the questionnaires (25/11/2026) working; `db update`, `report diff` to do
+- **Test coverage:** 100% lines (405/405), 97.4% branches (186/191) — 72 tests
 
 ## Done
 - `scudo` executable (System.CommandLine 3): without arguments prints the banner, the attribution and the self-assessment warning in English or Italian; `--help`, `--version`.
@@ -16,8 +16,8 @@
   - for every target a section named after its area (Email, Websites): problems most urgent first (`FindingPrioritizer`) with evidence, risk, fix, confidence and references; then checks passed, skipped (with the reason) and failed (with the error); summary by severity; attribution last;
   - exit code 0 when the checks ran (whatever they found), 1 for a wrong command line, 2 when there is nothing to check, a selector is not valid or a website is not valid.
 - `--report <folder>` (25/11/2026): after the text output writes the report as HTML, PDF and JSON (`Reporting`) and prints the three paths; the proxy notes go into the report too; the version written is the informational version without the commit id (`ProgramVersion`). A blank folder is a wrong option (exit 2, nothing runs); a folder that cannot be written gives exit 3, with the results already on screen.
+- Questionnaires (25/11/2026, ADR-008): `--profile Individual|Company`, `--company <name>` (required for a company), `--gdpr`, `--nis2` (companies only), `--answers <file>`. Without a file the questions are asked in the terminal before the checks start (`s`/`y`, `n`, `?`, `na` where allowed; choices by number); the NIS2 obligations only when the company is not probably out of scope; when the input ends the rest counts as "don't know". A file with unknown ids or answers not accepted is refused with the list (exit 2). A questionnaire-only assessment needs no target. The questionnaires get a section in the text output and in the report, and their notice goes into the notes of the report.
 - Commands receive the checks, the clock and the user name through `CliServices`, so tests run with no network.
 
 ## To do
-- Profile options (individual / company) when Compliance needs them.
 - `db update`, `report diff` (v0.2+).

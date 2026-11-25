@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="AnswerNo" xml:space="preserve">
+    <value>Answer: no.</value>
+  </data>
+  <data name="AnswerUnknown" xml:space="preserve">
+    <value>Answer: don't know.</value>
+  </data>
+  <data name="NoAnswer" xml:space="preserve">
+    <value>No answer given.</value>
+  </data>
+  <data name="NoAnswerShort" xml:space="preserve">
+    <value>no answer</value>
+  </data>
+  <data name="NotApplicable" xml:space="preserve">
+    <value>not applicable</value>
+  </data>
+  <data name="TechnicalEvidence" xml:space="preserve">
+    <value>{0} technical findings of Medium severity or above: {1}</value>
+  </data>
+  <data name="AndMore" xml:space="preserve">
+    <value>and {0} more</value>
+  </data>
+  <data name="Nis2TitleProbablyEssential" xml:space="preserve">
+    <value>Probably an essential entity under NIS2</value>
+  </data>
+  <data name="Nis2TitleProbablyImportant" xml:space="preserve">
+    <value>Probably an important entity under NIS2</value>
+  </data>
+  <data name="Nis2TitleProbablyInScope" xml:space="preserve">
+    <value>Probably within NIS2, category to be verified</value>
+  </data>
+  <data name="Nis2TitleProbablyOutOfScope" xml:space="preserve">
+    <value>Probably outside NIS2</value>
+  </data>
+  <data name="Nis2TitleToBeVerified" xml:space="preserve">
+    <value>NIS2 scope to be verified</value>
+  </data>
+  <data name="Nis2ScopeRisk" xml:space="preserve">
+    <value>An entity in scope that does not register and does not apply the measures is exposed to the sanctions of D.Lgs. 138/2024, and its management bodies are responsible for the violations (art. 23).</value>
+  </data>
+  <data name="Nis2FixProbablyEssential" xml:space="preserve">
+    <value>Register, or update the registration, on the ACN platform between 1 January and 28 February of every year (art. 7); then check the risk-management measures (art. 24) and the incident notifications (art. 25). Have the category confirmed by a lawyer: linked enterprises and decisions of ACN can change it.</value>
+  </data>
+  <data name="Nis2FixProbablyImportant" xml:space="preserve">
+    <value>Register, or update the registration, on the ACN platform between 1 January and 28 February of every year (art. 7); then check the risk-management measures (art. 24) and the incident notifications (art. 25). Have the category confirmed by a lawyer: linked enterprises and decisions of ACN can change it.</value>
+  </data>
+  <data name="Nis2FixProbablyInScope" xml:space="preserve">
+    <value>Register, or update the registration, on the ACN platform between 1 January and 28 February of every year (art. 7); then check the risk-management measures (art. 24) and the incident notifications (art. 25). Have the category confirmed by a lawyer: linked enterprises and decisions of ACN can change it.</value>
+  </data>
+  <data name="Nis2FixProbablyOutOfScope" xml:space="preserve">
+    <value>No NIS2 obligation appears from the answers. Check again every year, and also when the company is part of a group (linked and partner enterprises count for the size) or supplies ICT or security services to an entity in scope (art. 3, paragraph 10).</value>
+  </data>
+  <data name="Nis2FixToBeVerified" xml:space="preserve">
+    <value>Answer the questions left as "don't know" (sector, size, categories in scope whatever their size), or have the scope assessed by a lawyer.</value>
+  </data>
+</root>

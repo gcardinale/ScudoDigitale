@@ -46,10 +46,10 @@ Visible BLE/classic devices, "discoverable" state, manufacturer (OUI / company I
 - **Company:** record of processing activities (art. 30), privacy notices (arts. 13-14), DPO appointment if mandatory (art. 37), processor appointments (art. 28), data breach procedure (arts. 33-34, 72 hours), impact assessment (art. 35), security measures (art. 32). The technical evidence collected (TLS, DMARC, cookies) is linked to art. 32.
 
 ### 2.7 NIS2 questionnaire (companies only)
-- **Scope:** sector (Annexes I-IV of Legislative Decree 138/2024, Italy's NIS2 transposition), size (medium-sized enterprise: ≥50 employees or >€10 million turnover) → outcome *probably essential / important / out of scope / to be verified*.
+- **Scope:** sector (Annexes I-IV of Legislative Decree 138/2024, Italy's NIS2 transposition), size per Recommendation 2003/361/CE (art. 3 and 6 of the decree): above a small enterprise means 50 or more people, or turnover **and** balance sheet total both above €10 million; above a medium enterprise means 250 or more people, or turnover above €50 million **and** balance sheet total above €43 million. Some categories are in scope whatever their size (art. 3, paragraph 5). → outcome *probably essential / important / in scope (category to verify) / out of scope / to be verified* ([ADR-008](decisions/ADR-008-questionnaires-in-json.md)).
 - **Obligations:** registration on the ACN platform (Italy's National Cybersecurity Agency), risk-management measures, training of management bodies, incident notification (early warning 24 h, notification 72 h, final report within one month), supply-chain security.
 - Every "no" answer becomes a finding with an article reference.
-- ⚠️ Legal references to be verified against official sources (Normattiva, ACN) **before v0.1**.
+- ⚠️ Legal references to be verified against official sources (Normattiva, ACN) **before v0.1**. Done on 25/11/2026 for arts. 3, 6, 7, 23, 24 and 25 of D.Lgs. 138/2024 (Normattiva, text in force since 16/10/2024) and for the sectors of Annexes I-II (Gazzetta Ufficiale, to be checked on the PDF of GU n. 230 of 1/10/2024); the GDPR articles are still to be checked on EUR-Lex.
 
 ## 3. Finding format
 ```json

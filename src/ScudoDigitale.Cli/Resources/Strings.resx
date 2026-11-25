@@ -68,7 +68,7 @@
     <value>Role of that person: Owner, SecurityOfficer or AppointedPerson (default: Owner).</value>
   </data>
   <data name="NoTargets" xml:space="preserve">
-    <value>Nothing to check: give at least one domain with --mail &lt;domain&gt; or --web &lt;domain&gt;.</value>
+    <value>Nothing to check: give at least one domain with --mail &lt;domain&gt; or --web &lt;domain&gt;, or a questionnaire with --gdpr or --nis2.</value>
   </data>
   <data name="InvalidSelector" xml:space="preserve">
     <value>'{0}' is not a valid DKIM selector.</value>
@@ -180,5 +180,57 @@
   </data>
   <data name="InvalidReportFolder" xml:space="preserve">
     <value>--report needs the name of a folder.</value>
+  </data>
+  <data name="ProfileOptionDescription" xml:space="preserve">
+    <value>Who the assessment is for: Individual or Company (default Individual).</value>
+  </data>
+  <data name="CompanyOptionDescription" xml:space="preserve">
+    <value>Name of the company, required with --profile Company.</value>
+  </data>
+  <data name="GdprOptionDescription" xml:space="preserve">
+    <value>Answer the GDPR questionnaire for the profile (good practices for an individual, main obligations for a company).</value>
+  </data>
+  <data name="Nis2OptionDescription" xml:space="preserve">
+    <value>Answer the NIS2 questionnaire (D.Lgs. 138/2024): scope and main obligations; companies only.</value>
+  </data>
+  <data name="AnswersOptionDescription" xml:space="preserve">
+    <value>JSON file with the answers to the questionnaires, instead of the questions in the terminal.</value>
+  </data>
+  <data name="CompanyNameRequired" xml:space="preserve">
+    <value>--profile Company needs the name of the company: --company &lt;name&gt;.</value>
+  </data>
+  <data name="Nis2NeedsCompany" xml:space="preserve">
+    <value>The NIS2 questionnaire is for companies: add --profile Company --company &lt;name&gt;.</value>
+  </data>
+  <data name="AnswersNotRead" xml:space="preserve">
+    <value>The answers could not be read from {0}: {1}</value>
+  </data>
+  <data name="AnswersInvalid" xml:space="preserve">
+    <value>The answers in {0} are not valid:</value>
+  </data>
+  <data name="QuestionnaireIntro" xml:space="preserve">
+    <value>== {0} ==
+Answer each question and press Enter.</value>
+  </data>
+  <data name="PromptYesNo" xml:space="preserve">
+    <value>  y = yes · n = no · ? = don't know</value>
+  </data>
+  <data name="PromptNotApplicable" xml:space="preserve">
+    <value> · na = not applicable</value>
+  </data>
+  <data name="PromptChoice" xml:space="preserve">
+    <value>  Number of the answer:</value>
+  </data>
+  <data name="PromptInvalid" xml:space="preserve">
+    <value>  Not a valid answer, try again.</value>
+  </data>
+  <data name="PromptEnded" xml:space="preserve">
+    <value>Input ended: the questions not answered count as "don't know".</value>
+  </data>
+  <data name="QuestionsPassed" xml:space="preserve">
+    <value>Questions answered without problems</value>
+  </data>
+  <data name="QuestionnaireNote" xml:space="preserve">
+    <value>{0} (questionnaire {1}, version {2}). {3}</value>
   </data>
 </root>

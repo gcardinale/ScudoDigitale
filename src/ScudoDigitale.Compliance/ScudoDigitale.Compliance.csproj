@@ -1,6 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <InternalsVisibleTo Include="ScudoDigitale.Compliance.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The questionnaires, texts in English and Italian (ADR-008). -->
+    <EmbeddedResource Include="Questionnaires\*.json" LogicalName="ScudoDigitale.Compliance.Questionnaires.%(Filename)%(Extension)" />
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>ScudoDigitale.Compliance.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ScudoDigitale.Core\ScudoDigitale.Core.csproj" />
   </ItemGroup>
 

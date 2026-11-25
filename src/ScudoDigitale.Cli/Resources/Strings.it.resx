@@ -68,7 +68,7 @@
     <value>Ruolo di quella persona: Owner (titolare), SecurityOfficer (responsabile della sicurezza) o AppointedPerson (incaricato); predefinito Owner.</value>
   </data>
   <data name="NoTargets" xml:space="preserve">
-    <value>Niente da controllare: indica almeno un dominio con --mail &lt;dominio&gt; oppure --web &lt;dominio&gt;.</value>
+    <value>Niente da controllare: indica almeno un dominio con --mail &lt;dominio&gt; o --web &lt;dominio&gt;, oppure un questionario con --gdpr o --nis2.</value>
   </data>
   <data name="InvalidSelector" xml:space="preserve">
     <value>'{0}' non è un selettore DKIM valido.</value>
@@ -180,5 +180,57 @@
   </data>
   <data name="InvalidReportFolder" xml:space="preserve">
     <value>--report richiede il nome di una cartella.</value>
+  </data>
+  <data name="ProfileOptionDescription" xml:space="preserve">
+    <value>Per chi è la valutazione: Individual (persona) o Company (azienda); predefinito Individual.</value>
+  </data>
+  <data name="CompanyOptionDescription" xml:space="preserve">
+    <value>Nome dell'azienda, obbligatorio con --profile Company.</value>
+  </data>
+  <data name="GdprOptionDescription" xml:space="preserve">
+    <value>Rispondi al questionario GDPR del profilo (buone pratiche per la persona, principali obblighi per l'azienda).</value>
+  </data>
+  <data name="Nis2OptionDescription" xml:space="preserve">
+    <value>Rispondi al questionario NIS2 (D.Lgs. 138/2024): ambito e principali obblighi; solo per le aziende.</value>
+  </data>
+  <data name="AnswersOptionDescription" xml:space="preserve">
+    <value>File JSON con le risposte ai questionari, al posto delle domande nel terminale.</value>
+  </data>
+  <data name="CompanyNameRequired" xml:space="preserve">
+    <value>--profile Company richiede il nome dell'azienda: --company &lt;nome&gt;.</value>
+  </data>
+  <data name="Nis2NeedsCompany" xml:space="preserve">
+    <value>Il questionario NIS2 è per le aziende: aggiungi --profile Company --company &lt;nome&gt;.</value>
+  </data>
+  <data name="AnswersNotRead" xml:space="preserve">
+    <value>Non è stato possibile leggere le risposte da {0}: {1}</value>
+  </data>
+  <data name="AnswersInvalid" xml:space="preserve">
+    <value>Le risposte in {0} non sono valide:</value>
+  </data>
+  <data name="QuestionnaireIntro" xml:space="preserve">
+    <value>== {0} ==
+Rispondi a ogni domanda e premi Invio.</value>
+  </data>
+  <data name="PromptYesNo" xml:space="preserve">
+    <value>  s = sì · n = no · ? = non so</value>
+  </data>
+  <data name="PromptNotApplicable" xml:space="preserve">
+    <value> · na = non applicabile</value>
+  </data>
+  <data name="PromptChoice" xml:space="preserve">
+    <value>  Numero della risposta:</value>
+  </data>
+  <data name="PromptInvalid" xml:space="preserve">
+    <value>  Risposta non valida, riprova.</value>
+  </data>
+  <data name="PromptEnded" xml:space="preserve">
+    <value>Input terminato: le domande senza risposta contano come «non so».</value>
+  </data>
+  <data name="QuestionsPassed" xml:space="preserve">
+    <value>Domande senza problemi</value>
+  </data>
+  <data name="QuestionnaireNote" xml:space="preserve">
+    <value>{0} (questionario {1}, versione {2}). {3}</value>
   </data>
 </root>

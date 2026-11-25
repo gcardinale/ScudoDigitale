@@ -9,7 +9,7 @@
 | `ScudoDigitale.Checks.Network` | LAN discovery, TCP scan, services, UPnP |
 | `ScudoDigitale.Checks.Wireless` | Wi-Fi and Bluetooth, with per-OS adapters (`IWifiProvider`, `IBluetoothProvider`) |
 | `ScudoDigitale.Vulnerabilities` | local SQLite database: NVD (CVE/CPE/CVSS), CISA KEV, EPSS, OSV; incremental update |
-| `ScudoDigitale.Compliance` | GDPR/NIS2 questionnaires defined in versioned JSON (updatable without recompiling); evaluates the answers, together with the technical findings, into ordinary `Finding`s (ADR-005) |
+| `ScudoDigitale.Compliance` | GDPR/NIS2 questionnaires defined in versioned JSON with texts in English and Italian (ADR-008; embedded in v0.1, loading from a user folder later); evaluates the answers, together with the technical findings, into ordinary `Finding`s (ADR-005) |
 | `ScudoDigitale.Reporting` | HTML (Scriban template, single file), PDF (PdfSharp/MigraDoc 6.2.4, MIT, with the DejaVu Sans font included), JSON (its own versioned schema, ADR-005), comparison between runs |
 | `ScudoDigitale.Cli` | `System.CommandLine`: `scudo scan --profile --mail --web --lan --wifi --bt`, `scudo db update`, `scudo report diff` |
 | `ScudoDigitale.App` | Avalonia interface (v0.2+), same logic as the CLI |
