@@ -28,6 +28,7 @@
     <ProjectReference Include="..\ScudoDigitale.Core\ScudoDigitale.Core.csproj" />
     <ProjectReference Include="..\ScudoDigitale.Checks.Email\ScudoDigitale.Checks.Email.csproj" />
     <ProjectReference Include="..\ScudoDigitale.Checks.Web\ScudoDigitale.Checks.Web.csproj" />
+    <ProjectReference Include="..\ScudoDigitale.Reporting\ScudoDigitale.Reporting.csproj" />
   </ItemGroup>
 
 </Project>

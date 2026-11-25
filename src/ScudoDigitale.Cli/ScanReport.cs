@@ -21,7 +21,7 @@ namespace ScudoDigitale.Cli;
 /// <summary>
 /// Text output of <c>scudo scan</c>: banner, warning and declaration, then for every target the
 /// problems most urgent first (with evidence, risk and fix), the checks passed, skipped and failed,
-/// and a summary. The attribution closes the output. The HTML and PDF reports come with Reporting.
+/// and a summary. The attribution closes the output. The HTML, PDF and JSON files are written by Reporting.
 /// </summary>
 internal sealed class ScanReport(TextWriter output)
 {
@@ -41,10 +41,9 @@ internal sealed class ScanReport(TextWriter output)
         output.WriteLine(Format(Strings.Checking, string.Join(", ", targets)));
     }
 
-    /// <summary>Says that the requests to a site go through a proxy, and what that means for the certificate.</summary>
-    /// <param name="host">The site.</param>
-    /// <param name="proxy">Host and port of the proxy.</param>
-    public void WriteProxyNote(string host, string proxy) => output.WriteLine(Format(Strings.WebProxyNote, host, proxy));
+    /// <summary>Prints a note the reader must know before the results, for example that a site is reached through a proxy.</summary>
+    /// <param name="note">The note, already translated.</param>
+    public void WriteNote(string note) => output.WriteLine(note);
 
     /// <summary>The results of every target, the summary and the attribution.</summary>
     /// <param name="scope">The declaration, for the order of the targets.</param>

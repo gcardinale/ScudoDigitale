@@ -166,4 +166,19 @@
   <data name="WebProxyNote" xml:space="preserve">
     <value>Nota: le richieste verso {0} passano dal proxy configurato su questo computer ({1}). Se quel proxy ispeziona il traffico cifrato, il certificato controllato è quello del proxy, non quello del sito.</value>
   </data>
+  <data name="ReportOptionDescription" xml:space="preserve">
+    <value>Cartella in cui scrivere il rapporto in HTML, PDF e JSON (creata se manca; i rapporti esistenti non vengono mai sovrascritti).</value>
+  </data>
+  <data name="ReportWritten" xml:space="preserve">
+    <value>Rapporto scritto:
+  {0}
+  {1}
+  {2}</value>
+  </data>
+  <data name="ReportNotWritten" xml:space="preserve">
+    <value>Non è stato possibile scrivere il rapporto in {0}: {1}</value>
+  </data>
+  <data name="InvalidReportFolder" xml:space="preserve">
+    <value>--report richiede il nome di una cartella.</value>
+  </data>
 </root>

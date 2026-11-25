@@ -166,4 +166,19 @@
   <data name="WebProxyNote" xml:space="preserve">
     <value>Note: the requests to {0} go through the proxy configured on this computer ({1}). If that proxy inspects encrypted traffic, the certificate checked is the proxy's, not the site's.</value>
   </data>
+  <data name="ReportOptionDescription" xml:space="preserve">
+    <value>Folder where the report is written as HTML, PDF and JSON (created if missing; existing reports are never overwritten).</value>
+  </data>
+  <data name="ReportWritten" xml:space="preserve">
+    <value>Report written:
+  {0}
+  {1}
+  {2}</value>
+  </data>
+  <data name="ReportNotWritten" xml:space="preserve">
+    <value>The report could not be written in {0}: {1}</value>
+  </data>
+  <data name="InvalidReportFolder" xml:space="preserve">
+    <value>--report needs the name of a folder.</value>
+  </data>
 </root>

@@ -44,10 +44,12 @@ In this order: Bluetooth on macOS → comparison between two reports → Have I 
 - [x] `Checks.Email`: SPF, DMARC, DKIM, MX, 11 checks (19/11/2026, [ADR-006](decisions/ADR-006-check-granularity-and-dns-for-email.md)); MTA-STS, DNSSEC, STARTTLS, DNSBL and BIMI moved after the beta
 - [x] `Checks.Web`, first pass: HTTPS, certificate, security headers, cookies, security.txt, 15 passive checks (21/11/2026; checkpoint 1 of 20/11 was missed for websites by one day)
 - [ ] `Checks.Web`, second pass: TLS versions and ciphers (needs ADR-007: same result on the 3 systems), CMS detection, indicative GDPR
-- [ ] `Compliance`, `Reporting` (not started on 21/11/2026)
+- [x] `Reporting`: HTML, PDF, JSON (25/11/2026; comparison between runs in v0.2)
+- [ ] `Compliance`: GDPR/NIS2 questionnaires
 - [x] `Cli`: `scudo scan --mail` with text output (19/11/2026)
 - [x] `Cli`: `scudo scan --web`, alone or together with `--mail` (21/11/2026)
-- [ ] `Cli`: report files, together with `Reporting`
+- [x] `Cli`: `scudo scan --report <folder>` (25/11/2026)
+- [ ] `Cli`: questionnaires (`--profile`, `--gdpr`, `--nis2`, `--answers`)
 - [ ] v0.1 passive, published as beta 0.1 (01/12/2026)
 - [ ] v0.2 network and CVE
 - [ ] v0.3 wireless

@@ -17,6 +17,7 @@ using ScudoDigitale.Checks.Email;
 using ScudoDigitale.Checks.Web;
 using ScudoDigitale.Core;
 using ScudoDigitale.Core.Dns;
+using ScudoDigitale.Reporting;
 
 namespace ScudoDigitale.Cli.Tests;
 
@@ -398,6 +399,88 @@ public sealed class ScanCommandTests
 
         Assert.Equal(expected, ScanReport.SeverityLabel(severity));
     }
+
+    [Fact]
+    public async Task Scan_WhenReportFolderIsGiven_ShouldWriteHtmlPdfAndJsonAndSayWhere()
+    {
+        var folder = TempFolder();
+        try
+        {
+            var fake = new FakeChecks(High("MAIL-SPF-001"), Passed("MAIL-DMARC-001"), WebPassed("WEB-CERT-001"));
+            fake.Proxies["example.com"] = "proxy.local:8080";
+
+            using var culture = new UiCulture("it-IT");
+            var (exitCode, output, error) = await RunAsync(fake, "scan", "--mail", "example.com", "--web", "example.com", "--report", folder);
+
+            Assert.Equal(0, exitCode);
+            Assert.Empty(error);
+            var stem = Path.Combine(folder, "scudo-report-20261119-103000");
+            Assert.EndsWith($"Rapporto scritto:\n  {stem}.html\n  {stem}.pdf\n  {stem}.json\n", Normalize(output), StringComparison.Ordinal);
+
+            var document = ReportJson.Read(await File.ReadAllTextAsync(stem + ".json", TestContext.Current.CancellationToken));
+            Assert.Equal("it-IT", document.Language);
+            Assert.Equal(ProgramVersion.Current, document.ProgramVersion);
+            Assert.Equal("tester", document.Declaration.OperatorName);
+            Assert.Equal([CheckArea.Web, CheckArea.Email], document.Sections.Select(s => s.Area));
+            Assert.Equal(["MAIL-SPF-001"], document.Sections[1].Findings.Select(f => f.Id));
+            Assert.Contains("proxy.local:8080", Assert.Single(document.Notes), StringComparison.Ordinal);
+            Assert.Contains("<h2>Posta — example.com</h2>", await File.ReadAllTextAsync(stem + ".html", TestContext.Current.CancellationToken), StringComparison.Ordinal);
+            Assert.True(new FileInfo(stem + ".pdf").Length > 1000);
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task Scan_WhenReportFolderIsBlank_ShouldRunNothing()
+    {
+        var check = Passed("MAIL-SPF-001");
+
+        using var culture = new UiCulture("en-US");
+        var (exitCode, _, error) = await RunAsync(new FakeChecks(check), "scan", "--mail", "example.com", "--report", " ");
+
+        Assert.Equal(ScanCommand.InvalidInput, exitCode);
+        Assert.Contains("--report needs the name of a folder.", error, StringComparison.Ordinal);
+        Assert.False(check.Ran);
+    }
+
+    [Fact]
+    public async Task Scan_WhenReportCannotBeWritten_ShouldStillPrintTheResultsAndExitWith3()
+    {
+        // A file where the folder should be: the folder cannot be created.
+        var blocker = Path.Combine(Path.GetTempPath(), "scudo-cli-blocker-" + Guid.NewGuid().ToString("N"));
+        await File.WriteAllTextAsync(blocker, "not a folder", TestContext.Current.CancellationToken);
+        try
+        {
+            using var culture = new UiCulture("en-US");
+            var (exitCode, output, error) = await RunAsync(new FakeChecks(High("MAIL-SPF-001")), "scan", "--mail", "example.com", "--report", blocker);
+
+            Assert.Equal(ScanCommand.ReportNotWritten, exitCode);
+            Assert.Contains("[HIGH] MAIL-SPF-001", output, StringComparison.Ordinal);
+            Assert.EndsWith(Attribution.Notice + Environment.NewLine, output, StringComparison.Ordinal);
+            Assert.StartsWith($"The report could not be written in {blocker}: ", error, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(blocker);
+        }
+    }
+
+    [Fact]
+    public async Task Scan_WhenNoReportFolderIsGiven_ShouldWriteNoFile()
+    {
+        var before = Directory.GetFiles(Directory.GetCurrentDirectory(), "scudo-report-*").Length;
+
+        var (exitCode, output, _) = await RunAsync(new FakeChecks(Passed("MAIL-SPF-001")), "scan", "--mail", "example.com");
+
+        Assert.Equal(0, exitCode);
+        Assert.EndsWith(Attribution.Notice + Environment.NewLine, output, StringComparison.Ordinal);
+        Assert.Equal(before, Directory.GetFiles(Directory.GetCurrentDirectory(), "scudo-report-*").Length);
+    }
+
+    private static string TempFolder() => Path.Combine(Path.GetTempPath(), "scudo-cli-report-" + Guid.NewGuid().ToString("N"));
 
     private static async Task<(int ExitCode, string Output, string Error)> RunAsync(FakeChecks fake, params string[] args)
     {

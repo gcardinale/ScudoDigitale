@@ -19,18 +19,23 @@ using ScudoDigitale.Checks.Web;
 using ScudoDigitale.Cli.Resources;
 using ScudoDigitale.Core;
 using ScudoDigitale.Core.Dns;
+using ScudoDigitale.Reporting;
 
 namespace ScudoDigitale.Cli;
 
 /// <summary>
 /// <c>scudo scan</c>: runs the checks on the declared targets and prints the results. In v0.1 the
 /// targets are domains for the email checks (<c>--mail</c>) and websites for the passive website
-/// checks (<c>--web</c>); the two can be given together, also for the same domain.
+/// checks (<c>--web</c>); the two can be given together, also for the same domain. With
+/// <c>--report</c> the results are also written as HTML, PDF and JSON.
 /// </summary>
 internal static class ScanCommand
 {
     /// <summary>Exit code when there is nothing to check or an option value is not valid.</summary>
     public const int InvalidInput = 2;
+
+    /// <summary>Exit code when the checks ran but the report files could not be written.</summary>
+    public const int ReportNotWritten = 3;
 
     /// <summary>Builds the command.</summary>
     /// <param name="services">Checks, clock and user name.</param>
@@ -43,8 +48,9 @@ internal static class ScanCommand
         var systemDns = new Option<bool>("--system-dns") { Description = Strings.SystemDnsOptionDescription };
         var operatorName = new Option<string>("--operator") { Description = Strings.OperatorOptionDescription, HelpName = "name" };
         var role = new Option<OperatorRole>("--role") { Description = Strings.RoleOptionDescription, DefaultValueFactory = _ => OperatorRole.Owner };
+        var report = new Option<string>("--report") { Description = Strings.ReportOptionDescription, HelpName = "folder" };
 
-        var command = new Command("scan", Strings.ScanDescription) { mail, web, selectors, systemDns, operatorName, role };
+        var command = new Command("scan", Strings.ScanDescription) { mail, web, selectors, systemDns, operatorName, role, report };
         command.SetAction((parseResult, cancellationToken) => RunAsync(
             new ScanRequest(
                 parseResult.GetValue(mail) ?? [],
@@ -52,7 +58,8 @@ internal static class ScanCommand
                 parseResult.GetValue(selectors) ?? [],
                 parseResult.GetValue(systemDns),
                 parseResult.GetValue(operatorName),
-                parseResult.GetValue(role)),
+                parseResult.GetValue(role),
+                parseResult.GetValue(report)),
             services,
             parseResult.InvocationConfiguration.Output,
             parseResult.InvocationConfiguration.Error,
@@ -66,7 +73,10 @@ internal static class ScanCommand
     /// <param name="output">Where the results go.</param>
     /// <param name="error">Where input errors go.</param>
     /// <param name="cancellationToken">Stops the run (Ctrl+C).</param>
-    /// <returns>0 when the checks ran, whatever they found; <see cref="InvalidInput"/> otherwise.</returns>
+    /// <returns>
+    /// 0 when the checks ran, whatever they found; <see cref="InvalidInput"/> for a wrong option value;
+    /// <see cref="ReportNotWritten"/> when the report files could not be written.
+    /// </returns>
     internal static async Task<int> RunAsync(
         ScanRequest request,
         CliServices services,
@@ -92,6 +102,12 @@ internal static class ScanCommand
             }
 
             hosts.Add(host);
+        }
+
+        if (request.ReportFolder is { } folder && string.IsNullOrWhiteSpace(folder))
+        {
+            await error.WriteLineAsync(Strings.InvalidReportFolder).ConfigureAwait(false);
+            return InvalidInput;
         }
 
         if (request.DkimSelectors.FirstOrDefault(s => !IsSelector(s)) is { } invalid)
@@ -124,20 +140,43 @@ internal static class ScanCommand
         var report = new ScanReport(output);
         report.WriteHeader(scope, checks);
 
-        // A proxy between this computer and the site changes what the certificate checks see: say it.
+        // A proxy between this computer and the site changes what the certificate checks see: say it,
+        // on screen and in the report.
+        var notes = new List<string>();
         foreach (var host in hosts)
         {
             if (services.WebProxyFor(host) is { } proxy)
             {
-                report.WriteProxyNote(host, proxy);
+                var note = Format(Strings.WebProxyNote, host, proxy);
+                notes.Add(note);
+                report.WriteNote(note);
             }
         }
 
+        var profile = Profile.Individual();
         var runs = await new CheckEngine(new PassiveOnlyScopeGuard())
-            .RunAsync(checks, Profile.Individual(), scope, cancellationToken)
+            .RunAsync(checks, profile, scope, cancellationToken)
             .ConfigureAwait(false);
         report.WriteResults(scope, runs);
-        return 0;
+
+        if (request.ReportFolder is null)
+        {
+            return 0;
+        }
+
+        var document = ReportBuilder.Build(scope, profile, runs, ProgramVersion.Current, services.Now(), notes);
+        try
+        {
+            var paths = await ReportFiles.WriteAsync(document, request.ReportFolder, cancellationToken).ConfigureAwait(false);
+            await output.WriteLineAsync(Format(Strings.ReportWritten, paths.Html, paths.Pdf, paths.Json)).ConfigureAwait(false);
+            return 0;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or NotSupportedException or ArgumentException)
+        {
+            // The checks ran and their results are on screen: only the files are missing.
+            await error.WriteLineAsync(Format(Strings.ReportNotWritten, request.ReportFolder, e.Message)).ConfigureAwait(false);
+            return ReportNotWritten;
+        }
     }
 
     private static bool IsSelector(string selector)
@@ -165,10 +204,12 @@ internal static class ScanCommand
 /// <param name="SystemDns">Whether <c>--system-dns</c> was given.</param>
 /// <param name="Operator">Value of <c>--operator</c>, if any.</param>
 /// <param name="Role">Value of <c>--role</c>.</param>
+/// <param name="ReportFolder">Value of <c>--report</c>: where to write the report files; <see langword="null"/> for none.</param>
 internal sealed record ScanRequest(
     IReadOnlyList<string> Domains,
     IReadOnlyList<string> Websites,
     IReadOnlyList<string> DkimSelectors,
     bool SystemDns,
     string? Operator,
-    OperatorRole Role);
+    OperatorRole Role,
+    string? ReportFolder = null);

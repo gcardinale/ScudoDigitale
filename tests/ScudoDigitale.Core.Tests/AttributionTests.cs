@@ -12,6 +12,7 @@
 // ║ Attribution required (AGPL sec. 7(b)): see NOTICE file        ║
 // ╚═══════════════════════════════════════════════════════════════╝
 
+using System.Globalization;
 using ScudoDigitale.Core;
 
 namespace ScudoDigitale.Core.Tests;
@@ -62,6 +63,24 @@ public class AttributionTests
         Assert.Equal(
             "Report generato con Scudo Digitale v1.0 — © Gaetano Cardinale — https://gcardinale.it — AGPL-3.0-or-later",
             footer);
+    }
+
+    [Fact]
+    public void ReportFooter_WhenCultureIsGiven_ShouldIgnoreTheCultureOfTheThread()
+    {
+        using var _ = new UiCulture("en-US");
+
+        var footer = Attribution.ReportFooter("1.0", CultureInfo.GetCultureInfo("it-IT"));
+
+        Assert.Equal(
+            "Report generato con Scudo Digitale v1.0 — © Gaetano Cardinale — https://gcardinale.it — AGPL-3.0-or-later",
+            footer);
+    }
+
+    [Fact]
+    public void ReportFooter_WhenCultureIsNull_ShouldThrow()
+    {
+        Assert.Throws<ArgumentNullException>(() => Attribution.ReportFooter("1.0", null!));
     }
 
     [Theory]

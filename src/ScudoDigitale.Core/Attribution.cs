@@ -12,6 +12,7 @@
 // ║ Attribution required (AGPL sec. 7(b)): see NOTICE file        ║
 // ╚═══════════════════════════════════════════════════════════════╝
 
+using System.Globalization;
 using ScudoDigitale.Core.Resources;
 
 namespace ScudoDigitale.Core;
@@ -60,9 +61,22 @@ public static class Attribution
     /// <param name="version">Program version, for example <c>1.0</c>.</param>
     /// <returns>The footer text in the current UI language.</returns>
     /// <exception cref="ArgumentException"><paramref name="version"/> is empty or blank.</exception>
-    public static string ReportFooter(string version)
+    public static string ReportFooter(string version) => ReportFooter(version, CultureInfo.CurrentUICulture);
+
+    /// <summary>
+    /// Footer for every report page, with the leading words in the language of <paramref name="culture"/>:
+    /// a report keeps the language it was written in, whatever the language of the computer that renders it.
+    /// </summary>
+    /// <param name="version">Program version, for example <c>1.0</c>.</param>
+    /// <param name="culture">Language of the report.</param>
+    /// <returns>The footer text.</returns>
+    /// <exception cref="ArgumentException"><paramref name="version"/> is empty or blank.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="culture"/> is <see langword="null"/>.</exception>
+    public static string ReportFooter(string version, CultureInfo culture)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(version);
-        return $"{Strings.ReportGeneratedWith} {ProductName} v{version.Trim()} — © {Author} — {Website} — {License}";
+        ArgumentNullException.ThrowIfNull(culture);
+        var leading = Strings.ResourceManager.GetString(nameof(Strings.ReportGeneratedWith), culture);
+        return $"{leading} {ProductName} v{version.Trim()} — © {Author} — {Website} — {License}";
     }
 }
