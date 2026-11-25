@@ -97,10 +97,11 @@ public sealed class QuestionnaireEvaluatorTests
     {
         PrioritizedFinding[] technical = [Make.Technical("MAIL-DMARC-002", Severity.Low), Make.Technical("WEB-HDR-005", Severity.Info, CheckArea.Web), Make.Technical("GDPR-ART30-001", Severity.High, CheckArea.Gdpr)];
 
-        var outcome = QuestionnaireEvaluator.Evaluate(Company, Make.AllYesNo(Company, Answers.Yes), "Rossi SRL", technical, Make.English);
+        var outcome = QuestionnaireEvaluator.Evaluate(Company, Make.AllYesNo(Company, Answers.Yes), "Rossi SRL", new TechnicalEvidence(technical, [CheckArea.Web, CheckArea.Email, CheckArea.Email]), Make.English);
 
         Assert.Empty(outcome.Findings);
-        Assert.Contains(outcome.Passed, p => p.Id == "GDPR-ART32-002" && p.Label == "Technical evidence for art. 32");
+        // What was looked at is said, once per area, in the order of the report.
+        Assert.Contains(new AnsweredQuestion("GDPR-ART32-002", "Technical evidence for art. 32", "areas checked: websites, email"), outcome.Passed);
     }
 
     [Fact]
@@ -113,12 +114,12 @@ public sealed class QuestionnaireEvaluatorTests
             Make.Technical("MAIL-SPF-004", Severity.Low),
         ];
 
-        var finding = Assert.Single(QuestionnaireEvaluator.Evaluate(Company, Make.AllYesNo(Company, Answers.Yes), "Rossi SRL", technical, Make.Italian).Findings);
+        var finding = Assert.Single(QuestionnaireEvaluator.Evaluate(Company, Make.AllYesNo(Company, Answers.Yes), "Rossi SRL", new TechnicalEvidence(technical, [CheckArea.Email, CheckArea.Web]), Make.Italian).Findings);
 
         Assert.Equal("GDPR-ART32-002", finding.Id);
         Assert.Equal(Severity.Medium, finding.Severity);
         Assert.Equal(Confidence.Probable, finding.Confidence);
-        Assert.Equal("2 risultati tecnici di gravità media o superiore: MAIL-DMARC-001 (example.com), WEB-CERT-001 (www.example.com)", finding.Evidence);
+        Assert.Equal("2 risultati tecnici di gravità media o superiore: MAIL-DMARC-001 (example.com), WEB-CERT-001 (www.example.com) (aree controllate: siti web, posta)", finding.Evidence);
         Assert.Equal(["GDPR art. 32"], finding.References);
     }
 
@@ -127,10 +128,10 @@ public sealed class QuestionnaireEvaluatorTests
     {
         var technical = Enumerable.Range(100, 13).Select(i => Make.Technical($"MAIL-X-{i}", Severity.High)).ToArray();
 
-        var finding = Assert.Single(QuestionnaireEvaluator.Evaluate(Company, Make.AllYesNo(Company, Answers.Yes), "Rossi SRL", technical, Make.English).Findings);
+        var finding = Assert.Single(QuestionnaireEvaluator.Evaluate(Company, Make.AllYesNo(Company, Answers.Yes), "Rossi SRL", new TechnicalEvidence(technical, [CheckArea.Email]), Make.English).Findings);
 
         Assert.StartsWith("13 technical findings of Medium severity or above: MAIL-X-100 (example.com), ", finding.Evidence, StringComparison.Ordinal);
-        Assert.EndsWith("MAIL-X-109 (example.com) and 3 more", finding.Evidence, StringComparison.Ordinal);
+        Assert.EndsWith("MAIL-X-109 (example.com) and 3 more (areas checked: email)", finding.Evidence, StringComparison.Ordinal);
         Assert.DoesNotContain("MAIL-X-110", finding.Evidence, StringComparison.Ordinal);
     }
 
@@ -185,6 +186,41 @@ public sealed class QuestionnaireEvaluatorTests
         Assert.Equal(Confidence.ToBeVerified, outcome.Findings[0].Confidence);
         Assert.Equal("NIS2 scope to be verified", outcome.Findings[0].Title);
         Assert.Equal(6, outcome.Findings.Count);
+    }
+
+    [Fact]
+    public void TechnicalEvidenceOf_WhenNoCheckWasExecuted_ShouldBeNull()
+    {
+        var target = new Target(TargetKind.Domain, "example.com");
+        CheckRun[] runs =
+        [
+            new("MAIL-SPF-001", "SPF", CheckArea.Email, target, new CheckResult.Skipped("offline")),
+            new("MAIL-MX-001", "MX", CheckArea.Email, target, new CheckResult.Failed("DNS timeout")),
+        ];
+
+        Assert.Null(TechnicalEvidence.Of(runs));
+        Assert.Null(TechnicalEvidence.Of([]));
+        Assert.Throws<ArgumentNullException>(() => TechnicalEvidence.Of(null!));
+    }
+
+    [Fact]
+    public void TechnicalEvidenceOf_WhenSomeChecksWereExecuted_ShouldKeepOnlyTheirFindingsAndAreas()
+    {
+        var mail = new Target(TargetKind.Domain, "example.com");
+        var site = new Target(TargetKind.Website, "www.example.com");
+        var low = new Finding("MAIL-SPF-004", CheckArea.Email, "ptr", Severity.Low, Confidence.Certain, "example.com");
+        var high = new Finding("MAIL-DMARC-001", CheckArea.Email, "DMARC", Severity.High, Confidence.Certain, "example.com");
+        CheckRun[] runs =
+        [
+            new("MAIL-SPF-004", "SPF", CheckArea.Email, mail, new CheckResult.Executed([low])),
+            new("MAIL-DMARC-001", "DMARC", CheckArea.Email, mail, new CheckResult.Executed([high])),
+            new("WEB-CERT-001", "Certificate", CheckArea.Web, site, new CheckResult.Failed("unreachable")),
+        ];
+
+        var evidence = TechnicalEvidence.Of(runs)!;
+
+        Assert.Equal([CheckArea.Email], evidence.Areas);
+        Assert.Equal(["MAIL-DMARC-001", "MAIL-SPF-004"], evidence.Findings.Select(f => f.Finding.Id));
     }
 
     [Theory]

@@ -37,9 +37,12 @@ public sealed class ReportSummaryTests
         var summary = ReportSummary.Of(Make.Document());
 
         Assert.Equal([(CheckArea.Web, 2), (CheckArea.Email, 1), (CheckArea.Gdpr, 1)], summary.ByArea);
-        Assert.Equal(2, summary.Passed);
+        // The questions of the questionnaires are not checks: they are counted apart.
+        Assert.Equal(1, summary.Passed);
         Assert.Equal(1, summary.Skipped);
         Assert.Equal(1, summary.Failed);
+        Assert.Equal(1, summary.QuestionsPassed);
+        Assert.True(summary.HasQuestionnaires);
     }
 
     [Fact]
@@ -54,6 +57,8 @@ public sealed class ReportSummaryTests
             Make.GeneratedAt);
 
         Assert.Equal([(CheckArea.Email, 2)], ReportSummary.Of(document).ByArea);
+        Assert.False(ReportSummary.Of(document).HasQuestionnaires);
+        Assert.Equal(0, ReportSummary.Of(document).QuestionsPassed);
     }
 
     [Fact]

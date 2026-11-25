@@ -68,7 +68,8 @@ internal sealed record ReportView(
             Enum.GetValues<Severity>().OrderDescending().Select(s => new ViewCount(l.Severity(s), summary.BySeverity[s], ReportLabels.SeverityClass(s))).ToArray(),
             l.Get(nameof(Strings.FindingsByArea)),
             summary.ByArea.Select(a => new ViewCount(l.Area(a.Area), a.Findings, string.Empty)).ToArray(),
-            l.Format(nameof(Strings.ChecksCounts), summary.Passed, summary.Skipped, summary.Failed),
+            l.Format(nameof(Strings.ChecksCounts), summary.Passed, summary.Skipped, summary.Failed)
+                + (summary.HasQuestionnaires ? " " + l.Format(nameof(Strings.QuestionsCount), summary.QuestionsPassed) : string.Empty),
             l.Get(nameof(Strings.ActionsHeading)),
             summary.Actions.Select(f => new ViewAction(l.Severity(f.EffectiveSeverity), ReportLabels.SeverityClass(f.EffectiveSeverity), f.Title, f.Target, f.Fix)).ToArray(),
             l.Get(nameof(Strings.NoActions)));

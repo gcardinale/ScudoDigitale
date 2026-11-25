@@ -3,7 +3,7 @@
 - **Content:** GDPR and NIS2 questionnaires
 - **Release:** v0.1
 - **Status:** 🟢 implemented (25/11/2026), branch `feature/v0.1-compliance`; legal review of the texts to do before the beta
-- **Test coverage:** 100% lines (326/326), 98.5% branches (193/196) — 75 tests
+- **Test coverage:** 100% lines (341/341), 98.5% branches (195/198) — 78 tests
 
 ## Done
 - [ADR-008](../../docs/decisions/ADR-008-questionnaires-in-json.md): questionnaires in versioned JSON with texts in English and Italian, answers in the terminal or in a file, technical findings linked to art. 32 by area.
@@ -15,6 +15,10 @@
 - `QuestionnaireEvaluator.Evaluate`: "no" → finding marked certain; "don't know" or no answer → the same finding "to be verified"; "yes" or an allowed "not applicable" → question without problems. NIS2 adds `NIS2-SCOPE-001` (Info) with the outcome and the answers it comes from.
 - `Nis2Scope.Assess`: size per Recommendation 2003/361/CE (headcount, turnover **and** balance sheet total) as arts. 3 and 6 of D.Lgs. 138/2024 require; "out of scope" only with a clear "no" to the categories in scope whatever their size.
 - `AnswersFile`: reads `{ "id": "answer" }` and lists unknown ids and answers a question does not accept, so a typo never becomes a silent "don't know".
+- Independent review on 25/11/2026 (separate agent, 34 counter-checks), fixed the same day:
+  - art. 32 was "fine" when every technical check had been skipped or failed: now `TechnicalEvidence.Of(runs)` keeps only executed checks, and the question says which areas it covers;
+  - the messages of `AnswersFile` were in English only: now in English and Italian, with line and position for a JSON error;
+  - NIS2: turnover and balance sheet are now asked with linked and partner enterprises added, as the headcount already was (art. 3, paragraph 4); notice and ADR-008 aligned.
 - Counter-checks run on 25/11/2026: obligations asked when out of scope, "not applicable" accepted where not allowed, NIS2 obligations prompted when out of scope (CLI): each turned a test red.
 
 ## Legal references

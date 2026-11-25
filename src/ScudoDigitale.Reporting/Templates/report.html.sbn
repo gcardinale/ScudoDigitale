@@ -47,17 +47,26 @@
   ul.checks.failed li::before { content: "! "; color: #b91c1c; font-weight: 700; }
   .detail { color: var(--muted); }
   footer.attribution { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 8px; font-size: 12px; color: var(--muted); text-align: center; }
+  table.layout { width: 100%; border-collapse: collapse; }
+  table.layout > tbody > tr > td, table.layout > tfoot > tr > td { padding: 0; }
+  .footer-space { height: 0; }
+  @page { margin: 12mm 12mm 8mm; }
   @media print {
     body { font-size: 11pt; }
-    main { padding: 0 0 48px; max-width: none; }
+    main { padding: 0; max-width: none; }
     h2 { break-after: avoid; }
-    /* Repeated at the foot of every printed page: the attribution is a license term (AGPL 7(b)). */
-    footer.attribution { position: fixed; bottom: 0; left: 0; right: 0; margin: 0; background: #fff; }
+    /* The footer of the layout table is repeated on every printed page and keeps this space free... */
+    .footer-space { height: 16mm; }
+    /* ...where the attribution is drawn on every page: it is a license term (AGPL 7(b)). */
+    footer.attribution { position: fixed; bottom: 0; left: 0; right: 0; height: 12mm; margin: 0; padding-top: 3mm; background: #fff; }
     .badge, .counts li { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
 </head>
 <body>
+<table class="layout">
+<tfoot><tr><td><div class="footer-space"></div></td></tr></tfoot>
+<tbody><tr><td>
 <main>
 <header class="top">
   <h1>{{ title }}</h1>
@@ -142,6 +151,8 @@
 </section>
 {{- end }}
 </main>
+</td></tr></tbody>
+</table>
 <footer class="attribution">{{ footer }}</footer>
 </body>
 </html>

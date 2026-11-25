@@ -68,12 +68,68 @@ public static class ReportJson
                 throw new InvalidDataException($"Unsupported report schema version: {version?.ToJsonString() ?? "missing"}; this program reads version {ReportDocument.CurrentSchemaVersion}.");
             }
 
-            return JsonSerializer.Deserialize<ReportDocument>(json, Options)
+            var document = JsonSerializer.Deserialize<ReportDocument>(json, Options)
                 ?? throw new InvalidDataException("The report is empty.");
+
+            // The serializer checks the properties, not the items of the lists nor the ranges.
+            var problems = Problems(document).ToArray();
+            return problems.Length == 0 ? document : throw new InvalidDataException($"The report is not valid: {string.Join(" ", problems)}");
         }
         catch (JsonException e)
         {
             throw new InvalidDataException($"The report is not valid: {e.Message}", e);
         }
     }
+
+    /// <summary>What makes a document impossible to render or to compare, beyond what the serializer checks.</summary>
+    /// <param name="d">The document.</param>
+    /// <returns>One message per problem.</returns>
+    internal static IEnumerable<string> Problems(ReportDocument d)
+    {
+        if (Blank(d.Program) || Blank(d.ProgramVersion) || Blank(d.Language))
+        {
+            yield return "program, programVersion and language are required.";
+        }
+
+        if (Blank(d.Declaration.OperatorName) || d.Declaration.Targets.Any(t => t is null || Blank(t.Value)))
+        {
+            yield return "the declaration needs an operator and targets with a value.";
+        }
+
+        if (d.Notes.Any(n => n is null))
+        {
+            yield return "a note is null.";
+        }
+
+        for (var i = 0; i < d.Sections.Count; i++)
+        {
+            var s = d.Sections[i];
+            if (s is null)
+            {
+                yield return $"section {i} is null.";
+                continue;
+            }
+
+            if (s.Passed.Concat(s.Skipped).Concat(s.Failed).Any(c => c is null || Blank(c.Id) || Blank(c.Title)))
+            {
+                yield return $"section {i}: a check is null or has no id or title.";
+            }
+
+            foreach (var f in s.Findings)
+            {
+                if (f is null)
+                {
+                    yield return $"section {i}: a finding is null.";
+                }
+                else if (!Core.Finding.IsCheckId(f.Id) || Blank(f.Title) || Blank(f.Target)
+                    || f.Cve.Any(c => c is null) || f.References.Any(r => r is null)
+                    || f.Cvss is < 0 or > 10 || f.Epss is < 0 or > 1)
+                {
+                    yield return $"section {i}: finding {f.Id} has a bad id, title, target, list, CVSS or EPSS.";
+                }
+            }
+        }
+    }
+
+    private static bool Blank(string? text) => string.IsNullOrWhiteSpace(text);
 }

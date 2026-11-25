@@ -37,9 +37,10 @@ public static class QuestionnaireEvaluator
     /// <param name="questionnaire">The questionnaire.</param>
     /// <param name="answers">Answers by question id; missing ones count as "don't know".</param>
     /// <param name="subject">Who the findings are about: the company name, or the person.</param>
-    /// <param name="technicalFindings">
-    /// The prioritized findings of the technical checks of the same assessment, for the technical
-    /// questions; <see langword="null"/> when no technical check ran, and then those questions are left out.
+    /// <param name="technical">
+    /// What the technical checks of the same assessment found, for the technical questions;
+    /// <see langword="null"/> when no technical check was executed (none declared, or all skipped or
+    /// failed), and then those questions are left out: nothing checked is never "fine".
     /// </param>
     /// <param name="culture">Language of the texts.</param>
     /// <returns>The findings and the questions without problems.</returns>
@@ -49,7 +50,7 @@ public static class QuestionnaireEvaluator
         Questionnaire questionnaire,
         IReadOnlyDictionary<string, string> answers,
         string subject,
-        IReadOnlyList<PrioritizedFinding>? technicalFindings,
+        TechnicalEvidence? technical,
         CultureInfo culture)
     {
         ArgumentNullException.ThrowIfNull(questionnaire);
@@ -75,9 +76,9 @@ public static class QuestionnaireEvaluator
 
             if (question.Kind == QuestionKind.Technical)
             {
-                if (technicalFindings is not null)
+                if (technical is not null)
                 {
-                    EvaluateTechnical(questionnaire, question, technicalFindings, subject, culture, findings, passed);
+                    EvaluateTechnical(questionnaire, question, technical, subject, culture, findings, passed);
                 }
 
                 continue;
@@ -126,24 +127,29 @@ public static class QuestionnaireEvaluator
     private static void EvaluateTechnical(
         Questionnaire questionnaire,
         Question question,
-        IReadOnlyList<PrioritizedFinding> technicalFindings,
+        TechnicalEvidence technical,
         string subject,
         CultureInfo culture,
         List<Finding> findings,
         List<AnsweredQuestion> passed)
     {
-        var relevant = technicalFindings
+        // Say what was looked at: "no problem" on the email alone is not "no problem" on the website.
+        var areas = string.Format(
+            culture,
+            Text(nameof(Strings.AreasChecked), culture),
+            string.Join(", ", technical.Areas.Distinct().Order().Select(a => Text("Area" + a, culture))));
+        var relevant = technical.Findings
             .Where(f => f.EffectiveSeverity >= question.MinimumSeverity && f.Finding.Area is not (CheckArea.Gdpr or CheckArea.Nis2))
             .ToArray();
         if (relevant.Length == 0)
         {
-            passed.Add(new AnsweredQuestion(question.Id, question.Label.In(culture)));
+            passed.Add(new AnsweredQuestion(question.Id, question.Label.In(culture), areas));
             return;
         }
 
         var listed = string.Join(", ", relevant.Take(MaxListed).Select(f => $"{f.Finding.Id} ({f.Finding.Target})"));
         var more = relevant.Length > MaxListed ? " " + string.Format(culture, Text(nameof(Strings.AndMore), culture), relevant.Length - MaxListed) : string.Empty;
-        var evidence = string.Format(culture, Text(nameof(Strings.TechnicalEvidence), culture), relevant.Length, listed + more);
+        var evidence = string.Format(culture, Text(nameof(Strings.TechnicalEvidence), culture), relevant.Length, listed + more) + " (" + areas + ")";
         findings.Add(FindingOf(questionnaire, question, subject, culture, Confidence.Probable, evidence));
     }
 
@@ -177,6 +183,30 @@ public static class QuestionnaireEvaluator
         question.Options.FirstOrDefault(o => o.Id == answer)?.Text.In(culture) ?? Text(nameof(Strings.NoAnswerShort), culture);
 
     private static string Text(string name, CultureInfo culture) => Strings.ResourceManager.GetString(name, culture) ?? name;
+}
+
+/// <summary>What the technical checks of an assessment found, for the technical questions (ADR-008).</summary>
+/// <param name="Findings">The prioritized findings of the checks that were executed.</param>
+/// <param name="Areas">The areas of the checks that were executed (not skipped, not failed); never empty.</param>
+public sealed record TechnicalEvidence(IReadOnlyList<PrioritizedFinding> Findings, IReadOnlyList<CheckArea> Areas)
+{
+    /// <summary>
+    /// The evidence of a run of the engine: the findings of the executed checks and their areas, or
+    /// <see langword="null"/> when no check was executed.
+    /// </summary>
+    /// <param name="runs">What the engine returned.</param>
+    /// <returns>The evidence, or <see langword="null"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="runs"/> is <see langword="null"/>.</exception>
+    public static TechnicalEvidence? Of(IEnumerable<CheckRun> runs)
+    {
+        ArgumentNullException.ThrowIfNull(runs);
+        var executed = runs.Where(r => r.Result is CheckResult.Executed).ToArray();
+        return executed.Length == 0
+            ? null
+            : new TechnicalEvidence(
+                FindingPrioritizer.Prioritize(executed.SelectMany(r => ((CheckResult.Executed)r.Result).Findings)),
+                executed.Select(r => r.Area).Distinct().Order().ToArray());
+    }
 }
 
 /// <summary>What a questionnaire gave.</summary>

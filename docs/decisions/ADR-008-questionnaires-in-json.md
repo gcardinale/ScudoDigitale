@@ -19,18 +19,19 @@ ADR-005 decided that the questionnaires are evaluated by `Compliance` and give o
 
 ### 3. Link to the technical findings
 - **A — Listed per question in the JSON**: precise, but every new check would mean editing a questionnaire.
-- **B — By area**: the company GDPR questionnaire turns every technical finding of Medium severity or above (email, websites, later network) into one art. 32 finding that lists them.
+- **B — By area**: the company GDPR questionnaire turns every technical finding of Medium severity or above (email, websites, later network) into one art. 32 finding that lists them, and names the areas that were checked.
 
 ## Decision
 **1B, 2B, 3B.**
 - The questionnaires are JSON files embedded in `ScudoDigitale.Compliance` (`Questionnaires/*.json`), each with an `id` and a `version`, texts in English and Italian. Loading them from a folder of the user ("updatable without recompiling") is deferred: in v0.1 a new version comes with a new release.
 - Answers: `yes`, `no`, `unknown`, `notApplicable` (only where the question allows it), or the id of an option. "No" gives a finding marked certain; "unknown" or no answer gives the same finding marked "to be verified", so that nothing unanswered looks fine.
-- NIS2: the scope is assessed first (sector of Annexes I-II, size per Recommendation 2003/361/CE: employees, turnover **and** balance sheet total, as art. 3 and 6 of D.Lgs. 138/2024 require), with the outcome "probably essential / probably important / probably out of scope / to be verified". The obligations are asked only when the outcome is not "out of scope".
+- NIS2: the scope is assessed first (sector of Annexes I-II, size per Recommendation 2003/361/CE: employees, turnover **and** balance sheet total, as art. 3 and 6 of D.Lgs. 138/2024 require), with the outcome "probably essential / probably important / probably in scope, category to verify / probably out of scope / to be verified". The obligations are asked only when the outcome is not "out of scope".
 - Every finding of a questionnaire is indicative: the report says so, and the legal references are verified on Normattiva and the Gazzetta Ufficiale before the beta (spec §2.7).
 
 ## Consequences
 - ✅ A question is reviewed in one file, by a lawyer too.
 - ✅ A run with `--answers` is repeatable; the tests need no terminal.
 - ⚠️ The texts of the questionnaires are an exception to the `.resx` rule, written here; a test checks that both languages are present for every text.
-- ⚠️ The NIS2 scope is an estimate: group companies (linked and partner enterprises), the entities identified by ACN regardless of size (art. 3, paragraphs 8-10) and public administrations (Annex III) come out as "to be verified", never as "out of scope" with certainty.
+- ⚠️ The NIS2 scope is an estimate, and every outcome says "probably". The figures are asked with those of linked and partner enterprises added (art. 3, paragraph 4); the proportionality exception of that paragraph, the entities identified by ACN regardless of size (Annex IV, art. 3 paragraphs 8-10) and public administrations (Annex III) are not assessed: the notice and the fix of the finding say so.
+- ⚠️ The art. 32 question is answered only when at least one technical check was executed: checks that were all skipped or failed prove nothing, and the question is then left out (review of 25/11/2026).
 - 🔍 To do after the beta: questionnaires loaded from a user folder, with the same validation.

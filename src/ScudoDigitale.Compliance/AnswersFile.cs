@@ -12,7 +12,9 @@
 // ║ Attribution required (AGPL sec. 7(b)): see NOTICE file        ║
 // ╚═══════════════════════════════════════════════════════════════╝
 
+using System.Globalization;
 using System.Text.Json;
+using ScudoDigitale.Compliance.Resources;
 
 namespace ScudoDigitale.Compliance;
 
@@ -35,12 +37,13 @@ public static class AnswersFile
         {
             var answers = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
             return answers is null || answers.Values.Any(v => v is null)
-                ? throw new InvalidDataException("The answers must be a JSON object of texts, for example { \"GDPR-ART30-001\": \"yes\" }.")
+                ? throw new InvalidDataException(Strings.AnswersNotAnObject)
                 : answers;
         }
         catch (JsonException e)
         {
-            throw new InvalidDataException($"The answers are not valid JSON: {e.Message}", e);
+            // The message of System.Text.Json is in English only: the user gets the position instead.
+            throw new InvalidDataException(Format(Strings.AnswersNotJson, (e.LineNumber ?? 0) + 1, (e.BytePositionInLine ?? 0) + 1), e);
         }
     }
 
@@ -50,7 +53,7 @@ public static class AnswersFile
     /// </summary>
     /// <param name="answers">The answers.</param>
     /// <param name="questionnaires">The questionnaires of the assessment.</param>
-    /// <returns>One message per problem; none when the answers are valid.</returns>
+    /// <returns>One message per problem, in the current UI language; none when the answers are valid.</returns>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     public static IReadOnlyList<string> Validate(IReadOnlyDictionary<string, string> answers, IEnumerable<Questionnaire> questionnaires)
     {
@@ -62,16 +65,18 @@ public static class AnswersFile
         {
             if (!questions.TryGetValue(id, out var question))
             {
-                errors.Add($"{id}: no such question in the questionnaires of this assessment.");
+                errors.Add(Format(Strings.AnswerUnknownQuestion, id));
             }
             else if (!Accepted(question).Contains(value))
             {
-                errors.Add($"{id}: '{value}' is not an answer to this question; accepted: {string.Join(", ", Accepted(question))}.");
+                errors.Add(Format(Strings.AnswerNotAccepted, id, value, string.Join(", ", Accepted(question))));
             }
         }
 
         return errors;
     }
+
+    private static string Format(string format, params object?[] arguments) => string.Format(CultureInfo.CurrentCulture, format, arguments);
 
     /// <summary>The answers a question accepts.</summary>
     /// <param name="question">The question.</param>

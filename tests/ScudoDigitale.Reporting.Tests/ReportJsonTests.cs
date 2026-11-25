@@ -86,11 +86,52 @@ public sealed class ReportJsonTests
     }
 
     [Fact]
+    public void Read_WhenACompleteDocumentHasAnotherVersion_ShouldRefuseItBecauseOfTheVersion()
+    {
+        var json = ReportJson.Write(Make.Document()).Replace("\"schemaVersion\": 1,", "\"schemaVersion\": 2,", StringComparison.Ordinal);
+
+        var e = Assert.Throws<InvalidDataException>(() => ReportJson.Read(json));
+
+        Assert.StartsWith("Unsupported report schema version: 2;", e.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("\"sections\": [", "\"sections\": [null, ", "section 0 is null")]
+    [InlineData("\"notes\": [", "\"notes\": [null, ", "a note is null")]
+    [InlineData("\"programVersion\": \"0.1.0\"", "\"programVersion\": \" \"", "programVersion")]
+    [InlineData("\"language\": \"en-US\"", "\"language\": \"\"", "language")]
+    [InlineData("\"operatorName\": \"Mario Rossi\"", "\"operatorName\": \"\"", "operator")]
+    [InlineData("\"value\": \"example.com\"", "\"value\": \" \"", "targets with a value")]
+    [InlineData("\"cvss\": 8.8", "\"cvss\": 42", "CVSS")]
+    [InlineData("\"epss\": 0.97", "\"epss\": -3", "EPSS")]
+    [InlineData("\"id\": \"WEB-CMS-001\"", "\"id\": \"web cms\"", "bad id")]
+    [InlineData("\"cve\": [\n            \"CVE-2019-8942\"", "\"cve\": [\n            null", "list")]
+    [InlineData("\"findings\": [", "\"findings\": [null, ", "a finding is null")]
+    [InlineData("\"passed\": [\n        {\n          \"id\": \"MAIL-SPF-001\"", "\"passed\": [null, \n        {\n          \"id\": \"MAIL-SPF-001\"", "a check is null")]
+    [InlineData("\"title\": \"Check MAIL-SPF-001\"", "\"title\": \"\"", "no id or title")]
+    public void Read_WhenTheDocumentCouldNotBeRendered_ShouldRefuseItAndSayWhere(string valid, string broken, string expected)
+    {
+        using var _ = new UiCulture("en-US");
+        var json = ReportJson.Write(Make.Document());
+        Assert.Contains(valid, json, StringComparison.Ordinal);
+
+        var e = Assert.Throws<InvalidDataException>(() => ReportJson.Read(ReplaceFirst(json, valid, broken)));
+
+        Assert.Contains(expected, e.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Read_WhenJsonHasUnknownProperties_ShouldIgnoreThem()
     {
         var json = ReportJson.Write(Make.Document()).Replace("\"schemaVersion\": 1,", "\"schemaVersion\": 1, \"futureField\": true,", StringComparison.Ordinal);
 
         Assert.Equal("0.1.0", ReportJson.Read(json).ProgramVersion);
+    }
+
+    private static string ReplaceFirst(string text, string value, string replacement)
+    {
+        var at = text.IndexOf(value, StringComparison.Ordinal);
+        return text[..at] + replacement + text[(at + value.Length)..];
     }
 
     [Fact]

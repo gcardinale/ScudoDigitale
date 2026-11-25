@@ -99,7 +99,7 @@ public sealed class PdfReportTests
             "1 Critical",
             "0 Low",
             "Websites: 2 · Email: 1 · GDPR: 1",
-            "2 checks passed, 1 skipped, 1 could not run.",
+            "1 checks passed, 1 skipped, 1 could not run. 1 questions answered without problems.",
             "1. [CRITICAL] Outdated CMS (www.example.com)",
             "Websites — www.example.com",
             "Evidence: generator: WordPress 5.0",

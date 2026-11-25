@@ -79,7 +79,7 @@ public sealed class QuestionnaireCommandTests
 
         Assert.Equal(0, exitCode);
         Assert.Contains("  18) None of these", output, StringComparison.Ordinal);
-        Assert.Contains("[5] What is the annual balance sheet total?", output, StringComparison.Ordinal);
+        Assert.Contains("[5] What is the annual balance sheet total (adding that of linked enterprises and the share of partner enterprises)?", output, StringComparison.Ordinal);
         Assert.DoesNotContain("[6]", output, StringComparison.Ordinal);
         Assert.Contains("[INFO] NIS2-SCOPE-001  Probably outside NIS2", output, StringComparison.Ordinal);
     }
@@ -134,7 +134,7 @@ public sealed class QuestionnaireCommandTests
             var gdpr = document.Sections[1];
             Assert.Null(gdpr.Target);
             Assert.Equal(["GDPR-ART33-001", "GDPR-ART32-002"], gdpr.Findings.Select(f => f.Id));
-            Assert.Equal("1 technical findings of Medium severity or above: MAIL-DMARC-001 (example.com)", gdpr.Findings[1].Evidence);
+            Assert.Equal("1 technical findings of Medium severity or above: MAIL-DMARC-001 (example.com) (areas checked: email)", gdpr.Findings[1].Evidence);
             Assert.Equal("Rossi SRL", gdpr.Findings[0].Target);
             Assert.Contains(new ReportCheck("GDPR-ART28-001", "Processors under contract", "not applicable"), gdpr.Passed);
             Assert.Equal(5, document.Sections[2].Passed.Count);
@@ -146,6 +146,56 @@ public sealed class QuestionnaireCommandTests
         {
             Directory.Delete(folder, recursive: true);
         }
+    }
+
+    [Fact]
+    public async Task Scan_WhenEveryTechnicalCheckFailed_ShouldNotCallArticle32Fine()
+    {
+        var file = await AnswersAsync("{ \"GDPR-ART30-001\": \"yes\" }");
+        try
+        {
+            using var culture = new Culture("en-US");
+            var (exitCode, output, _) = await RunAsync(string.Empty, [new FailingCheck()], "scan", "--mail", "example.com", "--profile", "Company", "--company", "Rossi SRL", "--gdpr", "--answers", file);
+
+            Assert.Equal(0, exitCode);
+            Assert.Contains("!! MAIL-DMARC-001  DMARC policy: DNS timeout", output, StringComparison.Ordinal);
+            // Nothing was checked, so nothing can be said about the technical side of art. 32.
+            Assert.DoesNotContain("GDPR-ART32-002", output, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
+    [Fact]
+    public async Task Scan_WhenSomeTechnicalCheckRanWithoutProblems_ShouldSayWhichAreasArticle32Covers()
+    {
+        var file = await AnswersAsync("{ \"GDPR-ART30-001\": \"yes\" }");
+        try
+        {
+            using var culture = new Culture("it-IT");
+            var (_, output, _) = await RunAsync(string.Empty, [new FailingCheck(), new PassingCheck()], "scan", "--mail", "example.com", "--profile", "Company", "--company", "Rossi SRL", "--gdpr", "--answers", file);
+
+            Assert.Contains("  OK GDPR-ART32-002  Riscontri tecnici per l'art. 32: aree controllate: posta", output, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
+    [Fact]
+    public async Task Scan_WhenTheInputEndsInTheFirstOfTwoQuestionnaires_ShouldStopAskingAndSayItOnce()
+    {
+        using var culture = new Culture("en-US");
+
+        var (exitCode, output, _) = await RunAsync("y\n", "scan", "--gdpr", "--nis2", "--profile", "Company", "--company", "Rossi SRL");
+
+        Assert.Equal(0, exitCode);
+        Assert.Equal(1, Count(output, "Input ended"));
+        Assert.DoesNotContain("In which of these sectors", output, StringComparison.Ordinal);
+        Assert.Contains("[INFO] NIS2-SCOPE-001  NIS2 scope to be verified", output, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -270,6 +320,13 @@ public sealed class QuestionnaireCommandTests
 
     private static Task<(int ExitCode, string Output, string Error)> RunAsync(string input, params string[] args) => RunAsync(input, [], args);
 
+    private static async Task<string> AnswersAsync(string json)
+    {
+        var file = Path.Combine(Path.GetTempPath(), "scudo-answers-" + Guid.NewGuid().ToString("N") + ".json");
+        await File.WriteAllTextAsync(file, json, TestContext.Current.CancellationToken);
+        return file;
+    }
+
     private static async Task<(int ExitCode, string Output, string Error)> RunAsync(string input, ICheck[] emailChecks, params string[] args)
     {
         using var output = new StringWriter(CultureInfo.InvariantCulture);
@@ -299,6 +356,40 @@ public sealed class QuestionnaireCommandTests
 
         public Task<CheckResult> RunAsync(CheckContext context, CancellationToken cancellationToken) =>
             Task.FromResult<CheckResult>(new CheckResult.Executed([new Finding(Id, Area, "DMARC in monitoring mode", Severity.Medium, Confidence.Certain, context.Target.Value)]));
+    }
+
+    /// <summary>An email check that always fails, as with a DNS that does not answer.</summary>
+    private sealed class FailingCheck : ICheck
+    {
+        public string Id => "MAIL-DMARC-001";
+
+        public string Title => "DMARC policy";
+
+        public CheckArea Area => CheckArea.Email;
+
+        public TargetKind AppliesTo => TargetKind.Domain;
+
+        public ScopeRequirement Scope => ScopeRequirement.Passive;
+
+        public Task<CheckResult> RunAsync(CheckContext context, CancellationToken cancellationToken) =>
+            Task.FromResult<CheckResult>(new CheckResult.Failed("DNS timeout"));
+    }
+
+    /// <summary>An email check that finds nothing.</summary>
+    private sealed class PassingCheck : ICheck
+    {
+        public string Id => "MAIL-SPF-001";
+
+        public string Title => "SPF record";
+
+        public CheckArea Area => CheckArea.Email;
+
+        public TargetKind AppliesTo => TargetKind.Domain;
+
+        public ScopeRequirement Scope => ScopeRequirement.Passive;
+
+        public Task<CheckResult> RunAsync(CheckContext context, CancellationToken cancellationToken) =>
+            Task.FromResult<CheckResult>(new CheckResult.Executed([]));
     }
 
     private sealed class Culture : IDisposable

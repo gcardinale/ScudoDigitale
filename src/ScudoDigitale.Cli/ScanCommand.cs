@@ -203,10 +203,9 @@ internal static class ScanCommand
             .RunAsync(checks, profile, scope, cancellationToken)
             .ConfigureAwait(false);
 
-        // The technical findings feed the art. 32 question, only when some technical check ran (ADR-008).
-        var technical = runs.Count == 0
-            ? null
-            : FindingPrioritizer.Prioritize(runs.Select(r => r.Result).OfType<CheckResult.Executed>().SelectMany(r => r.Findings));
+        // The technical findings feed the art. 32 question only when some check was really executed:
+        // checks that were all skipped or failed prove nothing (ADR-008).
+        var technical = TechnicalEvidence.Of(runs);
         var subject = profile.CompanyName ?? operatorName;
         var outcomes = questionnaires.Select(q => QuestionnaireEvaluator.Evaluate(q, allAnswers, subject, technical, culture)).ToArray();
         report.WriteResults(scope, runs, outcomes);
@@ -228,9 +227,10 @@ internal static class ScanCommand
             await output.WriteLineAsync(Format(Strings.ReportWritten, paths.Html, paths.Pdf, paths.Json)).ConfigureAwait(false);
             return 0;
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException or NotSupportedException or ArgumentException)
+        catch (Exception e) when (e is not OperationCanceledException)
         {
-            // The checks ran and their results are on screen: only the files are missing.
+            // The checks ran and their results are on screen: only the files are missing. Any error
+            // (disk, path, but also the template or the PDF library) ends here, never as a crash.
             await error.WriteLineAsync(Format(Strings.ReportNotWritten, request.ReportFolder, e.Message)).ConfigureAwait(false);
             return ReportNotWritten;
         }

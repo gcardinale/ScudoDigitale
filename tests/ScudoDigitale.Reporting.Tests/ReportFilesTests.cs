@@ -48,16 +48,71 @@ public sealed class ReportFilesTests : IDisposable
     }
 
     [Fact]
-    public async Task WriteAsync_WhenAFileAlreadyExists_ShouldThrowAndNotOverwriteIt()
+    public async Task WriteAsync_WhenAReportOfTheSameSecondExists_ShouldAddANumberAndNotOverwriteIt()
     {
         var document = Make.Document();
         Directory.CreateDirectory(folder);
-        var existing = Path.Combine(folder, ReportFiles.BaseName(document) + ".html");
+        var existing = Path.Combine(folder, ReportFiles.BaseName(document) + ".pdf");
         await File.WriteAllTextAsync(existing, "mine", TestContext.Current.CancellationToken);
 
-        await Assert.ThrowsAsync<IOException>(() => ReportFiles.WriteAsync(document, folder, TestContext.Current.CancellationToken));
+        var second = await ReportFiles.WriteAsync(document, folder, TestContext.Current.CancellationToken);
+        var third = await ReportFiles.WriteAsync(document, folder, TestContext.Current.CancellationToken);
 
+        Assert.Equal(Path.Combine(folder, "scudo-report-20261125-103105-2.html"), second.Html);
+        Assert.Equal(Path.Combine(folder, "scudo-report-20261125-103105-3.json"), third.Json);
         Assert.Equal("mine", await File.ReadAllTextAsync(existing, TestContext.Current.CancellationToken));
+        Assert.False(File.Exists(Path.Combine(folder, "scudo-report-20261125-103105.html")));
+    }
+
+    [Fact]
+    public void FreePaths_WhenEveryNumberIsTaken_ShouldThrow()
+    {
+        Directory.CreateDirectory(folder);
+        var stem = Path.Combine(folder, "r");
+        File.WriteAllText(stem + ".json", string.Empty);
+        for (var n = 2; n < 100; n++)
+        {
+            File.WriteAllText($"{stem}-{n}.html", string.Empty);
+        }
+
+        Assert.Throws<IOException>(() => ReportFiles.FreePaths(stem));
+    }
+
+    [Fact]
+    public async Task WriteAsync_WhenAFileFailsHalfway_ShouldRemoveTheFilesAlreadyWritten()
+    {
+        var calls = 0;
+        Task Write(string path, byte[] bytes, CancellationToken token)
+        {
+            // The first file is written, the second fails as a full disk would.
+            if (++calls == 2)
+            {
+                throw new IOException("disk full");
+            }
+
+            return File.WriteAllBytesAsync(path, bytes, token);
+        }
+
+        var e = await Assert.ThrowsAsync<IOException>(() => ReportFiles.WriteAsync(Make.Document(), folder, Write, TestContext.Current.CancellationToken));
+
+        Assert.Equal("disk full", e.Message);
+        Assert.Empty(Directory.EnumerateFiles(folder));
+    }
+
+    [Fact]
+    public async Task WriteAsync_WhenCancelledAfterTheFirstFile_ShouldRemoveIt()
+    {
+        using var cancel = new CancellationTokenSource();
+        async Task Write(string path, byte[] bytes, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            await File.WriteAllBytesAsync(path, bytes, CancellationToken.None);
+            await cancel.CancelAsync();
+        }
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ReportFiles.WriteAsync(Make.Document(), folder, Write, cancel.Token));
+
+        Assert.Empty(Directory.EnumerateFiles(folder));
     }
 
     [Fact]

@@ -98,8 +98,8 @@
       "kind": "Technical",
       "label": { "en": "Technical evidence for art. 32", "it": "Riscontri tecnici per l'art. 32" },
       "text": {
-        "en": "The technical checks of this assessment (email, websites) found no problem of Medium severity or above.",
-        "it": "I controlli tecnici di questa valutazione (posta, siti web) non hanno trovato problemi di gravità media o superiore."
+        "en": "The technical checks executed in this assessment found no problem of Medium severity or above.",
+        "it": "I controlli tecnici eseguiti in questa valutazione non hanno trovato problemi di gravità media o superiore."
       },
       "finding": { "en": "Technical problems that weaken the security of processing", "it": "Problemi tecnici che indeboliscono la sicurezza del trattamento" },
       "severity": "Medium",

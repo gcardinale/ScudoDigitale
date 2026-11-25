@@ -3,7 +3,7 @@
 - **Content:** HTML, PDF, JSON (v0.1); comparison between two runs (v0.2)
 - **Release:** v0.1
 - **Status:** 🟢 HTML, PDF and JSON implemented (25/11/2026), branch `feature/v0.1-reporting`; comparison to do
-- **Test coverage:** 100% lines (611/611), 96.1% branches (123/128) — 78 tests
+- **Test coverage:** 99.6% lines (689/692), 97.4% branches (189/194) — 97 tests
 
 ## Done
 - `ReportDocument` (ADR-005): the versioned DTO written to JSON, `schemaVersion` 1. Declaration, profile, notes, program version, CVE database version (`null` in v0.1), language of the texts, and one `ReportSection` per area and target with findings (assigned and effective severity), checks passed, skipped (with the reason) and failed (with the error).
@@ -15,6 +15,14 @@
 - Labels in English and Italian in the language of the document, whatever the language of the computer that renders it. `Attribution.ReportFooter(version, culture)` added to Core for this.
 - `ReportFiles.WriteAsync`: `scudo-report-yyyyMMdd-HHmmss.{html,pdf,json}`, folder created if missing, rendering before writing, an existing file is never overwritten (`FileMode.CreateNew`), no BOM.
 - Run on 25/11/2026 with `scudo scan --mail gcardinale.it --web gcardinale.it --report …`: 25 checks in 9.6 s, three files written, PDF of 2 pages with the footer on both.
+
+## Review of 25/11/2026
+Independent review by a separate agent (34 counter-checks), fixed the same day, each with a test that turns red when the old behaviour is put back:
+- the fixed footer of the printed HTML covered a line of content per page (seen printing with Chrome): the content now sits in a table whose footer row, repeated on every printed page, keeps the space free; checked again by printing 300 checks with Edge;
+- `ReportJson.Read` accepted null sections, notes, findings and checks, a blank version, language or operator, CVSS 42 and EPSS -3: all refused now; a complete document with another `schemaVersion` is refused because of the version;
+- the `lang` attribute is now guarded by a test;
+- "checks passed" counted the questions of the questionnaires: counted apart now ("N questions answered without problems"), as in the terminal;
+- two reports in the same second: the second one gets `-2`, `-3`…; a failure or a cancellation halfway removes the files already written.
 
 ## Known limits
 - The PDF shows the severity as coloured text (`[HIGH]`): MigraDoc has no background for a run of text.

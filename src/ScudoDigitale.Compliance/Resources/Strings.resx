@@ -94,4 +94,34 @@
   <data name="Nis2FixToBeVerified" xml:space="preserve">
     <value>Answer the questions left as "don't know" (sector, size, categories in scope whatever their size), or have the scope assessed by a lawyer.</value>
   </data>
+  <data name="AreasChecked" xml:space="preserve">
+    <value>areas checked: {0}</value>
+  </data>
+  <data name="AreaNetwork" xml:space="preserve">
+    <value>local network</value>
+  </data>
+  <data name="AreaWifi" xml:space="preserve">
+    <value>Wi-Fi</value>
+  </data>
+  <data name="AreaWeb" xml:space="preserve">
+    <value>websites</value>
+  </data>
+  <data name="AreaEmail" xml:space="preserve">
+    <value>email</value>
+  </data>
+  <data name="AreaBluetooth" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="AnswersNotAnObject" xml:space="preserve">
+    <value>The answers must be a JSON object of texts, for example { "GDPR-ART30-001": "yes" }.</value>
+  </data>
+  <data name="AnswersNotJson" xml:space="preserve">
+    <value>the file is not valid JSON (line {0}, position {1}).</value>
+  </data>
+  <data name="AnswerUnknownQuestion" xml:space="preserve">
+    <value>{0}: no such question in the questionnaires of this assessment.</value>
+  </data>
+  <data name="AnswerNotAccepted" xml:space="preserve">
+    <value>{0}: '{1}' is not an answer to this question; accepted: {2}.</value>
+  </data>
 </root>

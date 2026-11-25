@@ -39,6 +39,7 @@ public sealed class AnswersFileTests
     [Fact]
     public void Validate_WhenAnswersHaveTypos_ShouldListEveryOneSorted()
     {
+        using var culture = new UiCulture("en-US");
         var questionnaires = new[] { QuestionnaireCatalog.Get(QuestionnaireCatalog.GdprCompany), QuestionnaireCatalog.Get(QuestionnaireCatalog.Nis2) };
         var answers = Make.Answers(
             ("GDPR-ART30-001", "si"),
@@ -57,6 +58,21 @@ public sealed class AnswersFileTests
         Assert.StartsWith("GDPR-ART32-002: 'yes'", errors[2], StringComparison.Ordinal);
         Assert.Equal("GDPR-BACKUP-001: no such question in the questionnaires of this assessment.", errors[3]);
         Assert.StartsWith("NIS2-SECTOR-001: 'annex9-moon'", errors[4], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReadAndValidate_WhenUiIsItalian_ShouldExplainInItalian()
+    {
+        using var culture = new UiCulture("it-IT");
+
+        var notJson = Assert.Throws<InvalidDataException>(() => AnswersFile.Read("{\n  \"GDPR-ART30-001\": yes\n}"));
+        Assert.Equal("il file non è un JSON valido (riga 2, posizione 21).", notJson.Message);
+        Assert.StartsWith("Le risposte devono essere un oggetto JSON", Assert.Throws<InvalidDataException>(() => AnswersFile.Read("null")).Message, StringComparison.Ordinal);
+
+        var errors = AnswersFile.Validate(Make.Answers(("GDPR-NOPE-001", "yes"), ("GDPR-ART30-001", "si")), [QuestionnaireCatalog.Get(QuestionnaireCatalog.GdprCompany)]);
+        Assert.Equal(
+            ["GDPR-ART30-001: «si» non è una risposta valida per questa domanda; ammesse: yes, no, unknown.", "GDPR-NOPE-001: nessuna domanda con questo codice nei questionari di questa valutazione."],
+            errors);
     }
 
     [Fact]

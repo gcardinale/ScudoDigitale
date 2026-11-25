@@ -8,8 +8,8 @@
     "it": "NIS2 (D.Lgs. 138/2024): ambito e principali obblighi"
   },
   "notice": {
-    "en": "Indicative estimate from your answers, on the text of D.Lgs. 138/2024 in force since 16/10/2024. Size per Recommendation 2003/361/CE; linked and partner enterprises, public administrations (Annex III) and the entities that ACN identifies case by case are not assessed.",
-    "it": "Stima indicativa basata sulle risposte, sul testo del D.Lgs. 138/2024 in vigore dal 16/10/2024. Dimensione secondo la Raccomandazione 2003/361/CE; non sono valutate le imprese collegate e associate, le pubbliche amministrazioni (allegato III) e i soggetti che l'ACN individua caso per caso."
+    "en": "Indicative estimate from your answers, on the text of D.Lgs. 138/2024 in force since 16/10/2024. Size per Recommendation 2003/361/CE, with the figures of linked and partner enterprises added as art. 3, paragraph 4 requires (the exception for proportionality is not assessed); public administrations (Annex III) and the entities that ACN identifies case by case (Annex IV, art. 3 paragraphs 8-10) are not assessed.",
+    "it": "Stima indicativa basata sulle risposte, sul testo del D.Lgs. 138/2024 in vigore dal 16/10/2024. Dimensione secondo la Raccomandazione 2003/361/CE, sommando i dati delle imprese collegate e associate come richiede l'art. 3, comma 4 (l'eccezione di proporzionalità non è valutata); non sono valutate le pubbliche amministrazioni (allegato III) e i soggetti che l'ACN individua caso per caso (allegato IV, art. 3, commi 8-10)."
   },
   "questions": [
     {
@@ -61,8 +61,8 @@
       "kind": "Choice",
       "label": { "en": "Employees", "it": "Dipendenti" },
       "text": {
-        "en": "How many people does the company employ (annual work units, counting those of linked enterprises)?",
-        "it": "Quante persone occupa l'azienda (unità lavorative annue, contando quelle delle imprese collegate)?"
+        "en": "How many people does the company employ (annual work units, adding those of linked enterprises and the share of partner enterprises)?",
+        "it": "Quante persone occupa l'azienda (unità lavorative annue, sommando quelle delle imprese collegate e la quota delle imprese associate)?"
       },
       "options": [
         { "id": "under50", "text": { "en": "Fewer than 50", "it": "Meno di 50" } },
@@ -76,8 +76,8 @@
       "kind": "Choice",
       "label": { "en": "Annual turnover", "it": "Fatturato annuo" },
       "text": {
-        "en": "What is the annual turnover?",
-        "it": "Qual è il fatturato annuo?"
+        "en": "What is the annual turnover (adding that of linked enterprises and the share of partner enterprises)?",
+        "it": "Qual è il fatturato annuo (sommando quello delle imprese collegate e la quota delle imprese associate)?"
       },
       "options": [
         { "id": "upTo10m", "text": { "en": "Up to 10 million euro", "it": "Fino a 10 milioni di euro" } },
@@ -91,8 +91,8 @@
       "kind": "Choice",
       "label": { "en": "Balance sheet total", "it": "Totale di bilancio" },
       "text": {
-        "en": "What is the annual balance sheet total?",
-        "it": "Qual è il totale di bilancio annuo?"
+        "en": "What is the annual balance sheet total (adding that of linked enterprises and the share of partner enterprises)?",
+        "it": "Qual è il totale di bilancio annuo (sommando quello delle imprese collegate e la quota delle imprese associate)?"
       },
       "options": [
         { "id": "upTo10m", "text": { "en": "Up to 10 million euro", "it": "Fino a 10 milioni di euro" } },

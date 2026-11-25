@@ -66,6 +66,32 @@ public sealed class HtmlReportTests
     }
 
     [Fact]
+    public void Render_WhenLanguageComesFromAHostileJson_ShouldEscapeTheLangAttribute()
+    {
+        var document = Make.Document() with { Language = "x\" onmouseover=\"alert(1)" };
+
+        var html = HtmlReport.Render(document);
+
+        Assert.Contains("<html lang=\"x&quot; onmouseover=&quot;alert(1)\">", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("onmouseover=\"", html, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Render_WhenPrinted_ShouldKeepFreeTheSpaceOfTheFooterOnEveryPage()
+    {
+        var html = HtmlReport.Render(Make.Document());
+
+        // The content sits in a table whose footer row, repeated by the browser on every printed page,
+        // is taller than the fixed attribution: nothing is drawn under it (checked with Chrome).
+        var spacer = html.IndexOf("<tfoot><tr><td><div class=\"footer-space\"></div></td></tr></tfoot>", StringComparison.Ordinal);
+        var content = html.IndexOf("<tbody><tr><td>\n<main>", StringComparison.Ordinal);
+        var end = html.IndexOf("</main>\n</td></tr></tbody>\n</table>\n<footer class=\"attribution\">", StringComparison.Ordinal);
+        Assert.True(spacer > 0 && content > spacer && end > content, html);
+        Assert.Contains(".footer-space { height: 16mm; }", html, StringComparison.Ordinal);
+        Assert.Contains("footer.attribution { position: fixed; bottom: 0; left: 0; right: 0; height: 12mm;", html, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Render_WhenCalled_ShouldEndWithTheAttributionRepeatedOnEveryPrintedPage()
     {
         using var _ = new UiCulture("en-US");
@@ -110,7 +136,7 @@ public sealed class HtmlReportTests
         Assert.Contains("<li class=\"sev-critical\"><strong>1</strong>Critical</li>", html, StringComparison.Ordinal);
         Assert.Contains("<li class=\"sev-low\"><strong>0</strong>Low</li>", html, StringComparison.Ordinal);
         Assert.Contains("<li><strong>2</strong>Websites</li>", html, StringComparison.Ordinal);
-        Assert.Contains("<p>2 checks passed, 1 skipped, 1 could not run.</p>", html, StringComparison.Ordinal);
+        Assert.Contains("<p>1 checks passed, 1 skipped, 1 could not run. 1 questions answered without problems.</p>", html, StringComparison.Ordinal);
         Assert.Contains("<li><span class=\"badge sev-critical\">Critical</span> <strong>Outdated CMS</strong> <span class=\"target\">(www.example.com)</span><br>Update WordPress.</li>", html, StringComparison.Ordinal);
         Assert.Contains("<section class=\"notes\" aria-label=\"Notes\">", html, StringComparison.Ordinal);
 

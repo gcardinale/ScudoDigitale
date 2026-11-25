@@ -17,6 +17,16 @@ using ScudoDigitale.Core;
 
 namespace ScudoDigitale.Compliance.Tests;
 
+/// <summary>Sets the UI culture for the current async flow and restores it on dispose.</summary>
+internal sealed class UiCulture : IDisposable
+{
+    private readonly CultureInfo previous = CultureInfo.CurrentUICulture;
+
+    public UiCulture(string name) => CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(name);
+
+    public void Dispose() => CultureInfo.CurrentUICulture = previous;
+}
+
 /// <summary>Builders for test objects.</summary>
 internal static class Make
 {

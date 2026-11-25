@@ -32,6 +32,7 @@ public sealed record ReportSummary
         int passed,
         int skipped,
         int failed,
+        int questionsPassed,
         IReadOnlyList<ReportFinding> actions)
     {
         BySeverity = bySeverity;
@@ -39,6 +40,7 @@ public sealed record ReportSummary
         Passed = passed;
         Skipped = skipped;
         Failed = failed;
+        QuestionsPassed = questionsPassed;
         Actions = actions;
     }
 
@@ -48,7 +50,7 @@ public sealed record ReportSummary
     /// <summary>Number of findings in every area present in the report, in the order of the sections.</summary>
     public IReadOnlyList<(CheckArea Area, int Findings)> ByArea { get; }
 
-    /// <summary>Checks or questions that raised no problem.</summary>
+    /// <summary>Technical checks that raised no problem; the questions of the questionnaires are counted apart.</summary>
     public int Passed { get; }
 
     /// <summary>Checks that could not run here.</summary>
@@ -56,6 +58,12 @@ public sealed record ReportSummary
 
     /// <summary>Checks that failed.</summary>
     public int Failed { get; }
+
+    /// <summary>Questions of the questionnaires answered without problems.</summary>
+    public int QuestionsPassed { get; }
+
+    /// <summary>Whether the report has at least one questionnaire section (a section without a target).</summary>
+    public bool HasQuestionnaires { get; init; }
 
     /// <summary>
     /// The most urgent findings of the whole report, at most <see cref="MaxActions"/>, most urgent first.
@@ -94,12 +102,19 @@ public sealed record ReportSummary
             .Take(MaxActions)
             .ToArray();
 
+        // Technical sections have a target, questionnaire sections do not (ReportBuilder.QuestionnaireSection).
+        var technical = document.Sections.Where(s => s.Target is not null).ToArray();
+        var questionnaires = document.Sections.Where(s => s.Target is null).ToArray();
         return new ReportSummary(
             bySeverity,
             byArea,
-            document.Sections.Sum(s => s.Passed.Count),
-            document.Sections.Sum(s => s.Skipped.Count),
-            document.Sections.Sum(s => s.Failed.Count),
-            actions);
+            technical.Sum(s => s.Passed.Count),
+            technical.Sum(s => s.Skipped.Count),
+            technical.Sum(s => s.Failed.Count),
+            questionnaires.Sum(s => s.Passed.Count),
+            actions)
+        {
+            HasQuestionnaires = questionnaires.Length > 0,
+        };
     }
 }

@@ -214,4 +214,7 @@
   <data name="TargetLocalMachine" xml:space="preserve">
     <value>questo computer</value>
   </data>
+  <data name="QuestionsCount" xml:space="preserve">
+    <value>{0} domande senza problemi.</value>
+  </data>
 </root>
