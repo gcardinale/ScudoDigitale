@@ -1,0 +1,180 @@
+{
+  "id": "gdpr-company",
+  "version": "2026-11-25",
+  "area": "Gdpr",
+  "profile": "Company",
+  "title": {
+    "en": "GDPR: main obligations of the controller",
+    "it": "GDPR: principali obblighi del titolare"
+  },
+  "notice": {
+    "en": "Indicative. The answers are not checked and the questionnaire covers only the main obligations of Regulation (EU) 2016/679: it does not replace an assessment by a lawyer or a DPO.",
+    "it": "Indicativo. Le risposte non vengono verificate e il questionario copre solo i principali obblighi del Regolamento (UE) 2016/679: non sostituisce la valutazione di un legale o di un DPO."
+  },
+  "questions": [
+    {
+      "id": "GDPR-ART30-001",
+      "kind": "YesNo",
+      "label": { "en": "Record of processing activities", "it": "Registro dei trattamenti" },
+      "text": {
+        "en": "Does the company keep an up-to-date record of its processing activities (purposes, categories of data and people, recipients, retention times, security measures)?",
+        "it": "L'azienda tiene un registro aggiornato delle attività di trattamento (finalità, categorie di dati e di interessati, destinatari, tempi di conservazione, misure di sicurezza)?"
+      },
+      "finding": { "en": "No record of processing activities", "it": "Manca il registro delle attività di trattamento" },
+      "severity": "Medium",
+      "risk": {
+        "en": "It is the first document asked for in an inspection; without it the company cannot show what it does with personal data.",
+        "it": "È il primo documento richiesto in un'ispezione; senza, l'azienda non può dimostrare cosa fa con i dati personali."
+      },
+      "fix": {
+        "en": "Write the record (the Garante publishes a template). The exemption for companies with fewer than 250 employees does not apply when the processing is not occasional, may be a risk, or covers special categories of data: payroll alone usually rules it out.",
+        "it": "Redigere il registro (il Garante pubblica un modello). L'esenzione per chi ha meno di 250 dipendenti non vale se il trattamento non è occasionale, può presentare un rischio o riguarda categorie particolari di dati: di solito basta la gestione del personale a escluderla."
+      },
+      "references": ["GDPR art. 30"]
+    },
+    {
+      "id": "GDPR-ART13-001",
+      "kind": "YesNo",
+      "label": { "en": "Privacy notices", "it": "Informative privacy" },
+      "text": {
+        "en": "Are there up-to-date privacy notices for every group of people whose data you collect (customers, employees, website visitors, suppliers)?",
+        "it": "Esistono informative privacy aggiornate per ogni gruppo di persone di cui raccogliete i dati (clienti, dipendenti, visitatori del sito, fornitori)?"
+      },
+      "finding": { "en": "Privacy notices missing or incomplete", "it": "Informative privacy mancanti o incomplete" },
+      "severity": "Medium",
+      "risk": {
+        "en": "People are not told what is done with their data, which is among the most frequent reasons for complaints to the Garante.",
+        "it": "Le persone non sanno cosa viene fatto dei loro dati: è tra i motivi più frequenti dei reclami al Garante."
+      },
+      "fix": {
+        "en": "Write one notice per group of people, with the contents of arts. 13-14, and give it when the data are collected (on the website, in contracts, at hiring).",
+        "it": "Scrivere un'informativa per ogni gruppo di persone, con i contenuti degli artt. 13-14, e fornirla al momento della raccolta (sul sito, nei contratti, all'assunzione)."
+      },
+      "references": ["GDPR art. 13", "GDPR art. 14"]
+    },
+    {
+      "id": "GDPR-ART28-001",
+      "kind": "YesNo",
+      "label": { "en": "Processors under contract", "it": "Responsabili del trattamento" },
+      "text": {
+        "en": "Is there a data processing agreement with every supplier that handles personal data for you (accountant, payroll, cloud, IT support, newsletter service)?",
+        "it": "C'è un accordo sul trattamento dei dati con ogni fornitore che tratta dati personali per vostro conto (commercialista, paghe, cloud, assistenza informatica, newsletter)?"
+      },
+      "finding": { "en": "Processors without a data processing agreement", "it": "Responsabili del trattamento senza accordo" },
+      "severity": "Medium",
+      "risk": {
+        "en": "The company answers for what its suppliers do with the data, without the guarantees the contract must give.",
+        "it": "L'azienda risponde di ciò che i fornitori fanno con i dati, senza le garanzie che il contratto deve dare."
+      },
+      "fix": {
+        "en": "List the suppliers that handle personal data and sign with each an agreement with the contents of art. 28 (many offer a standard one).",
+        "it": "Elencare i fornitori che trattano dati personali e firmare con ciascuno un accordo con i contenuti dell'art. 28 (molti ne offrono uno standard)."
+      },
+      "references": ["GDPR art. 28"],
+      "allowNotApplicable": true
+    },
+    {
+      "id": "GDPR-ART32-001",
+      "kind": "YesNo",
+      "label": { "en": "Security measures", "it": "Misure di sicurezza" },
+      "text": {
+        "en": "Are the security measures decided and written down (backups tested, personal accounts with strong passwords and two-factor authentication, updates, access limited to who needs it)?",
+        "it": "Le misure di sicurezza sono decise e scritte (backup provati, account personali con password robuste e verifica in due passaggi, aggiornamenti, accessi limitati a chi ne ha bisogno)?"
+      },
+      "finding": { "en": "Security measures not defined", "it": "Misure di sicurezza non definite" },
+      "severity": "High",
+      "risk": {
+        "en": "Without decided measures a breach is more likely, and the company cannot show that the measures were adequate to the risk.",
+        "it": "Senza misure decise una violazione è più probabile, e l'azienda non può dimostrare che le misure erano adeguate al rischio."
+      },
+      "fix": {
+        "en": "Write a short document with the measures in place and who is responsible for them, starting from backups, accounts and updates; review it every year.",
+        "it": "Scrivere un breve documento con le misure adottate e chi ne è responsabile, partendo da backup, account e aggiornamenti; rivederlo ogni anno."
+      },
+      "references": ["GDPR art. 32"]
+    },
+    {
+      "id": "GDPR-ART32-002",
+      "kind": "Technical",
+      "label": { "en": "Technical evidence for art. 32", "it": "Riscontri tecnici per l'art. 32" },
+      "text": {
+        "en": "The technical checks executed in this assessment found no problem of Medium severity or above.",
+        "it": "I controlli tecnici eseguiti in questa valutazione non hanno trovato problemi di gravità media o superiore."
+      },
+      "finding": { "en": "Technical problems that weaken the security of processing", "it": "Problemi tecnici che indeboliscono la sicurezza del trattamento" },
+      "severity": "Medium",
+      "minimumSeverity": "Medium",
+      "risk": {
+        "en": "Art. 32 asks for measures adequate to the risk, taking the state of the art into account: open technical problems weaken that position.",
+        "it": "L'art. 32 chiede misure adeguate al rischio, tenuto conto dello stato dell'arte: i problemi tecnici aperti indeboliscono questa posizione."
+      },
+      "fix": {
+        "en": "Fix the technical findings listed, starting from the most urgent ones in the email and website sections of this report.",
+        "it": "Correggere i problemi tecnici elencati, cominciando dai più urgenti nelle sezioni posta e siti web di questo rapporto."
+      },
+      "references": ["GDPR art. 32"]
+    },
+    {
+      "id": "GDPR-ART33-001",
+      "kind": "YesNo",
+      "label": { "en": "Data breach procedure", "it": "Procedura per le violazioni" },
+      "text": {
+        "en": "Is there a procedure for personal data breaches (who decides, notification to the Garante within 72 hours when required, record of breaches)?",
+        "it": "Esiste una procedura per le violazioni dei dati personali (chi decide, notifica al Garante entro 72 ore quando dovuta, registro delle violazioni)?"
+      },
+      "finding": { "en": "No procedure for personal data breaches", "it": "Manca la procedura per le violazioni dei dati" },
+      "severity": "High",
+      "risk": {
+        "en": "In an incident the 72 hours pass while deciding who does what, and a late or missing notification is a violation in itself.",
+        "it": "In un incidente le 72 ore passano a decidere chi fa cosa, e una notifica tardiva o mancata è di per sé una violazione."
+      },
+      "fix": {
+        "en": "Write a one-page procedure: who to call, how to assess the risk, when and how to notify the Garante and the people concerned (arts. 33-34), and keep a record of every breach, also those not notified.",
+        "it": "Scrivere una procedura di una pagina: chi chiamare, come valutare il rischio, quando e come notificare al Garante e alle persone interessate (artt. 33-34), e tenere un registro di ogni violazione, anche di quelle non notificate."
+      },
+      "references": ["GDPR art. 33", "GDPR art. 34"]
+    },
+    {
+      "id": "GDPR-ART35-001",
+      "kind": "YesNo",
+      "label": { "en": "Impact assessment", "it": "Valutazione d'impatto" },
+      "text": {
+        "en": "When a processing is likely to be a high risk (video surveillance, geolocation, health data on a large scale, profiling), has an impact assessment (DPIA) been carried out?",
+        "it": "Quando un trattamento può presentare un rischio elevato (videosorveglianza, geolocalizzazione, dati sanitari su larga scala, profilazione), è stata fatta una valutazione d'impatto (DPIA)?"
+      },
+      "finding": { "en": "Impact assessment not carried out", "it": "Valutazione d'impatto non svolta" },
+      "severity": "Medium",
+      "risk": {
+        "en": "A high-risk processing without an impact assessment is a violation, and its risks were never weighed.",
+        "it": "Un trattamento a rischio elevato senza valutazione d'impatto è una violazione, e i suoi rischi non sono mai stati pesati."
+      },
+      "fix": {
+        "en": "Check the list of processings that require a DPIA published by the Garante; for those that do, carry it out before starting, or now if they have already started.",
+        "it": "Verificare l'elenco dei trattamenti soggetti a DPIA pubblicato dal Garante; per quelli che la richiedono, svolgerla prima di iniziare, o subito se sono già in corso."
+      },
+      "references": ["GDPR art. 35"],
+      "allowNotApplicable": true
+    },
+    {
+      "id": "GDPR-ART37-001",
+      "kind": "YesNo",
+      "label": { "en": "Data protection officer", "it": "Responsabile della protezione dei dati" },
+      "text": {
+        "en": "If the company must have a data protection officer (public body, regular and systematic monitoring of people on a large scale, special categories of data on a large scale), has one been designated and communicated to the Garante?",
+        "it": "Se l'azienda deve avere un responsabile della protezione dei dati (ente pubblico, monitoraggio regolare e sistematico delle persone su larga scala, categorie particolari di dati su larga scala), è stato designato e comunicato al Garante?"
+      },
+      "finding": { "en": "Data protection officer not designated", "it": "Responsabile della protezione dei dati non designato" },
+      "severity": "Medium",
+      "risk": {
+        "en": "Where the designation is mandatory, its absence is a violation, and nobody follows the compliance of the processing with the needed independence.",
+        "it": "Dove la designazione è obbligatoria la sua mancanza è una violazione, e nessuno segue la conformità dei trattamenti con l'indipendenza necessaria."
+      },
+      "fix": {
+        "en": "Check whether one of the cases of art. 37 applies; if so, designate a DPO, internal or external, publish the contact details and communicate them to the Garante.",
+        "it": "Verificare se ricorre uno dei casi dell'art. 37; se sì, designare un DPO, interno o esterno, pubblicarne i contatti e comunicarli al Garante."
+      },
+      "references": ["GDPR art. 37"],
+      "allowNotApplicable": true
+    }
+  ]
+}

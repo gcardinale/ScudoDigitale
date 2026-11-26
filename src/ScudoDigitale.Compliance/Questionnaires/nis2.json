@@ -1,0 +1,210 @@
+{
+  "id": "nis2",
+  "version": "2026-11-25",
+  "area": "Nis2",
+  "profile": "Company",
+  "title": {
+    "en": "NIS2 (D.Lgs. 138/2024): scope and main obligations",
+    "it": "NIS2 (D.Lgs. 138/2024): ambito e principali obblighi"
+  },
+  "notice": {
+    "en": "Indicative estimate from your answers, on the text of D.Lgs. 138/2024 in force since 16/10/2024. Size per Recommendation 2003/361/CE, with the figures of linked and partner enterprises added as art. 3, paragraph 4 requires (the exception for proportionality is not assessed); public administrations (Annex III) and the entities that ACN identifies case by case (Annex IV, art. 3 paragraphs 8-10) are not assessed.",
+    "it": "Stima indicativa basata sulle risposte, sul testo del D.Lgs. 138/2024 in vigore dal 16/10/2024. Dimensione secondo la Raccomandazione 2003/361/CE, sommando i dati delle imprese collegate e associate come richiede l'art. 3, comma 4 (l'eccezione di proporzionalità non è valutata); non sono valutate le pubbliche amministrazioni (allegato III) e i soggetti che l'ACN individua caso per caso (allegato IV, art. 3, commi 8-10)."
+  },
+  "questions": [
+    {
+      "id": "NIS2-SECTOR-001",
+      "kind": "Choice",
+      "label": { "en": "Sector", "it": "Settore" },
+      "text": {
+        "en": "In which of these sectors does the company mainly work?",
+        "it": "In quale di questi settori opera principalmente l'azienda?"
+      },
+      "options": [
+        { "id": "annex1-energy", "text": { "en": "Energy (electricity, district heating and cooling, oil, gas, hydrogen)", "it": "Energia (energia elettrica, teleriscaldamento e teleraffrescamento, petrolio, gas, idrogeno)" } },
+        { "id": "annex1-transport", "text": { "en": "Transport (air, rail, water, road)", "it": "Trasporti (aereo, ferroviario, per vie d'acqua, su strada)" } },
+        { "id": "annex1-banking", "text": { "en": "Banking (credit institutions)", "it": "Settore bancario (enti creditizi)" } },
+        { "id": "annex1-financial-markets", "text": { "en": "Financial market infrastructures", "it": "Infrastrutture dei mercati finanziari" } },
+        { "id": "annex1-health", "text": { "en": "Health (healthcare providers, laboratories, pharmaceutical and critical medical device manufacturers)", "it": "Settore sanitario (prestatori di assistenza sanitaria, laboratori, fabbricanti di farmaci e di dispositivi medici critici)" } },
+        { "id": "annex1-drinking-water", "text": { "en": "Drinking water", "it": "Acqua potabile" } },
+        { "id": "annex1-waste-water", "text": { "en": "Waste water", "it": "Acque reflue" } },
+        { "id": "annex1-digital-infrastructure", "text": { "en": "Digital infrastructure (internet exchange points, DNS, top-level domains, cloud, data centres, content delivery networks, trust services, electronic communications)", "it": "Infrastrutture digitali (punti di interscambio internet, DNS, domini di primo livello, cloud, data center, reti di distribuzione dei contenuti, servizi fiduciari, comunicazioni elettroniche)" } },
+        { "id": "annex1-ict-b2b", "text": { "en": "ICT service management for other businesses (managed services, managed security services)", "it": "Gestione dei servizi TIC per altre imprese (servizi gestiti, servizi di sicurezza gestiti)" } },
+        { "id": "annex1-space", "text": { "en": "Space (ground infrastructure for space-based services)", "it": "Spazio (infrastrutture terrestri per servizi spaziali)" } },
+        { "id": "annex2-postal", "text": { "en": "Postal and courier services", "it": "Servizi postali e di corriere" } },
+        { "id": "annex2-waste", "text": { "en": "Waste management", "it": "Gestione dei rifiuti" } },
+        { "id": "annex2-chemicals", "text": { "en": "Manufacture, production and distribution of chemicals", "it": "Fabbricazione, produzione e distribuzione di sostanze chimiche" } },
+        { "id": "annex2-food", "text": { "en": "Production, processing and distribution of food", "it": "Produzione, trasformazione e distribuzione di alimenti" } },
+        { "id": "annex2-manufacturing", "text": { "en": "Manufacturing (medical devices, computers and electronics, electrical equipment, machinery, motor vehicles, other transport equipment)", "it": "Fabbricazione (dispositivi medici, computer ed elettronica, apparecchiature elettriche, macchinari, autoveicoli, altri mezzi di trasporto)" } },
+        { "id": "annex2-digital-providers", "text": { "en": "Digital providers (online marketplaces, search engines, social networks)", "it": "Fornitori di servizi digitali (mercati online, motori di ricerca, social network)" } },
+        { "id": "annex2-research", "text": { "en": "Research organisations", "it": "Organizzazioni di ricerca" } },
+        { "id": "none", "text": { "en": "None of these", "it": "Nessuno di questi" } },
+        { "id": "unknown", "text": { "en": "Don't know", "it": "Non so" } }
+      ]
+    },
+    {
+      "id": "NIS2-SPECIAL-001",
+      "kind": "Choice",
+      "label": { "en": "In scope whatever the size", "it": "Inclusi a prescindere dalla dimensione" },
+      "text": {
+        "en": "Is the company a provider of public electronic communications networks or services, a trust service provider, a top-level domain registry or a DNS service provider, a domain name registration service, or an entity identified as critical?",
+        "it": "L'azienda è un fornitore di reti o servizi pubblici di comunicazione elettronica, un prestatore di servizi fiduciari, un gestore di registro di domini di primo livello o un fornitore di servizi DNS, un servizio di registrazione dei nomi di dominio, o un soggetto identificato come critico?"
+      },
+      "options": [
+        { "id": "yes", "text": { "en": "Yes", "it": "Sì" } },
+        { "id": "no", "text": { "en": "No", "it": "No" } },
+        { "id": "unknown", "text": { "en": "Don't know", "it": "Non so" } }
+      ]
+    },
+    {
+      "id": "NIS2-EMPLOYEES-001",
+      "kind": "Choice",
+      "label": { "en": "Employees", "it": "Dipendenti" },
+      "text": {
+        "en": "How many people does the company employ (annual work units, adding those of linked enterprises and the share of partner enterprises)?",
+        "it": "Quante persone occupa l'azienda (unità lavorative annue, sommando quelle delle imprese collegate e la quota delle imprese associate)?"
+      },
+      "options": [
+        { "id": "under50", "text": { "en": "Fewer than 50", "it": "Meno di 50" } },
+        { "id": "from50to249", "text": { "en": "From 50 to 249", "it": "Da 50 a 249" } },
+        { "id": "from250", "text": { "en": "250 or more", "it": "250 o più" } },
+        { "id": "unknown", "text": { "en": "Don't know", "it": "Non so" } }
+      ]
+    },
+    {
+      "id": "NIS2-TURNOVER-001",
+      "kind": "Choice",
+      "label": { "en": "Annual turnover", "it": "Fatturato annuo" },
+      "text": {
+        "en": "What is the annual turnover (adding that of linked enterprises and the share of partner enterprises)?",
+        "it": "Qual è il fatturato annuo (sommando quello delle imprese collegate e la quota delle imprese associate)?"
+      },
+      "options": [
+        { "id": "upTo10m", "text": { "en": "Up to 10 million euro", "it": "Fino a 10 milioni di euro" } },
+        { "id": "upTo50m", "text": { "en": "Over 10 and up to 50 million euro", "it": "Oltre 10 e fino a 50 milioni di euro" } },
+        { "id": "over50m", "text": { "en": "Over 50 million euro", "it": "Oltre 50 milioni di euro" } },
+        { "id": "unknown", "text": { "en": "Don't know", "it": "Non so" } }
+      ]
+    },
+    {
+      "id": "NIS2-BALANCE-001",
+      "kind": "Choice",
+      "label": { "en": "Balance sheet total", "it": "Totale di bilancio" },
+      "text": {
+        "en": "What is the annual balance sheet total (adding that of linked enterprises and the share of partner enterprises)?",
+        "it": "Qual è il totale di bilancio annuo (sommando quello delle imprese collegate e la quota delle imprese associate)?"
+      },
+      "options": [
+        { "id": "upTo10m", "text": { "en": "Up to 10 million euro", "it": "Fino a 10 milioni di euro" } },
+        { "id": "upTo43m", "text": { "en": "Over 10 and up to 43 million euro", "it": "Oltre 10 e fino a 43 milioni di euro" } },
+        { "id": "over43m", "text": { "en": "Over 43 million euro", "it": "Oltre 43 milioni di euro" } },
+        { "id": "unknown", "text": { "en": "Don't know", "it": "Non so" } }
+      ]
+    },
+    {
+      "id": "NIS2-ART7-001",
+      "kind": "YesNo",
+      "askIf": "nis2InScope",
+      "label": { "en": "Registration on the ACN platform", "it": "Registrazione sulla piattaforma ACN" },
+      "text": {
+        "en": "Has the company registered on the NIS platform of ACN, or updated its registration this year (between 1 January and 28 February)?",
+        "it": "L'azienda si è registrata sulla piattaforma NIS dell'ACN, o ha aggiornato la registrazione quest'anno (tra il 1° gennaio e il 28 febbraio)?"
+      },
+      "finding": { "en": "Not registered on the ACN NIS platform", "it": "Non registrata sulla piattaforma NIS dell'ACN" },
+      "severity": "High",
+      "risk": {
+        "en": "Registration is the first obligation of every entity in scope, and the one ACN sees first.",
+        "it": "La registrazione è il primo obbligo di ogni soggetto nell'ambito, e il primo che l'ACN vede."
+      },
+      "fix": {
+        "en": "Register on the ACN platform with company name, address, contact point and sector, and update the registration every year between 1 January and 28 February.",
+        "it": "Registrarsi sulla piattaforma ACN con ragione sociale, indirizzo, punto di contatto e settore, e aggiornare la registrazione ogni anno tra il 1° gennaio e il 28 febbraio."
+      },
+      "references": ["D.Lgs. 138/2024 art. 7"]
+    },
+    {
+      "id": "NIS2-ART23-001",
+      "kind": "YesNo",
+      "askIf": "nis2InScope",
+      "label": { "en": "Management bodies", "it": "Organi di amministrazione" },
+      "text": {
+        "en": "Do the management bodies approve the cybersecurity risk-management measures, and have their members followed cybersecurity training?",
+        "it": "Gli organi di amministrazione approvano le misure di gestione dei rischi per la sicurezza informatica, e i loro componenti hanno seguito una formazione in materia?"
+      },
+      "finding": { "en": "Management bodies not involved or not trained", "it": "Organi di amministrazione non coinvolti o non formati" },
+      "severity": "High",
+      "risk": {
+        "en": "The management bodies are responsible for the violations of the decree: without approval and training that responsibility falls on people who did not decide.",
+        "it": "Gli organi di amministrazione rispondono delle violazioni del decreto: senza approvazione e formazione quella responsabilità ricade su chi non ha deciso."
+      },
+      "fix": {
+        "en": "Have the measures approved by the board, plan cybersecurity training for its members, and offer it periodically to the employees.",
+        "it": "Far approvare le misure dall'organo di amministrazione, pianificare la formazione dei suoi componenti e offrirla periodicamente ai dipendenti."
+      },
+      "references": ["D.Lgs. 138/2024 art. 23"]
+    },
+    {
+      "id": "NIS2-ART24-001",
+      "kind": "YesNo",
+      "askIf": "nis2InScope",
+      "label": { "en": "Risk-management measures", "it": "Misure di gestione dei rischi" },
+      "text": {
+        "en": "Are risk-management measures in place and written down: risk analysis, incident handling, backup and business continuity, access control, multi-factor authentication, use of encryption?",
+        "it": "Sono in atto e scritte le misure di gestione dei rischi: analisi dei rischi, gestione degli incidenti, backup e continuità operativa, controllo degli accessi, autenticazione a più fattori, uso della crittografia?"
+      },
+      "finding": { "en": "Risk-management measures missing or not documented", "it": "Misure di gestione dei rischi mancanti o non documentate" },
+      "severity": "High",
+      "risk": {
+        "en": "The measures of art. 24 are the core of NIS2: without them an incident is more likely and the company cannot show what it has done.",
+        "it": "Le misure dell'art. 24 sono il cuore della NIS2: senza, un incidente è più probabile e l'azienda non può dimostrare cosa ha fatto."
+      },
+      "fix": {
+        "en": "Start from a risk analysis, then write and apply the measures of art. 24, paragraph 2, following the terms and the measures that ACN sets (arts. 30-32).",
+        "it": "Partire da un'analisi dei rischi, poi scrivere e applicare le misure dell'art. 24, comma 2, secondo i termini e le misure stabiliti dall'ACN (artt. 30-32)."
+      },
+      "references": ["D.Lgs. 138/2024 art. 24"]
+    },
+    {
+      "id": "NIS2-ART24-002",
+      "kind": "YesNo",
+      "askIf": "nis2InScope",
+      "label": { "en": "Supply chain security", "it": "Sicurezza della catena di approvvigionamento" },
+      "text": {
+        "en": "Does the company assess the security of its direct suppliers and service providers (requirements in contracts, checks of their security practices)?",
+        "it": "L'azienda valuta la sicurezza dei propri diretti fornitori e fornitori di servizi (requisiti nei contratti, verifica delle loro pratiche di sicurezza)?"
+      },
+      "finding": { "en": "Security of suppliers not assessed", "it": "Sicurezza dei fornitori non valutata" },
+      "severity": "Medium",
+      "risk": {
+        "en": "Many incidents come in through a supplier: a provider with remote access or a compromised software update.",
+        "it": "Molti incidenti entrano da un fornitore: un'assistenza con accesso remoto o un aggiornamento software compromesso."
+      },
+      "fix": {
+        "en": "List the suppliers that touch the systems, put security requirements in their contracts, and check their practices, the most critical first.",
+        "it": "Elencare i fornitori che toccano i sistemi, inserire requisiti di sicurezza nei contratti e verificarne le pratiche, partendo dai più critici."
+      },
+      "references": ["D.Lgs. 138/2024 art. 24"]
+    },
+    {
+      "id": "NIS2-ART25-001",
+      "kind": "YesNo",
+      "askIf": "nis2InScope",
+      "label": { "en": "Incident notification", "it": "Notifica degli incidenti" },
+      "text": {
+        "en": "Is there a procedure to notify CSIRT Italia of a significant incident: pre-notification within 24 hours, notification within 72 hours, final report within one month?",
+        "it": "Esiste una procedura per notificare al CSIRT Italia un incidente significativo: pre-notifica entro 24 ore, notifica entro 72 ore, relazione finale entro un mese?"
+      },
+      "finding": { "en": "No procedure to notify incidents to CSIRT Italia", "it": "Manca la procedura di notifica degli incidenti al CSIRT Italia" },
+      "severity": "High",
+      "risk": {
+        "en": "The 24 hours of the pre-notification start when the company learns of the incident: without a procedure they are lost deciding who does what.",
+        "it": "Le 24 ore della pre-notifica partono da quando l'azienda viene a conoscenza dell'incidente: senza una procedura si perdono a decidere chi fa cosa."
+      },
+      "fix": {
+        "en": "Write the procedure: how to recognize a significant incident, who notifies, the three deadlines (24 hours, 72 hours, one month), and test it once a year.",
+        "it": "Scrivere la procedura: come riconoscere un incidente significativo, chi notifica, le tre scadenze (24 ore, 72 ore, un mese), e provarla una volta l'anno."
+      },
+      "references": ["D.Lgs. 138/2024 art. 25"]
+    }
+  ]
+}

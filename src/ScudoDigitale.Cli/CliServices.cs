@@ -27,12 +27,14 @@ namespace ScudoDigitale.Cli;
 /// <param name="WebProxyFor">The proxy this computer uses to reach a site, if any.</param>
 /// <param name="Now">The current time, for the scope declaration.</param>
 /// <param name="DefaultOperator">Name used when <c>--operator</c> is not given.</param>
+/// <param name="Input">Where the answers to the questionnaires are read from; <see langword="null"/> for the console.</param>
 internal sealed record CliServices(
     Func<EmailCheckOptions, IReadOnlyList<ICheck>> CreateEmailChecks,
     Func<WebCheckOptions, IReadOnlyList<ICheck>> CreateWebChecks,
     Func<string, string?> WebProxyFor,
     Func<DateTimeOffset> Now,
-    Func<string> DefaultOperator)
+    Func<string> DefaultOperator,
+    TextReader? Input = null)
 {
     /// <summary>The real email and website checks, the system clock and the user name of this computer.</summary>
     public static CliServices Default { get; } = new(EmailChecks.Create, WebChecks.Create, WebChecks.SystemProxyFor, () => DateTimeOffset.Now, () => Environment.UserName);

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+{{- # Every value arrives already HTML-escaped (HtmlReport.Encode): never escape twice, never add raw input. }}
+<html lang="{{ language }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Scudo Digitale">
+<title>{{ title }}</title>
+<style>
+  :root { --ink: #1f2937; --muted: #6b7280; --line: #e5e7eb; --soft: #f9fafb; --brand: #1e3a5f; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "DejaVu Sans", sans-serif; color: var(--ink); background: #fff; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 24px 96px; }
+  header.top { border-bottom: 3px solid var(--brand); padding-bottom: 16px; margin-bottom: 24px; }
+  h1 { margin: 0 0 8px; font-size: 26px; color: var(--brand); }
+  h2 { margin: 32px 0 12px; font-size: 20px; color: var(--brand); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  h3 { margin: 20px 0 8px; font-size: 16px; }
+  .disclaimer { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+  dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 0; }
+  dl.facts dt { font-weight: 600; }
+  dl.facts dd { margin: 0; }
+  dl.facts .alone { grid-column: 1 / -1; }
+  .notes { background: #fffbeb; border-left: 4px solid #d97706; padding: 8px 12px; margin: 16px 0; }
+  .notes p { margin: 4px 0; }
+  .counts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; padding: 0; list-style: none; }
+  .counts li { border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; background: var(--soft); }
+  .counts strong { font-size: 18px; margin-right: 6px; }
+  ol.actions { padding-left: 20px; }
+  ol.actions li { margin-bottom: 6px; }
+  .badge { display: inline-block; min-width: 64px; text-align: center; border-radius: 4px; padding: 1px 8px; font-size: 12px; font-weight: 700; color: #fff; text-transform: uppercase; }
+  .sev-critical { background: #7f1d1d; } .sev-high { background: #b91c1c; } .sev-medium { background: #c2410c; }
+  .sev-low { background: #a16207; } .sev-info { background: #475569; }
+  .counts li.sev-critical, .counts li.sev-high, .counts li.sev-medium, .counts li.sev-low, .counts li.sev-info { color: #fff; border-color: transparent; }
+  article.finding { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin: 0 0 12px; break-inside: avoid; }
+  article.finding h4 { margin: 0 0 6px; font-size: 15px; }
+  .id { font-family: ui-monospace, Consolas, "DejaVu Sans Mono", monospace; color: var(--muted); font-size: 12px; }
+  .target { color: var(--muted); font-size: 13px; margin: 0 0 6px; }
+  dl.details { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 0; font-size: 14px; }
+  dl.details dt { font-weight: 600; color: #374151; }
+  dl.details dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .finding-note { font-size: 13px; color: #92400e; margin: 6px 0 0; }
+  .none { color: #15803d; font-weight: 600; }
+  ul.checks { list-style: none; padding: 0; margin: 0 0 8px; font-size: 14px; }
+  ul.checks li { padding: 2px 0; }
+  ul.checks.passed li::before { content: "✓ "; color: #15803d; }
+  ul.checks.skipped li::before { content: "– "; color: var(--muted); }
+  ul.checks.failed li::before { content: "! "; color: #b91c1c; font-weight: 700; }
+  .detail { color: var(--muted); }
+  footer.attribution { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 8px; font-size: 12px; color: var(--muted); text-align: center; }
+  table.layout { width: 100%; border-collapse: collapse; }
+  table.layout > tbody > tr > td, table.layout > tfoot > tr > td { padding: 0; }
+  .footer-space { height: 0; }
+  @page { margin: 12mm 12mm 8mm; }
+  @media print {
+    body { font-size: 11pt; }
+    main { padding: 0; max-width: none; }
+    h2 { break-after: avoid; }
+    /* The footer of the layout table is repeated on every printed page and keeps this space free... */
+    .footer-space { height: 16mm; }
+    /* ...where the attribution is drawn on every page: it is a license term (AGPL 7(b)). */
+    footer.attribution { position: fixed; bottom: 0; left: 0; right: 0; height: 12mm; margin: 0; padding-top: 3mm; background: #fff; }
+    .badge, .counts li { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<table class="layout">
+<tfoot><tr><td><div class="footer-space"></div></td></tr></tfoot>
+<tbody><tr><td>
+<main>
+<header class="top">
+  <h1>{{ title }}</h1>
+  <p class="disclaimer">{{ disclaimer }}</p>
+  <dl class="facts">
+  {{- for fact in facts }}
+    {{- if fact.label == "" }}
+    <dd class="alone">{{ fact.value }}</dd>
+    {{- else }}
+    <dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd>
+    {{- end }}
+  {{- end }}
+  </dl>
+</header>
+{{- if notes.size > 0 }}
+<section class="notes" aria-label="{{ notes_heading }}">
+  <strong>{{ notes_heading }}</strong>
+  {{- for note in notes }}
+  <p>{{ note }}</p>
+  {{- end }}
+</section>
+{{- end }}
+<section class="summary">
+  <h2>{{ summary.heading }}</h2>
+  <h3>{{ summary.severity_heading }}</h3>
+  <ul class="counts">
+  {{- for s in summary.severities }}
+    <li class="{{ s.class }}"><strong>{{ s.count }}</strong>{{ s.label }}</li>
+  {{- end }}
+  </ul>
+  {{- if summary.areas.size > 0 }}
+  <h3>{{ summary.area_heading }}</h3>
+  <ul class="counts">
+  {{- for a in summary.areas }}
+    <li><strong>{{ a.count }}</strong>{{ a.label }}</li>
+  {{- end }}
+  </ul>
+  {{- end }}
+  <p>{{ summary.checks }}</p>
+  <h3>{{ summary.actions_heading }}</h3>
+  {{- if summary.actions.size == 0 }}
+  <p class="none">{{ summary.no_actions }}</p>
+  {{- else }}
+  <ol class="actions">
+  {{- for a in summary.actions }}
+    <li><span class="badge {{ a.class }}">{{ a.severity }}</span> <strong>{{ a.title }}</strong> <span class="target">({{ a.target }})</span>{{ if a.fix }}<br>{{ a.fix }}{{ end }}</li>
+  {{- end }}
+  </ol>
+  {{- end }}
+</section>
+{{- for section in sections }}
+<section class="area">
+  <h2>{{ section.heading }}</h2>
+  {{- if section.no_problems }}
+  <p class="none">{{ section.no_problems }}</p>
+  {{- end }}
+  {{- if section.findings.size > 0 }}
+  <h3>{{ section.problems_heading }}</h3>
+  {{- for f in section.findings }}
+  <article class="finding">
+    <h4><span class="badge {{ f.class }}">{{ f.severity }}</span> {{ f.title }} <span class="id">{{ f.id }}</span></h4>
+    <p class="target">{{ f.target }}</p>
+    <dl class="details">
+    {{- for d in f.details }}
+      <dt>{{ d.label }}</dt><dd>{{ d.value }}</dd>
+    {{- end }}
+    </dl>
+    {{- for n in f.notes }}
+    <p class="finding-note">{{ n }}</p>
+    {{- end }}
+  </article>
+  {{- end }}
+  {{- end }}
+  {{- for list in section.lists }}
+  <h3>{{ list.heading }}</h3>
+  <ul class="checks {{ list.kind }}">
+  {{- for c in list.items }}
+    <li><span class="id">{{ c.id }}</span> {{ c.title }}{{ if c.detail }}: <span class="detail">{{ c.detail }}</span>{{ end }}</li>
+  {{- end }}
+  </ul>
+  {{- end }}
+</section>
+{{- end }}
+</main>
+</td></tr></tbody>
+</table>
+<footer class="attribution">{{ footer }}</footer>
+</body>
+</html>

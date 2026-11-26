@@ -1,6 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <InternalsVisibleTo Include="ScudoDigitale.Reporting.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PDFsharp-MigraDoc" />
+    <PackageReference Include="Scriban" />
+    <!-- Raises the vulnerable 8.0.1 that PDFsharp brings: see Directory.Packages.props. Remove when PDFsharp asks for a fixed one. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- DejaVu Sans (free license, Fonts/DejaVu-LICENSE.txt): PdfSharp finds no system fonts on Linux and macOS. -->
+    <EmbeddedResource Include="Fonts\*.ttf" LogicalName="ScudoDigitale.Reporting.Fonts.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Templates\report.html.sbn" LogicalName="ScudoDigitale.Reporting.Templates.report.html.sbn" />
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>ScudoDigitale.Reporting.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ScudoDigitale.Core\ScudoDigitale.Core.csproj" />
   </ItemGroup>
 

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="ReportTitle" xml:space="preserve">
+    <value>Rapporto di autovalutazione della sicurezza</value>
+  </data>
+  <data name="Disclaimer" xml:space="preserve">
+    <value>Questo è uno strumento di autovalutazione: non sostituisce un penetration test né una consulenza legale. Usalo solo su sistemi tuoi o che sei autorizzato a controllare.</value>
+  </data>
+  <data name="DeclaredBy" xml:space="preserve">
+    <value>Dichiarato da {0} ({1}) il {2}.</value>
+  </data>
+  <data name="GeneratedOn" xml:space="preserve">
+    <value>Rapporto generato il {0}.</value>
+  </data>
+  <data name="ProfileLabel" xml:space="preserve">
+    <value>Per</value>
+  </data>
+  <data name="ProfileIndividual" xml:space="preserve">
+    <value>una persona</value>
+  </data>
+  <data name="ProfileCompanyDetails" xml:space="preserve">
+    <value>dipendenti: {0} · fatturato annuo: {1} · partita IVA: {2} · ATECO: {3}</value>
+  </data>
+  <data name="NotGiven" xml:space="preserve">
+    <value>non indicato</value>
+  </data>
+  <data name="TargetsLabel" xml:space="preserve">
+    <value>Controllato</value>
+  </data>
+  <data name="NoTargets" xml:space="preserve">
+    <value>nessun sistema: solo questionari</value>
+  </data>
+  <data name="VulnerabilityDatabase" xml:space="preserve">
+    <value>Database CVE: {0}</value>
+  </data>
+  <data name="NoVulnerabilityDatabase" xml:space="preserve">
+    <value>Database CVE: non usato in questa versione</value>
+  </data>
+  <data name="NotesHeading" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="SummaryHeading" xml:space="preserve">
+    <value>Riepilogo</value>
+  </data>
+  <data name="FindingsBySeverity" xml:space="preserve">
+    <value>Problemi per gravità</value>
+  </data>
+  <data name="FindingsByArea" xml:space="preserve">
+    <value>Problemi per area</value>
+  </data>
+  <data name="ChecksCounts" xml:space="preserve">
+    <value>{0} controlli superati, {1} saltati, {2} non eseguiti.</value>
+  </data>
+  <data name="ActionsHeading" xml:space="preserve">
+    <value>Azioni più urgenti</value>
+  </data>
+  <data name="NoActions" xml:space="preserve">
+    <value>Nessuna azione urgente.</value>
+  </data>
+  <data name="ProblemsFound" xml:space="preserve">
+    <value>Problemi trovati</value>
+  </data>
+  <data name="NoProblems" xml:space="preserve">
+    <value>Nessun problema trovato.</value>
+  </data>
+  <data name="ChecksPassed" xml:space="preserve">
+    <value>Controlli superati</value>
+  </data>
+  <data name="ChecksSkipped" xml:space="preserve">
+    <value>Controlli saltati</value>
+  </data>
+  <data name="ChecksFailed" xml:space="preserve">
+    <value>Controlli non eseguiti</value>
+  </data>
+  <data name="EvidenceLabel" xml:space="preserve">
+    <value>Rilevato</value>
+  </data>
+  <data name="RiskLabel" xml:space="preserve">
+    <value>Rischio</value>
+  </data>
+  <data name="FixLabel" xml:space="preserve">
+    <value>Correzione</value>
+  </data>
+  <data name="ConfidenceLabel" xml:space="preserve">
+    <value>Affidabilità</value>
+  </data>
+  <data name="ReferencesLabel" xml:space="preserve">
+    <value>Riferimenti</value>
+  </data>
+  <data name="CveLabel" xml:space="preserve">
+    <value>CVE</value>
+  </data>
+  <data name="CvssLabel" xml:space="preserve">
+    <value>CVSS</value>
+  </data>
+  <data name="EpssLabel" xml:space="preserve">
+    <value>EPSS</value>
+  </data>
+  <data name="KevNote" xml:space="preserve">
+    <value>Nel catalogo CISA delle vulnerabilità sfruttate davvero.</value>
+  </data>
+  <data name="SeverityRaised" xml:space="preserve">
+    <value>Gravità assegnata dal controllo: {0}.</value>
+  </data>
+  <data name="PageNumber" xml:space="preserve">
+    <value>Pagina {0} di {1}</value>
+  </data>
+  <data name="SeverityCritical" xml:space="preserve">
+    <value>Critico</value>
+  </data>
+  <data name="SeverityHigh" xml:space="preserve">
+    <value>Alto</value>
+  </data>
+  <data name="SeverityMedium" xml:space="preserve">
+    <value>Medio</value>
+  </data>
+  <data name="SeverityLow" xml:space="preserve">
+    <value>Basso</value>
+  </data>
+  <data name="SeverityInfo" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="ConfidenceCertain" xml:space="preserve">
+    <value>certa</value>
+  </data>
+  <data name="ConfidenceProbable" xml:space="preserve">
+    <value>probabile</value>
+  </data>
+  <data name="ConfidenceToBeVerified" xml:space="preserve">
+    <value>da verificare</value>
+  </data>
+  <data name="RoleOwner" xml:space="preserve">
+    <value>titolare</value>
+  </data>
+  <data name="RoleSecurityOfficer" xml:space="preserve">
+    <value>responsabile della sicurezza</value>
+  </data>
+  <data name="RoleAppointedPerson" xml:space="preserve">
+    <value>incaricato</value>
+  </data>
+  <data name="AreaNetwork" xml:space="preserve">
+    <value>Rete locale</value>
+  </data>
+  <data name="AreaWifi" xml:space="preserve">
+    <value>Wi-Fi</value>
+  </data>
+  <data name="AreaWeb" xml:space="preserve">
+    <value>Siti web</value>
+  </data>
+  <data name="AreaEmail" xml:space="preserve">
+    <value>Posta</value>
+  </data>
+  <data name="AreaBluetooth" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="AreaGdpr" xml:space="preserve">
+    <value>GDPR</value>
+  </data>
+  <data name="AreaNis2" xml:space="preserve">
+    <value>NIS2</value>
+  </data>
+  <data name="TargetDomain" xml:space="preserve">
+    <value>dominio</value>
+  </data>
+  <data name="TargetEmailAddress" xml:space="preserve">
+    <value>indirizzo email</value>
+  </data>
+  <data name="TargetWebsite" xml:space="preserve">
+    <value>sito web</value>
+  </data>
+  <data name="TargetNetwork" xml:space="preserve">
+    <value>rete</value>
+  </data>
+  <data name="TargetLocalMachine" xml:space="preserve">
+    <value>questo computer</value>
+  </data>
+  <data name="QuestionsCount" xml:space="preserve">
+    <value>{0} domande senza problemi.</value>
+  </data>
+</root>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="AnswerNo" xml:space="preserve">
+    <value>Risposta: no.</value>
+  </data>
+  <data name="AnswerUnknown" xml:space="preserve">
+    <value>Risposta: non so.</value>
+  </data>
+  <data name="NoAnswer" xml:space="preserve">
+    <value>Nessuna risposta.</value>
+  </data>
+  <data name="NoAnswerShort" xml:space="preserve">
+    <value>nessuna risposta</value>
+  </data>
+  <data name="NotApplicable" xml:space="preserve">
+    <value>non applicabile</value>
+  </data>
+  <data name="TechnicalEvidence" xml:space="preserve">
+    <value>{0} risultati tecnici di gravità media o superiore: {1}</value>
+  </data>
+  <data name="AndMore" xml:space="preserve">
+    <value>e altri {0}</value>
+  </data>
+  <data name="Nis2TitleProbablyEssential" xml:space="preserve">
+    <value>Probabilmente soggetto essenziale NIS2</value>
+  </data>
+  <data name="Nis2TitleProbablyImportant" xml:space="preserve">
+    <value>Probabilmente soggetto importante NIS2</value>
+  </data>
+  <data name="Nis2TitleProbablyInScope" xml:space="preserve">
+    <value>Probabilmente nell'ambito NIS2, categoria da verificare</value>
+  </data>
+  <data name="Nis2TitleProbablyOutOfScope" xml:space="preserve">
+    <value>Probabilmente fuori dall'ambito NIS2</value>
+  </data>
+  <data name="Nis2TitleToBeVerified" xml:space="preserve">
+    <value>Ambito NIS2 da verificare</value>
+  </data>
+  <data name="Nis2ScopeRisk" xml:space="preserve">
+    <value>Un soggetto nell'ambito che non si registra e non applica le misure è esposto alle sanzioni del D.Lgs. 138/2024, e i suoi organi di amministrazione rispondono delle violazioni (art. 23).</value>
+  </data>
+  <data name="Nis2FixProbablyEssential" xml:space="preserve">
+    <value>Registrarsi, o aggiornare la registrazione, sulla piattaforma ACN tra il 1° gennaio e il 28 febbraio di ogni anno (art. 7); poi verificare le misure di gestione dei rischi (art. 24) e le notifiche degli incidenti (art. 25). Far confermare la categoria da un legale: le imprese collegate e le decisioni dell'ACN possono cambiarla.</value>
+  </data>
+  <data name="Nis2FixProbablyImportant" xml:space="preserve">
+    <value>Registrarsi, o aggiornare la registrazione, sulla piattaforma ACN tra il 1° gennaio e il 28 febbraio di ogni anno (art. 7); poi verificare le misure di gestione dei rischi (art. 24) e le notifiche degli incidenti (art. 25). Far confermare la categoria da un legale: le imprese collegate e le decisioni dell'ACN possono cambiarla.</value>
+  </data>
+  <data name="Nis2FixProbablyInScope" xml:space="preserve">
+    <value>Registrarsi, o aggiornare la registrazione, sulla piattaforma ACN tra il 1° gennaio e il 28 febbraio di ogni anno (art. 7); poi verificare le misure di gestione dei rischi (art. 24) e le notifiche degli incidenti (art. 25). Far confermare la categoria da un legale: le imprese collegate e le decisioni dell'ACN possono cambiarla.</value>
+  </data>
+  <data name="Nis2FixProbablyOutOfScope" xml:space="preserve">
+    <value>Dalle risposte non risulta alcun obbligo NIS2. Ricontrollare ogni anno, e anche se l'impresa fa parte di un gruppo (le imprese collegate e associate contano per la dimensione) o fornisce servizi TIC o di sicurezza a un soggetto nell'ambito (art. 3, comma 10).</value>
+  </data>
+  <data name="Nis2FixToBeVerified" xml:space="preserve">
+    <value>Rispondere alle domande lasciate su «non so» (settore, dimensione, categorie incluse a prescindere dalla dimensione), oppure far valutare l'ambito da un legale.</value>
+  </data>
+  <data name="AreasChecked" xml:space="preserve">
+    <value>aree controllate: {0}</value>
+  </data>
+  <data name="AreaNetwork" xml:space="preserve">
+    <value>rete locale</value>
+  </data>
+  <data name="AreaWifi" xml:space="preserve">
+    <value>Wi-Fi</value>
+  </data>
+  <data name="AreaWeb" xml:space="preserve">
+    <value>siti web</value>
+  </data>
+  <data name="AreaEmail" xml:space="preserve">
+    <value>posta</value>
+  </data>
+  <data name="AreaBluetooth" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="AnswersNotAnObject" xml:space="preserve">
+    <value>Le risposte devono essere un oggetto JSON di testi, per esempio { "GDPR-ART30-001": "yes" }.</value>
+  </data>
+  <data name="AnswersNotJson" xml:space="preserve">
+    <value>il file non è un JSON valido (riga {0}, posizione {1}).</value>
+  </data>
+  <data name="AnswerUnknownQuestion" xml:space="preserve">
+    <value>{0}: nessuna domanda con questo codice nei questionari di questa valutazione.</value>
+  </data>
+  <data name="AnswerNotAccepted" xml:space="preserve">
+    <value>{0}: «{1}» non è una risposta valida per questa domanda; ammesse: {2}.</value>
+  </data>
+</root>
