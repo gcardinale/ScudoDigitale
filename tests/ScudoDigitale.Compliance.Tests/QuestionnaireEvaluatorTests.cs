@@ -156,7 +156,7 @@ public sealed class QuestionnaireEvaluatorTests
         Assert.Equal(Confidence.Probable, scope.Confidence);
         Assert.Equal(CheckArea.Nis2, scope.Area);
         Assert.Equal(
-            "Settore: Produzione, trasformazione e distribuzione di alimenti; Inclusi a prescindere dalla dimensione: No; Dipendenti: Da 50 a 249; Fatturato annuo: Oltre 10 e fino a 50 milioni di euro; Totale di bilancio: Oltre 10 e fino a 43 milioni di euro",
+            "Settore: Alimenti (produzione industriale e trasformazione, distribuzione all'ingrosso); Inclusi a prescindere dalla dimensione: No; Dipendenti: Da 50 a 249; Fatturato annuo: Oltre 10 e fino a 50 milioni di euro; Totale di bilancio: Oltre 10 e fino a 43 milioni di euro",
             scope.Evidence);
         Assert.StartsWith("Registrarsi, o aggiornare la registrazione, sulla piattaforma ACN", scope.Fix, StringComparison.Ordinal);
         Assert.Equal(["D.Lgs. 138/2024 art. 3", "D.Lgs. 138/2024 art. 6", "Raccomandazione 2003/361/CE"], scope.References);

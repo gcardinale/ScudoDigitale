@@ -139,8 +139,8 @@ public sealed class QuestionnaireCommandTests
             Assert.Contains(new ReportCheck("GDPR-ART28-001", "Processors under contract", "not applicable"), gdpr.Passed);
             Assert.Equal(5, document.Sections[2].Passed.Count);
             Assert.Equal(2, document.Notes.Count);
-            Assert.StartsWith("GDPR: main obligations of the controller (questionnaire gdpr-company, version 2026-11-25). Indicative.", document.Notes[0], StringComparison.Ordinal);
-            Assert.Contains("(questionnaire nis2, version 2026-11-25)", document.Notes[1], StringComparison.Ordinal);
+            Assert.StartsWith("GDPR: main obligations of the controller (questionnaire gdpr-company, version 2026-11-27). Indicative.", document.Notes[0], StringComparison.Ordinal);
+            Assert.Contains("(questionnaire nis2, version 2026-11-27)", document.Notes[1], StringComparison.Ordinal);
         }
         finally
         {

@@ -1,6 +1,6 @@
 {
   "id": "nis2",
-  "version": "2026-11-25",
+  "version": "2026-11-27",
   "area": "Nis2",
   "profile": "Company",
   "title": {
@@ -8,8 +8,8 @@
     "it": "NIS2 (D.Lgs. 138/2024): ambito e principali obblighi"
   },
   "notice": {
-    "en": "Indicative estimate from your answers, on the text of D.Lgs. 138/2024 in force since 16/10/2024. Size per Recommendation 2003/361/CE, with the figures of linked and partner enterprises added as art. 3, paragraph 4 requires (the exception for proportionality is not assessed); public administrations (Annex III) and the entities that ACN identifies case by case (Annex IV, art. 3 paragraphs 8-10) are not assessed.",
-    "it": "Stima indicativa basata sulle risposte, sul testo del D.Lgs. 138/2024 in vigore dal 16/10/2024. Dimensione secondo la Raccomandazione 2003/361/CE, sommando i dati delle imprese collegate e associate come richiede l'art. 3, comma 4 (l'eccezione di proporzionalità non è valutata); non sono valutate le pubbliche amministrazioni (allegato III) e i soggetti che l'ACN individua caso per caso (allegato IV, art. 3, commi 8-10)."
+    "en": "Indicative estimate from your answers, on the text of D.Lgs. 138/2024 in force since 16/10/2024. Size per Recommendation 2003/361/CE, with the figures of linked and partner enterprises added as art. 3, paragraph 4 requires (the exception for proportionality is not assessed); public administrations (Annex III), the entities that ACN identifies case by case (Annex IV and art. 3, paragraphs 8, 9 and 13) and the enterprises linked to an essential or important entity (art. 3, paragraph 10) are not assessed.",
+    "it": "Stima indicativa basata sulle risposte, sul testo del D.Lgs. 138/2024 in vigore dal 16/10/2024. Dimensione secondo la Raccomandazione 2003/361/CE, sommando i dati delle imprese collegate e associate come richiede l'art. 3, comma 4 (l'eccezione di proporzionalità non è valutata); non sono valutate le pubbliche amministrazioni (allegato III), i soggetti che l'ACN individua caso per caso (allegato IV e art. 3, commi 8, 9 e 13) e le imprese collegate a un soggetto essenziale o importante (art. 3, comma 10)."
   },
   "questions": [
     {
@@ -25,18 +25,18 @@
         { "id": "annex1-transport", "text": { "en": "Transport (air, rail, water, road)", "it": "Trasporti (aereo, ferroviario, per vie d'acqua, su strada)" } },
         { "id": "annex1-banking", "text": { "en": "Banking (credit institutions)", "it": "Settore bancario (enti creditizi)" } },
         { "id": "annex1-financial-markets", "text": { "en": "Financial market infrastructures", "it": "Infrastrutture dei mercati finanziari" } },
-        { "id": "annex1-health", "text": { "en": "Health (healthcare providers, laboratories, pharmaceutical and critical medical device manufacturers)", "it": "Settore sanitario (prestatori di assistenza sanitaria, laboratori, fabbricanti di farmaci e di dispositivi medici critici)" } },
+        { "id": "annex1-health", "text": { "en": "Health (healthcare providers, EU reference laboratories, research and development of medicinal products, manufacturers of basic pharmaceutical products and preparations, manufacturers of medical devices critical in a public health emergency)", "it": "Settore sanitario (prestatori di assistenza sanitaria, laboratori di riferimento dell'UE, ricerca e sviluppo di medicinali, fabbricanti di prodotti farmaceutici di base e preparati farmaceutici, fabbricanti di dispositivi medici critici in un'emergenza di sanità pubblica)" } },
         { "id": "annex1-drinking-water", "text": { "en": "Drinking water", "it": "Acqua potabile" } },
         { "id": "annex1-waste-water", "text": { "en": "Waste water", "it": "Acque reflue" } },
         { "id": "annex1-digital-infrastructure", "text": { "en": "Digital infrastructure (internet exchange points, DNS, top-level domains, cloud, data centres, content delivery networks, trust services, electronic communications)", "it": "Infrastrutture digitali (punti di interscambio internet, DNS, domini di primo livello, cloud, data center, reti di distribuzione dei contenuti, servizi fiduciari, comunicazioni elettroniche)" } },
         { "id": "annex1-ict-b2b", "text": { "en": "ICT service management for other businesses (managed services, managed security services)", "it": "Gestione dei servizi TIC per altre imprese (servizi gestiti, servizi di sicurezza gestiti)" } },
         { "id": "annex1-space", "text": { "en": "Space (ground infrastructure for space-based services)", "it": "Spazio (infrastrutture terrestri per servizi spaziali)" } },
         { "id": "annex2-postal", "text": { "en": "Postal and courier services", "it": "Servizi postali e di corriere" } },
-        { "id": "annex2-waste", "text": { "en": "Waste management", "it": "Gestione dei rifiuti" } },
+        { "id": "annex2-waste", "text": { "en": "Waste management (as the main economic activity)", "it": "Gestione dei rifiuti (come attività economica principale)" } },
         { "id": "annex2-chemicals", "text": { "en": "Manufacture, production and distribution of chemicals", "it": "Fabbricazione, produzione e distribuzione di sostanze chimiche" } },
-        { "id": "annex2-food", "text": { "en": "Production, processing and distribution of food", "it": "Produzione, trasformazione e distribuzione di alimenti" } },
+        { "id": "annex2-food", "text": { "en": "Food (industrial production and processing, wholesale distribution)", "it": "Alimenti (produzione industriale e trasformazione, distribuzione all'ingrosso)" } },
         { "id": "annex2-manufacturing", "text": { "en": "Manufacturing (medical devices, computers and electronics, electrical equipment, machinery, motor vehicles, other transport equipment)", "it": "Fabbricazione (dispositivi medici, computer ed elettronica, apparecchiature elettriche, macchinari, autoveicoli, altri mezzi di trasporto)" } },
-        { "id": "annex2-digital-providers", "text": { "en": "Digital providers (online marketplaces, search engines, social networks)", "it": "Fornitori di servizi digitali (mercati online, motori di ricerca, social network)" } },
+        { "id": "annex2-digital-providers", "text": { "en": "Digital providers (online marketplaces, search engines, social networks, domain name registration services)", "it": "Fornitori di servizi digitali (mercati online, motori di ricerca, social network, servizi di registrazione dei nomi di dominio)" } },
         { "id": "annex2-research", "text": { "en": "Research organisations", "it": "Organizzazioni di ricerca" } },
         { "id": "none", "text": { "en": "None of these", "it": "Nessuno di questi" } },
         { "id": "unknown", "text": { "en": "Don't know", "it": "Non so" } }
@@ -191,8 +191,8 @@
       "askIf": "nis2InScope",
       "label": { "en": "Incident notification", "it": "Notifica degli incidenti" },
       "text": {
-        "en": "Is there a procedure to notify CSIRT Italia of a significant incident: pre-notification within 24 hours, notification within 72 hours, final report within one month?",
-        "it": "Esiste una procedura per notificare al CSIRT Italia un incidente significativo: pre-notifica entro 24 ore, notifica entro 72 ore, relazione finale entro un mese?"
+        "en": "Is there a procedure to notify CSIRT Italia of a significant incident: pre-notification within 24 hours, notification within 72 hours, final report within one month of the notification?",
+        "it": "Esiste una procedura per notificare al CSIRT Italia un incidente significativo: pre-notifica entro 24 ore, notifica entro 72 ore, relazione finale entro un mese dalla notifica?"
       },
       "finding": { "en": "No procedure to notify incidents to CSIRT Italia", "it": "Manca la procedura di notifica degli incidenti al CSIRT Italia" },
       "severity": "High",
@@ -201,8 +201,8 @@
         "it": "Le 24 ore della pre-notifica partono da quando l'azienda viene a conoscenza dell'incidente: senza una procedura si perdono a decidere chi fa cosa."
       },
       "fix": {
-        "en": "Write the procedure: how to recognize a significant incident, who notifies, the three deadlines (24 hours, 72 hours, one month), and test it once a year.",
-        "it": "Scrivere la procedura: come riconoscere un incidente significativo, chi notifica, le tre scadenze (24 ore, 72 ore, un mese), e provarla una volta l'anno."
+        "en": "Write the procedure: how to recognize a significant incident, who notifies, the three deadlines (24 hours, 72 hours, one month from the notification), and test it once a year.",
+        "it": "Scrivere la procedura: come riconoscere un incidente significativo, chi notifica, le tre scadenze (24 ore, 72 ore, un mese dalla notifica), e provarla una volta l'anno."
       },
       "references": ["D.Lgs. 138/2024 art. 25"]
     }
