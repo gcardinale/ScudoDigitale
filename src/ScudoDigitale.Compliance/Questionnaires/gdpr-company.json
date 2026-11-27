@@ -1,6 +1,6 @@
 {
   "id": "gdpr-company",
-  "version": "2026-11-25",
+  "version": "2026-11-27",
   "area": "Gdpr",
   "profile": "Company",
   "title": {
@@ -27,8 +27,8 @@
         "it": "È il primo documento richiesto in un'ispezione; senza, l'azienda non può dimostrare cosa fa con i dati personali."
       },
       "fix": {
-        "en": "Write the record (the Garante publishes a template). The exemption for companies with fewer than 250 employees does not apply when the processing is not occasional, may be a risk, or covers special categories of data: payroll alone usually rules it out.",
-        "it": "Redigere il registro (il Garante pubblica un modello). L'esenzione per chi ha meno di 250 dipendenti non vale se il trattamento non è occasionale, può presentare un rischio o riguarda categorie particolari di dati: di solito basta la gestione del personale a escluderla."
+        "en": "Write the record (the Garante publishes a simplified template for SMEs). The exemption for companies with fewer than 250 employees does not apply when the processing may be a risk to the rights and freedoms of the people concerned, is not occasional, or covers special categories of data or data on criminal convictions (art. 30, paragraph 5): payroll, which is not occasional, usually rules it out.",
+        "it": "Redigere il registro (il Garante pubblica un modello di registro semplificato per le PMI). L'esenzione per chi ha meno di 250 dipendenti non vale se il trattamento può presentare un rischio per i diritti e le libertà degli interessati, non è occasionale o riguarda categorie particolari di dati o dati relativi a condanne penali e reati (art. 30, par. 5): di solito basta la gestione del personale, che non è occasionale, a escluderla."
       },
       "references": ["GDPR art. 30"]
     },
@@ -48,7 +48,7 @@
       },
       "fix": {
         "en": "Write one notice per group of people, with the contents of arts. 13-14, and give it when the data are collected (on the website, in contracts, at hiring).",
-        "it": "Scrivere un'informativa per ogni gruppo di persone, con i contenuti degli artt. 13-14, e fornirla al momento della raccolta (sul sito, nei contratti, all'assunzione)."
+        "it": "Scrivere un'informativa per ogni gruppo di persone, con i contenuti degli artt. 13-14, e fornirla al momento della raccolta (sul sito, nei contratti, all'assunzione); quando i dati non vengono raccolti presso la persona, entro un termine ragionevole e al più tardi entro un mese (art. 14, par. 3)."
       },
       "references": ["GDPR art. 13", "GDPR art. 14"]
     },
@@ -149,8 +149,8 @@
         "it": "Un trattamento a rischio elevato senza valutazione d'impatto è una violazione, e i suoi rischi non sono mai stati pesati."
       },
       "fix": {
-        "en": "Check the list of processings that require a DPIA published by the Garante; for those that do, carry it out before starting, or now if they have already started.",
-        "it": "Verificare l'elenco dei trattamenti soggetti a DPIA pubblicato dal Garante; per quelli che la richiedono, svolgerla prima di iniziare, o subito se sono già in corso."
+        "en": "Check the list of processings that require a DPIA published by the Garante (decision no. 467 of 11 October 2018), in addition to the cases of art. 35, paragraph 3; for those that do, carry it out before starting, or now if they have already started.",
+        "it": "Verificare l'elenco dei trattamenti soggetti a DPIA pubblicato dal Garante (provvedimento n. 467 dell'11 ottobre 2018), che si aggiunge ai casi dell'art. 35, par. 3; per quelli che la richiedono, svolgerla prima di iniziare, o subito se sono già in corso."
       },
       "references": ["GDPR art. 35"],
       "allowNotApplicable": true
@@ -160,8 +160,8 @@
       "kind": "YesNo",
       "label": { "en": "Data protection officer", "it": "Responsabile della protezione dei dati" },
       "text": {
-        "en": "If the company must have a data protection officer (public body, regular and systematic monitoring of people on a large scale, special categories of data on a large scale), has one been designated and communicated to the Garante?",
-        "it": "Se l'azienda deve avere un responsabile della protezione dei dati (ente pubblico, monitoraggio regolare e sistematico delle persone su larga scala, categorie particolari di dati su larga scala), è stato designato e comunicato al Garante?"
+        "en": "If the company must have a data protection officer (public body, regular and systematic monitoring of people on a large scale, special categories of data or data on criminal convictions on a large scale), has one been designated and communicated to the Garante?",
+        "it": "Se l'azienda deve avere un responsabile della protezione dei dati (ente pubblico, monitoraggio regolare e sistematico delle persone su larga scala, categorie particolari di dati o dati su condanne penali e reati su larga scala), è stato designato e comunicato al Garante?"
       },
       "finding": { "en": "Data protection officer not designated", "it": "Responsabile della protezione dei dati non designato" },
       "severity": "Medium",
