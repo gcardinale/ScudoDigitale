@@ -15,12 +15,13 @@
 using System.Text.RegularExpressions;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
+using PdfSharp;
 using ScudoDigitale.Core;
 
 namespace ScudoDigitale.Reporting;
 
 /// <summary>
-/// The PDF report (MigraDoc, MIT): the same content as the HTML, on A4 pages, with the attribution
+/// The PDF report (MigraDoc, AGPL): the same content as the HTML, on A4 pages, with the attribution
 /// and the page number at the foot of every page.
 /// </summary>
 public static class PdfReport
@@ -38,6 +39,10 @@ public static class PdfReport
     public static byte[] Render(ReportDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
+        // PDFsharp 6.5 and later refuses to render until a license is chosen: Scudo Digitale is AGPL,
+        // so it uses PDFsharp under the AGPL (AGPL-3.0-only) too. A paid edition would load a
+        // commercial license here instead.
+        PdfSharpLicense.SetAgplLicense();
         EmbeddedFontResolver.Install();
 
         var view = ReportView.Of(document);
