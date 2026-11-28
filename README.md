@@ -30,7 +30,9 @@ Every issue in the report lists: **severity**, **CVE and CVSS score**, **EPSS** 
 - It is a **self-assessment** tool: it does not replace a professional penetration test or legal advice. False positives and false negatives are possible.
 
 ## Download
-A first **beta 0.1** (email, website, GDPR/NIS2 questionnaires and reports) is planned for **1 December 2026** in [Releases](https://github.com/gcardinale/ScudoDigitale/releases), for Windows, macOS and Linux with SHA-256 hashes. Version 1.0 follows by mid-December 2026 with build provenance attestation.
+The **beta 0.1** (email, website, GDPR/NIS2 questionnaires and reports) is in [Releases](https://github.com/gcardinale/ScudoDigitale/releases) from **1 December 2026**: one executable for Windows, Linux and macOS (Intel and Apple Silicon), .NET included, with SHA-256 hashes. The release notes explain how to verify the download and how to open an executable that is not signed yet. Version 1.0 follows by mid-December 2026 with build provenance attestation.
+
+To prepare a release: set `<Version>` in `Directory.Build.props`, write `docs/releases/v<Version>.md`, push the tag `v<Version>`; the [Release workflow](.github/workflows/release.yml) tests, builds the four executables and creates a **draft** pre-release to be published by hand.
 
 ## Project status
 In development, towards the beta of 1 December 2026. See the [roadmap](docs/03-roadmap.md), the [functional specification](docs/00-functional-spec.md) and the weekly [build journal](docs/journal/README.md).
@@ -39,8 +41,8 @@ In development, towards the beta of 1 December 2026. See the [roadmap](docs/03-r
 |---|---|
 | ✉️ Email (SPF, DMARC, DKIM, MX) | ✅ working — 11 passive checks, `scudo scan --mail` |
 | 🔒 Websites (HTTPS, certificate, security headers, cookies, security.txt) | ✅ working — 15 passive checks, `scudo scan --web` |
-| 🔒 Websites: TLS versions and ciphers, CMS, cookies before consent | 🚧 in progress for the beta |
-| 📋 GDPR/NIS2 questionnaires, HTML/PDF/JSON report | 🚧 in progress for the beta |
+| 🔒 Websites: TLS versions and ciphers, CMS, cookies before consent | 🗓️ after the beta |
+| 📋 GDPR/NIS2 questionnaires, HTML/PDF/JSON report | ✅ working — `--gdpr`, `--nis2`, `--report` |
 | 🌐 Local network, CVE database, 📶 Wi-Fi, 🔵 Bluetooth | 🗓️ after the beta (v0.2, v0.3) |
 
 ## Try the email checks (from source)

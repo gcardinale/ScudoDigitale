@@ -31,4 +31,3 @@ Independent review by a separate agent (34 counter-checks), fixed the same day, 
 
 ## To do
 - Comparison between two JSON reports (`scudo report diff`) — v0.2.
-- Packaging: ship `Fonts/DejaVu-LICENSE.txt` next to the executables.

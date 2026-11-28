@@ -6,6 +6,20 @@
     <RootNamespace>ScudoDigitale.Cli</RootNamespace>
   </PropertyGroup>
 
+  <!-- Release executables (dotnet publish -r <rid>): one file, .NET included, nothing to install.
+       Not trimmed: Scriban, System.CommandLine and System.Text.Json use reflection. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Only the executable: no .pdb or .xml of the libraries next to it. -->
+    <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
+    <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="ScudoDigitale.Cli.Tests" />
   </ItemGroup>

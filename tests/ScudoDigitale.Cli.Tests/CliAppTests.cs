@@ -64,7 +64,9 @@ public class CliAppTests
         var (exitCode, output, _) = Run("--version");
 
         Assert.Equal(0, exitCode);
-        Assert.StartsWith("0.0.0", output, StringComparison.Ordinal);
+        Assert.StartsWith(ProgramVersion.Current, output, StringComparison.Ordinal);
+        // The version in Directory.Build.props reaches the program: 0.0.0 means it was lost.
+        Assert.NotEqual("0.0.0", ProgramVersion.Current);
     }
 
     [Fact]

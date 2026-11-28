@@ -7,6 +7,7 @@
 
 ## Done
 - `scudo` executable (System.CommandLine 3): without arguments prints the banner, the attribution and the self-assessment warning in English or Italian; `--help`, `--version`.
+- Release executables: `dotnet publish src/ScudoDigitale.Cli -c Release -r <rid>` gives one self-contained file (.NET included, not trimmed, compressed), without the .pdb and .xml of the libraries; `.github/workflows/release.yml` builds win-x64, linux-x64, osx-x64 and osx-arm64 on a tag and prepares a draft pre-release with SHA-256 (28/11/2026). win-x64 tried on this PC without .NET on the PATH: report in Italian with `programVersion` 0.1.0-beta.
 - `scudo scan [--mail <domain> …] [--web <domain> …] [--dkim-selector <s> …] [--system-dns] [--operator <name>] [--role Owner|SecurityOfficer|AppointedPerson]`:
   - `--mail` declares a target of kind `Domain` for the 11 email checks, `--web` a target of kind `Website` for the 15 website checks; the two can be given together, also for the same domain, and each area runs only on its own targets;
   - `--web` accepts a domain name or an `http`/`https` URL (only the host is used); the same site given twice is checked once;
