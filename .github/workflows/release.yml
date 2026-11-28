@@ -6,6 +6,13 @@ name: Release
 on:
   push:
     tags: ['v*']
+  # A pull request that changes the packaging builds the executables too, without a release.
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - 'src/ScudoDigitale.Cli/ScudoDigitale.Cli.csproj'
   workflow_dispatch:
 
 permissions:
