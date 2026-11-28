@@ -50,6 +50,7 @@ In this order: Bluetooth on macOS → comparison between two reports → Have I 
 - [x] `Cli`: `scudo scan --web`, alone or together with `--mail` (21/11/2026)
 - [x] `Cli`: `scudo scan --report <folder>` (25/11/2026)
 - [x] `Cli`: questionnaires (`--profile`, `--company`, `--gdpr`, `--nis2`, `--answers`) (25/11/2026)
+- [x] Release workflow: single-file executables for Windows, Linux, macOS x64 and arm64 (Apple Silicon, added because it is most Macs today), SHA-256, draft pre-release (28/11/2026)
 - [ ] v0.1 passive, published as beta 0.1 (01/12/2026)
 - [ ] v0.2 network and CVE
 - [ ] v0.3 wireless

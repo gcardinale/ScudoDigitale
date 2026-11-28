@@ -423,20 +423,34 @@ public class CheckEngineTests
     {
         var running = 0;
         var peak = 0;
-        // Rude checks: they ignore their token and run longer than the timeout, but less than timeout + grace.
-        var checks = Enumerable.Range(1, 3).Select(i => new FakeCheck($"NET-PORT-{i:000}", TargetKind.Domain, async (_, _) =>
+        // Rude checks: they keep running after the timeout, but end well within the grace period.
+        // They wait for the timeout itself (the engine cancels their token when it expires) instead of
+        // a fixed delay longer than it: a late timer on a busy machine cannot let them win the race.
+        var checks = Enumerable.Range(1, 3).Select(i => new FakeCheck($"NET-PORT-{i:000}", TargetKind.Domain, async (_, token) =>
         {
             InterlockedMax(ref peak, Interlocked.Increment(ref running));
-            await Task.Delay(300);
+            try
+            {
+                await Task.Delay(Timeout.Infinite, token);
+            }
+            catch (OperationCanceledException)
+            {
+                // Rude: ignores the cancellation and goes on for a while.
+            }
+
+            await Task.Delay(50);
             Interlocked.Decrement(ref running);
             return Nothing;
         })).ToArray();
         var engine = new CheckEngine(
             FakeScopeGuard.Allowing(),
-            new CheckEngineOptions { MaxConcurrentChecks = 1, CheckTimeout = TimeSpan.FromMilliseconds(200) });
+            new CheckEngineOptions { MaxConcurrentChecks = 1, CheckTimeout = TimeSpan.FromMilliseconds(500) });
 
         var runs = await engine.RunAsync(checks, Individual, Make.Scope(Domain), TestContext.Current.CancellationToken);
-        await Task.Delay(400, TestContext.Current.CancellationToken);
+        while (Volatile.Read(ref running) > 0)
+        {
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
 
         Assert.All(runs, r => Assert.IsType<CheckResult.Failed>(r.Result));
         Assert.Equal(1, peak);

@@ -8,7 +8,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Deterministic>true</Deterministic>
-    <Version>0.0.0</Version>
+    <!-- Written in every report and in the User-Agent of the website checks; the tag of a release is v + this value. -->
+    <Version>0.1.0-beta</Version>
     <Authors>Gaetano Cardinale</Authors>
     <Product>Scudo Digitale</Product>
     <Copyright>© 2026 Gaetano Cardinale — https://gcardinale.it</Copyright>

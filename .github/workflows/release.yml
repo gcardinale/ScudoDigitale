@@ -1,0 +1,135 @@
+# Release executables: on a tag v<Version> (Directory.Build.props), test, build one self-contained
+# file per system, pack it with the licenses, compute SHA-256 and prepare a DRAFT pre-release.
+# Publishing the draft is a manual step on GitHub, so that nothing goes public by accident.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  # A pull request that changes the packaging builds the executables too, without a release.
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - 'src/ScudoDigitale.Cli/ScudoDigitale.Cli.csproj'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  version:
+    name: Read and check the version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: read
+        shell: bash
+        run: |
+          version=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' Directory.Build.props)
+          test -n "$version" || { echo "::error::No <Version> in Directory.Build.props"; exit 1; }
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match the version ${version} (expected v${version})"
+            exit 1
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Test before packing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - run: dotnet build ScudoDigitale.sln -c Release
+      - run: dotnet test --solution ScudoDigitale.sln -c Release --no-build
+
+  publish:
+    name: Executable (${{ matrix.rid }})
+    needs: [version, test]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - { os: windows-latest, rid: win-x64 }
+          - { os: ubuntu-latest, rid: linux-x64 }
+          # macOS on macOS, each on its own processor: the SDK signs the executable (ad hoc) only
+          # there, Apple Silicon refuses to run an unsigned one, and the smoke test runs natively.
+          - { os: macos-15-intel, rid: osx-x64 }
+          - { os: macos-latest, rid: osx-arm64 }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Publish one self-contained file
+        run: dotnet publish src/ScudoDigitale.Cli -c Release -r ${{ matrix.rid }} -o out/scudo
+
+      - name: Add licenses
+        shell: bash
+        run: cp LICENSE NOTICE src/ScudoDigitale.Reporting/Fonts/DejaVu-LICENSE.txt out/scudo/
+
+      - name: Smoke test
+        shell: bash
+        run: |
+          exe=out/scudo/scudo; [ -f "$exe.exe" ] && exe="$exe.exe"
+          "$exe" --version
+          "$exe" scan --help > /dev/null
+
+      - name: Pack
+        shell: bash
+        run: |
+          name="scudo-${{ needs.version.outputs.version }}-${{ matrix.rid }}"
+          mkdir -p dist
+          if [ "${{ matrix.rid }}" = "win-x64" ]; then
+            (cd out && 7z a -tzip "../dist/${name}.zip" scudo > /dev/null)
+          else
+            chmod +x out/scudo/scudo
+            tar -czf "dist/${name}.tar.gz" -C out scudo
+          fi
+          ls -l dist
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: package-${{ matrix.rid }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+
+  draft:
+    name: Draft pre-release
+    needs: [version, publish]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: package-*
+          path: dist
+          merge-multiple: true
+      - name: SHA-256
+        working-directory: dist
+        run: sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+      - name: Create the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes=docs/releases/v${{ needs.version.outputs.version }}.md
+          test -f "$notes" || { echo "::error::Missing release notes $notes"; exit 1; }
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --draft --prerelease \
+            --title "Scudo Digitale ${{ needs.version.outputs.version }}" \
+            --notes-file "$notes"
