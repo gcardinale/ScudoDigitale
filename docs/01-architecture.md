@@ -10,7 +10,7 @@
 | `ScudoDigitale.Checks.Wireless` | Wi-Fi and Bluetooth, with per-OS adapters (`IWifiProvider`, `IBluetoothProvider`) |
 | `ScudoDigitale.Vulnerabilities` | local SQLite database: NVD (CVE/CPE/CVSS), CISA KEV, EPSS, OSV; incremental update |
 | `ScudoDigitale.Compliance` | GDPR/NIS2 questionnaires defined in versioned JSON with texts in English and Italian (ADR-008; embedded in v0.1, loading from a user folder later); evaluates the answers, together with the technical findings, into ordinary `Finding`s (ADR-005) |
-| `ScudoDigitale.Reporting` | HTML (Scriban template, single file), PDF (PdfSharp/MigraDoc 6.2.4, MIT, with the DejaVu Sans font included), JSON (its own versioned schema, ADR-005), comparison between runs |
+| `ScudoDigitale.Reporting` | HTML (Scriban template, single file), PDF (PdfSharp/MigraDoc 6.5, AGPL-3.0-only, with the DejaVu Sans font included), JSON (its own versioned schema, ADR-005), comparison between runs |
 | `ScudoDigitale.Cli` | `System.CommandLine`: `scudo scan --profile --mail --web --lan --wifi --bt`, `scudo db update`, `scudo report diff` |
 | `ScudoDigitale.App` | Avalonia interface (v0.2+), same logic as the CLI |
 | `tests/*` | xUnit for every project, fake in-process DNS/HTTP/TLS servers; coverage >90% |
@@ -23,7 +23,7 @@
 - **Localization**: user-facing strings live in `.resx` resource files in English and Italian; Italian is selected automatically when the OS language is Italian. XML docs and identifiers are in English.
 
 ## Libraries (all AGPL-compatible)
-DnsClient.NET (Apache-2.0), Microsoft.Data.Sqlite (MIT), System.CommandLine (MIT), Avalonia (MIT), PdfSharp/MigraDoc 6.2.4 (MIT; from 6.5 the library is AGPL + commercial and needs a license call at run time, so the move is a decision of its own), DejaVu Sans font (free license, `src/ScudoDigitale.Reporting/Fonts/DejaVu-LICENSE.txt`, to be shipped with the executables), Scriban (BSD-2), xUnit (Apache-2.0). **Excluded:** QuestPDF (commercial license above a threshold), Npcap (not freely redistributable), SharpPcap (depends on Npcap/libpcap).
+DnsClient.NET (Apache-2.0), Microsoft.Data.Sqlite (MIT), System.CommandLine (MIT), Avalonia (MIT), PdfSharp/MigraDoc 6.5 (AGPL-3.0-only or commercial, used under the AGPL with `PdfSharpLicense.SetAgplLicense()`; a paid edition of Scudo Digitale would need the commercial license of PDFsharp or another library), DejaVu Sans font (free license, `src/ScudoDigitale.Reporting/Fonts/DejaVu-LICENSE.txt`, to be shipped with the executables), Scriban (BSD-2), xUnit (Apache-2.0). **Excluded:** QuestPDF (commercial license above a threshold), Npcap (not freely redistributable), SharpPcap (depends on Npcap/libpcap).
 
 ## Cross-platform
 | Function | Windows | Linux | macOS |
