@@ -32,6 +32,13 @@ public static class PdfReport
     private static readonly Color Good = Color.FromRgb(0x15, 0x80, 0x3d);
     private static readonly Color Warning = Color.FromRgb(0x92, 0x40, 0x0e);
 
+    /// <summary>
+    /// PDFsharp 6.5 and later refuses to render until a license is chosen: Scudo Digitale is AGPL, so it
+    /// uses PDFsharp under the AGPL (AGPL-3.0-only) too, once per process, before the first PDF. A paid
+    /// edition would load a commercial license here instead.
+    /// </summary>
+    static PdfReport() => PdfSharpLicense.SetAgplLicense();
+
     /// <summary>Renders a document as PDF.</summary>
     /// <param name="document">The report.</param>
     /// <returns>The bytes of the PDF file.</returns>
@@ -39,10 +46,6 @@ public static class PdfReport
     public static byte[] Render(ReportDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        // PDFsharp 6.5 and later refuses to render until a license is chosen: Scudo Digitale is AGPL,
-        // so it uses PDFsharp under the AGPL (AGPL-3.0-only) too. A paid edition would load a
-        // commercial license here instead.
-        PdfSharpLicense.SetAgplLicense();
         EmbeddedFontResolver.Install();
 
         var view = ReportView.Of(document);

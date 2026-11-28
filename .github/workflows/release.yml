@@ -13,6 +13,7 @@ on:
       - 'Directory.Build.props'
       - 'Directory.Packages.props'
       - 'src/ScudoDigitale.Cli/ScudoDigitale.Cli.csproj'
+      - 'THIRD-PARTY-NOTICES.txt'
   workflow_dispatch:
 
 permissions:
@@ -29,7 +30,7 @@ jobs:
     outputs:
       version: ${{ steps.read.outputs.version }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - id: read
         shell: bash
         run: |
@@ -45,8 +46,8 @@ jobs:
     name: Test before packing
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: global.json
       - run: dotnet build ScudoDigitale.sln -c Release
@@ -67,24 +68,45 @@ jobs:
           - { os: macos-15-intel, rid: osx-x64 }
           - { os: macos-latest, rid: osx-arm64 }
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: global.json
 
       - name: Publish one self-contained file
         run: dotnet publish src/ScudoDigitale.Cli -c Release -r ${{ matrix.rid }} -o out/scudo
 
+      # The licenses of everything inside the executable: ours, the libraries (THIRD-PARTY-NOTICES),
+      # the font, and the notices of the .NET runtime pack that publish actually used.
       - name: Add licenses
-        shell: bash
-        run: cp LICENSE NOTICE src/ScudoDigitale.Reporting/Fonts/DejaVu-LICENSE.txt out/scudo/
+        shell: pwsh
+        run: |
+          Copy-Item LICENSE, NOTICE, THIRD-PARTY-NOTICES.txt, src/ScudoDigitale.Reporting/Fonts/DejaVu-LICENSE.txt out/scudo/
+          $assets = Get-Content src/ScudoDigitale.Cli/obj/project.assets.json -Raw | ConvertFrom-Json
+          $pack = $assets.project.frameworks.'net10.0'.downloadDependencies |
+            Where-Object name -eq 'Microsoft.NETCore.App.Runtime.${{ matrix.rid }}'
+          if (-not $pack) { throw 'Runtime pack not found in project.assets.json' }
+          # The version is written as a range, "[10.0.15, 10.0.15]".
+          $version = ($pack.version.Trim('[', ']') -split ',')[0].Trim()
+          $packages = (dotnet nuget locals global-packages --list) -replace '^global-packages:\s*', ''
+          $notices = Join-Path $packages "microsoft.netcore.app.runtime.${{ matrix.rid }}/$version/THIRD-PARTY-NOTICES.TXT"
+          if (-not (Test-Path $notices)) { throw "Missing $notices" }
+          Copy-Item $notices out/scudo/DOTNET-THIRD-PARTY-NOTICES.txt
+          Write-Host ".NET runtime pack $version"
 
+      # Runs the executable as a user would, without network: version, help, and a report from the
+      # GDPR questionnaire, so that PDFsharp, its license and the embedded fonts are exercised too.
       - name: Smoke test
         shell: bash
         run: |
           exe=out/scudo/scudo; [ -f "$exe.exe" ] && exe="$exe.exe"
           "$exe" --version
           "$exe" scan --help > /dev/null
+          echo '{}' > "$RUNNER_TEMP/answers.json"
+          "$exe" scan --gdpr --answers "$RUNNER_TEMP/answers.json" --report "$RUNNER_TEMP/report" < /dev/null
+          pdf=$(ls "$RUNNER_TEMP"/report/*.pdf)
+          head -c 5 "$pdf" | grep -q '%PDF-' || { echo "::error::$pdf is not a PDF"; exit 1; }
+          ls -l "$RUNNER_TEMP/report" out/scudo
 
       - name: Pack
         shell: bash
@@ -99,7 +121,7 @@ jobs:
           fi
           ls -l dist
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: package-${{ matrix.rid }}
           path: dist/*
@@ -114,8 +136,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           pattern: package-*
           path: dist
@@ -129,7 +151,9 @@ jobs:
         run: |
           notes=docs/releases/v${{ needs.version.outputs.version }}.md
           test -f "$notes" || { echo "::error::Missing release notes $notes"; exit 1; }
+          # A version with a suffix (0.1.0-beta) is a pre-release; 1.0.0 is not.
+          prerelease=""; case "${{ needs.version.outputs.version }}" in *-*) prerelease="--prerelease";; esac
           gh release create "${GITHUB_REF_NAME}" dist/* \
-            --draft --prerelease \
+            --draft $prerelease \
             --title "Scudo Digitale ${{ needs.version.outputs.version }}" \
             --notes-file "$notes"

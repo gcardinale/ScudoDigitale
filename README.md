@@ -30,7 +30,7 @@ Every issue in the report lists: **severity**, **CVE and CVSS score**, **EPSS** 
 - It is a **self-assessment** tool: it does not replace a professional penetration test or legal advice. False positives and false negatives are possible.
 
 ## Download
-The **beta 0.1** (email, website, GDPR/NIS2 questionnaires and reports) is in [Releases](https://github.com/gcardinale/ScudoDigitale/releases) from **1 December 2026**: one executable for Windows, Linux and macOS (Intel and Apple Silicon), .NET included, with SHA-256 hashes. The release notes explain how to verify the download and how to open an executable that is not signed yet. Version 1.0 follows by mid-December 2026 with build provenance attestation.
+The **beta 0.1** (email, website, GDPR/NIS2 questionnaires and reports) will be in [Releases](https://github.com/gcardinale/ScudoDigitale/releases) on **1 December 2026**: one executable for Windows, Linux and macOS (Intel and Apple Silicon), .NET included, with SHA-256 hashes. The release notes explain how to verify the download and how to open an executable that is not signed yet. Version 1.0 follows by mid-December 2026 with build provenance attestation.
 
 To prepare a release: set `<Version>` in `Directory.Build.props`, write `docs/releases/v<Version>.md`, push the tag `v<Version>`; the [Release workflow](.github/workflows/release.yml) tests, builds the four executables and creates a **draft** pre-release to be published by hand.
 
@@ -69,6 +69,8 @@ dotnet run --project src/ScudoDigitale.Cli -- scan --mail example.com
 © 2026 **Gaetano Cardinale** — [gcardinale.it](https://gcardinale.it)
 
 Distributed under the **GNU AGPL-3.0-or-later** with additional terms (section 7) described in the [NOTICE](NOTICE) file: anyone who redistributes or modifies the program **must keep the attribution to the author visible** in the interface and in the reports, and may not present modified versions as the official one.
+
+The executables also contain third-party libraries, listed with their licenses in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). PDFsharp and MigraDoc are AGPL-3.0-only, so an executable as a whole is conveyed under the GNU AGPL version 3.
 
 ## Reporting a vulnerability
 See [SECURITY.md](SECURITY.md).
