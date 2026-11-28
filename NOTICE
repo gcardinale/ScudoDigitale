@@ -11,6 +11,13 @@ WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE (sections 15 and 16
 of the license).
 
+The executables (binary releases) also contain the third-party components
+listed in THIRD-PARTY-NOTICES.txt, each under its own license. Among them,
+PDFsharp and MigraDoc are licensed under version 3 of the GNU AGPL only: an
+executable as a whole is therefore conveyed under version 3 of the GNU AGPL,
+with the additional terms below. The source code of Scudo Digitale itself
+stays available under version 3 or any later version.
+
 -------------------------------------------------------------------------
 ADDITIONAL TERMS under section 7 of the GNU AGPL v3
 -------------------------------------------------------------------------
@@ -49,6 +56,14 @@ Free Software Foundation (vedi il file LICENSE).
 Questo programma è distribuito nella speranza che sia utile, ma SENZA
 ALCUNA GARANZIA, nemmeno la garanzia implicita di COMMERCIABILITÀ o di
 IDONEITÀ PER UNO SCOPO PARTICOLARE (sezioni 15 e 16 della licenza).
+
+Gli eseguibili (le versioni binarie) contengono anche i componenti di terzi
+elencati in THIRD-PARTY-NOTICES.txt, ciascuno con la propria licenza. Tra
+questi, PDFsharp e MigraDoc sono distribuiti solo con la versione 3 della
+GNU AGPL: un eseguibile nel suo insieme è quindi distribuito secondo la
+versione 3 della GNU AGPL, con i termini aggiuntivi qui sotto. Il codice
+sorgente di Scudo Digitale resta disponibile secondo la versione 3 o
+qualsiasi versione successiva.
 
 -------------------------------------------------------------------------
 TERMINI AGGIUNTIVI ai sensi della sezione 7 della GNU AGPL v3
